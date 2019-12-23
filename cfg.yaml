@@ -1,1 +1,8 @@
 name: foo
+
+##web htpp port
+open_http: true
+http_port: 8080
+
+#net port
+net_port: 3344
