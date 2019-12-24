@@ -1,8 +1,13 @@
-name: foo
+name: firstServer
 
 ##web htpp port
 open_http: true
 http_port: 8080
 
-#net port
-net_port: 3344
+#network : tcp/udp
+network: tcp
+port: 3344
+
+#protobuf path
+proto_path: ""
+go_out: ""
