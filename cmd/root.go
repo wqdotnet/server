@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"os"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 // ServerConfig  server cfg
@@ -30,6 +30,8 @@ var rootCmd = &cobra.Command{
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
+var cfgfile string
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -47,8 +49,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&ServerCfg.CfgFile, "config", "", "config file (default is $HOME/demo.yaml)")
-	rootCmd.PersistentFlags().StringVar(&ServerCfg.Host, "host", "", "localhost:8080")
+	rootCmd.PersistentFlags().StringVar(&cfgfile, "config", "", "config file (default is $HOME/demo.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -57,9 +58,10 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	fmt.Println("cfgFile:", ServerCfg.CfgFile)
-	fmt.Println("ServerCfg cfgFile:", ServerCfg.CfgFile)
-	fmt.Println("ServerCfg host:", ServerCfg.Host)
+
+	if cfgfile != "" {
+		ServerCfg.CfgFile = cfgfile
+	}
 
 	if ServerCfg.CfgFile != "" {
 		// Use config file from the flag.
