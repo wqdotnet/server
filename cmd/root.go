@@ -36,8 +36,8 @@ var ServerCfg = ServerConfig{
 	Port:    3344,
 
 	// #protobuf path
-	ProtoPath: "",
-	GoOut:     "",
+	ProtoPath: "E:/worke/proto",
+	GoOut:     "E:/worke/server/proto",
 }
 
 // rootCmd represents the base command when called without any subcommands
