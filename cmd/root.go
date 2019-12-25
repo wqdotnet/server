@@ -10,8 +10,6 @@ import (
 
 // ServerConfig  server cfg
 type ServerConfig struct {
-	CfgFile string
-
 	OpenHTTP string
 	HTTPPort int
 
@@ -26,7 +24,6 @@ type ServerConfig struct {
 
 // ServerCfg  Program overall configuration
 var ServerCfg = ServerConfig{
-	CfgFile: "",
 
 	OpenHTTP: "localhost",
 	HTTPPort: 8080,
@@ -80,12 +77,8 @@ func init() {
 func initConfig() {
 
 	if cfgfile != "" {
-		ServerCfg.CfgFile = cfgfile
-	}
-
-	if ServerCfg.CfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(ServerCfg.CfgFile)
+		viper.SetConfigFile(cfgfile)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -93,9 +86,12 @@ func initConfig() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+
+		fmt.Println("initconfig ", home)
+
 		// Search config in home directory with name ".demo" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName("demo")
+		viper.SetConfigName("cfg")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
