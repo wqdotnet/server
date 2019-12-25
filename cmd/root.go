@@ -11,13 +11,33 @@ import (
 // ServerConfig  server cfg
 type ServerConfig struct {
 	CfgFile string
-	Host    string
+
+	OpenHTTP string
+	HTTPPort int
+
+	NetWork string
+	Port    int
+
+	//proto_path=%s  --go_out
+
+	ProtoPath string
+	GoOut     string
 }
 
 // ServerCfg  Program overall configuration
 var ServerCfg = ServerConfig{
 	CfgFile: "",
-	Host:    "localhost:8080",
+
+	OpenHTTP: "localhost",
+	HTTPPort: 8080,
+
+	// #network : tcp/udp
+	NetWork: "tcp",
+	Port:    3344,
+
+	// #protobuf path
+	ProtoPath: "",
+	GoOut:     "",
 }
 
 // rootCmd represents the base command when called without any subcommands

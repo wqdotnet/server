@@ -1,13 +1,14 @@
 name: firstServer
 
 ##web htpp port
-open_http: true
-http_port: 8080
+OpenHTTP: true
+HTTPPort: 8080
 
 #network : tcp/udp
-network: tcp
-port: 3344
+NetWork: tcp
+Port: 3344
 
 #protobuf path
-proto_path: ""
-go_out: ""
+ProtoPath: ""
+GoOut: ""
+

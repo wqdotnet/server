@@ -13,6 +13,7 @@ var protobufCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//protoc --proto_path=d:/proto  --go_out=d:/proto  msg.pro
+		//fmt.Sprintf("protoc --proto_path=%s  --go_out=%s ", ServerCfg.ProtoPath, ServerCfg.GoOut)
 
 		out, errout, err := Shellout(args...)
 		if err != nil {
