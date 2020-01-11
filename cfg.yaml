@@ -9,6 +9,6 @@ NetWork: tcp
 Port: 3344
 
 #protobuf path
-ProtoPath: "E:/worke/proto"
-GoOut: "E:/worke/server/proto"
+ProtoPath: "E:/gopath/src/server/proto"
+GoOut: "E:/gopath/src/server/proto"
 

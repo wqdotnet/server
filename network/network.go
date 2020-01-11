@@ -1,6 +1,6 @@
 package netwrok
 
-// import ()
+// import "server/msg"
 
 //NetworkInterface network
 type NetworkInterface interface {
@@ -17,3 +17,5 @@ type NetworkMsg struct {
 	method int
 	buf    []byte
 }
+
+ 

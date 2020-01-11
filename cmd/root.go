@@ -33,15 +33,15 @@ var ServerCfg = ServerConfig{
 	Port:    3344,
 
 	// #protobuf path
-	ProtoPath: "E:/worke/proto",
-	GoOut:     "E:/worke/server/proto",
+	ProtoPath: "E:/gopath/src/server/proto",
+	GoOut:     "E:/gopath/src/server/proto",
 }
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "demo",
-	Short: "Short",
-	Long:  `long`,
+	Use:   "root demo",
+	Short: "root Short",
+	Long:  `服务器`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
@@ -77,6 +77,7 @@ func init() {
 func initConfig() {
 
 	if cfgfile != "" {
+		fmt.Println("initconfig ", cfgfile)
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgfile)
 	} else {
