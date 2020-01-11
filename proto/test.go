@@ -6,14 +6,10 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-// type Message interface {
-// 	Reset()
-// 	String() string
-// 	ProtoMessage()
-// }
 
-func testMarshal(pb Message) {
 
+func testMarshal(pb proto.Message) {
+	
 	// encode
 	data, err := proto.Marshal(pb)
 	if err != nil {
