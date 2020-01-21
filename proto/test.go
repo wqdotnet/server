@@ -14,7 +14,7 @@ func testMarshal(pb proto.Message, outpb proto.Message) {
 		return
 	}
 
-	msginfo := &Msg{}
+	msginfo := &NetworkMsg{}
 	msginfo.Module = 1
 	msginfo.Method = 2
 	msginfo.MsgBytes = data
@@ -24,7 +24,7 @@ func testMarshal(pb proto.Message, outpb proto.Message) {
 	}
 
 	// decode  msg
-	msginfo2 := &Msg{}
+	msginfo2 := &NetworkMsg{}
 	err = proto.Unmarshal(msgdata, msginfo2)
 	if err != nil {
 		fmt.Printf("msg decode error[%s]\n", err.Error())
