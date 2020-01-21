@@ -1,7 +1,15 @@
 syntax = "proto3";
 
+
+message Msg{
+  int32 Module =1;
+  int32 Method =2;
+  bytes MsgBytes =3;
+}
+
+
 message SearchRequest {
-  string query = 1;
-  int32 page_number = 2;
-  int32 result_per_page = 3;
+  string Query = 1;
+  int32 PageNumber = 2;
+  int32 ResultPerPage = 3;
 }

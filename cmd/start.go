@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-	
-
+	"fmt" 
 	"github.com/spf13/cobra"
+
+	"server/proto"
 )
 
 // startCmd represents the start command
@@ -14,13 +14,15 @@ var startCmd = &cobra.Command{
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("start")
+		msg.ProtobufTest()
+		//	"server/web"
 		//web.Start()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-
+	
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
