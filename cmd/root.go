@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
+	//"github.com/joho/godotenv"
 )
 
 // ServerConfig  server cfg
@@ -33,8 +35,8 @@ var ServerCfg = ServerConfig{
 	Port:    3344,
 
 	// #protobuf path
-	ProtoPath: "E:/gopath/src/server/proto",
-	GoOut:     "E:/gopath/src/server/proto",
+	ProtoPath: "/proto",
+	GoOut:     "/proto",
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -66,7 +68,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgfile, "config", "", "config file (default is $HOME/demo.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgfile, "config", "", "config file (default is $HOME/cfg.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -77,7 +79,7 @@ func init() {
 func initConfig() {
 
 	if cfgfile != "" {
-		fmt.Println("initconfig ", cfgfile)
+		fmt.Println("initConfig config :", cfgfile)
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgfile)
 	} else {
@@ -88,7 +90,7 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		fmt.Println("initconfig ", home)
+		fmt.Println("initConfig config home:", home)
 
 		// Search config in home directory with name ".demo" (without extension).
 		viper.AddConfigPath(home)

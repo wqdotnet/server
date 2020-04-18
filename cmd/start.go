@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
-	msg "server/proto"
+	net "server/network"
+	//msg "server/proto"
 )
 
 // startCmd represents the start command
@@ -14,10 +13,10 @@ var startCmd = &cobra.Command{
 	Short: "Short",
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("start")
-		msg.ProtobufTest()
+		//msg.ProtobufTest()
+		net.StartNetWorkServer(ServerCfg.NetWork, ServerCfg.Port)
 
-		//	"server/web"
+		//"server/web"
 		//web.Start()
 	},
 }

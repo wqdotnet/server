@@ -1,14 +1,16 @@
-package netwrok
+package network
 
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
+
 	msg "server/proto"
+
+	"github.com/golang/protobuf/proto"
 )
 
-//NetworkInterface network
-type NetworkInterface interface {
+//NetInterface network
+type NetInterface interface {
 	Start()
 	Stop()
 	Send(msg []byte)
@@ -19,8 +21,25 @@ type NetworkInterface interface {
 // 	fmt.Printf("NetworkMsg send ")
 // }
 
+//StartNetWorkServer 启动网络服务
+func StartNetWorkServer(nettype string, port int) {
+	fmt.Println("network start")
+	var network NetInterface
+
+	switch nettype {
+	case "kcp":
+		fmt.Println("start kcp port:", port)
+	case "tcp":
+		network = TCPNetwork{}
+	default:
+		network = TCPNetwork{}
+	}
+
+	network.Start()
+}
+
 //EncodeSend send msg
-func EncodeSend(network NetworkInterface, module int32, method int32, pb proto.Message) {
+func EncodeSend(network NetInterface, module int32, method int32, pb proto.Message) {
 	// encode
 	data, err := proto.Marshal(pb)
 	if err != nil {

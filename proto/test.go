@@ -48,5 +48,5 @@ func ProtobufTest() {
 	searchRequest2 := &SearchRequest{}
 	testMarshal(searchRequest, searchRequest2)
 
-	fmt.Printf("proto decode searchRequest: %d\n", searchRequest2)
+	fmt.Printf("proto decode searchRequest: [%s]\n", searchRequest2)
 }

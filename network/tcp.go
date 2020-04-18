@@ -1,30 +1,28 @@
-package netwrok
+package network
 
 import (
 	"fmt"
-
-	"github.com/golang/protobuf/proto"
 )
 
-//TcpNetwork tcp/ip
-type TcpNetwork struct {
+//TCPNetwork tcp/ip
+type TCPNetwork struct {
 	laddr string
 }
 
 //Start NetworkInterface.Start
-func Start(c *TcpNetwork) {
+func (c TCPNetwork) Start() {
 	fmt.Printf("TcpNetwork start")
 
 }
 
 //Stop NetworkInterface.Stop
-func Stop(c *TcpNetwork) {
+func (c TCPNetwork) Stop() {
 	fmt.Printf("TcpNetwork Stop ")
 }
 
 //Send network sendmsg
-func Send(c *TcpNetwork, outpb proto.Message) {
+func (c TCPNetwork) Send(msg []byte) {
 	fmt.Printf("TcpNetwork send ")
-
+	//outpb proto.Message
 	//EncodeSend(1,1,outpb)
 }

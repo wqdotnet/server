@@ -1,4 +1,4 @@
-package netwrok
+package network
 
 import (
 	"crypto/sha1"
