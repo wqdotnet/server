@@ -50,9 +50,17 @@ func handle(conn net.Conn) {
 	fmt.Println("socket handle")
 	//读取客户端传送的消息
 	go func() {
-
-		response, _ := ioutil.ReadAll(conn)
+		var (
+			response innerBuffer
+			header   []byte
+			err      error
+		)
+		response, _ = ioutil.ReadAll(conn)
 		fmt.Println(string(response))
+
+		header, err = response.readN(2)
+		fmt.Println(header, err)
+
 	}()
 
 	// //向客户端发送消息
