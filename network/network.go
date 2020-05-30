@@ -32,7 +32,7 @@ func StartNetWorkServer(nettype string, port int) {
 	case "tcp":
 		network = TCPNetwork{}
 	default:
-		network = TCPNetwork{}
+		network = new(TCPNetwork) // TCPNetwork{}
 	}
 
 	network.Start()

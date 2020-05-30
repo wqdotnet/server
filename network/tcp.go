@@ -1,51 +1,11 @@
 package network
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
-
-	"github.com/panjf2000/gnet"
 )
-
-type echoServer struct {
-	*gnet.EventServer
-}
-
-func (es *echoServer) OnInitComplete(srv gnet.Server) (action gnet.Action) {
-	log.Printf("Echo server is listening on %s (multi-cores: %t, loops: %d)\n",
-		srv.Addr.String(), srv.Multicore, srv.NumEventLoop)
-	return
-}
-func (es *echoServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
-	// Echo synchronously.
-	out = frame
-	return
-
-	/*
-		// Echo asynchronously.
-		data := append([]byte{}, frame...)
-		go func() {
-			time.Sleep(time.Second)
-			c.AsyncWrite(data)
-		}()
-		return
-	*/
-}
-
-func main() {
-	var port int
-	var multicore bool
-
-	// Example command: go run echo.go --port 9000 --multicore=true
-	flag.IntVar(&port, "port", 9000, "--port 9000")
-	flag.BoolVar(&multicore, "multicore", false, "--multicore true")
-	flag.Parse()
-	echo := new(echoServer)
-	log.Fatal(gnet.Serve(echo, fmt.Sprintf("tcp://:%d", port), gnet.WithMulticore(multicore)))
-}
 
 //TCPNetwork tcp/ip
 type TCPNetwork struct {
@@ -53,12 +13,22 @@ type TCPNetwork struct {
 	address string
 }
 
+type innerBuffer []byte
+
+func (in *innerBuffer) readN(n int) (buf []byte, err error) {
+	if n <= 0 {
+		return nil, errors.New("zero or negative length is invalid")
+	} else if n > len(*in) {
+		return nil, errors.New("exceeding buffer length")
+	}
+	buf = (*in)[:n]
+	*in = (*in)[n:]
+	return
+}
+
 //Start NetworkInterface.Start
 func (c TCPNetwork) Start() {
 	fmt.Println("TcpNetwork start")
-
-	// gnet.Serve(c, fmt.Sprintf("tcp://:%d", "port"), gnet.WithMulticore(true))
-
 	tcpServer, _ := net.ResolveTCPAddr("tcp4", ":8080")
 	listener, _ := net.ListenTCP("tcp", tcpServer)
 
