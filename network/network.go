@@ -30,7 +30,7 @@ func StartNetWorkServer(nettype string, port int) {
 	case "kcp":
 		fmt.Println("start kcp port:", port)
 	case "tcp":
-		network = TCPNetwork{}
+		network = &TCPNetwork{}
 	default:
 		network = new(TCPNetwork) // TCPNetwork{}
 	}

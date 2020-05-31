@@ -3,7 +3,6 @@ package network
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
 )
 
@@ -27,7 +26,7 @@ func (in *innerBuffer) readN(n int) (buf []byte, err error) {
 }
 
 //Start NetworkInterface.Start
-func (c TCPNetwork) Start() {
+func (c *TCPNetwork) Start() {
 	fmt.Println("TcpNetwork start")
 	tcpServer, _ := net.ResolveTCPAddr("tcp4", ":8080")
 	listener, _ := net.ListenTCP("tcp", tcpServer)
@@ -53,13 +52,15 @@ func handle(conn net.Conn) {
 		var (
 			response innerBuffer
 			header   []byte
-			err      error
+			// err    error
+			// i      int
 		)
-		response, _ = ioutil.ReadAll(conn)
-		fmt.Println(string(response))
+		// response, _ = ioutil.ReadAll(conn)
+		// fmt.Println(string(response))
 
+		_, err := conn.Read(response)
 		header, err = response.readN(2)
-		fmt.Println(header, err)
+		fmt.Println("readN:", string(header), "-------err:", err)
 
 	}()
 
@@ -70,12 +71,12 @@ func handle(conn net.Conn) {
 }
 
 //Stop NetworkInterface.Stop
-func (c TCPNetwork) Stop() {
+func (c *TCPNetwork) Stop() {
 	fmt.Printf("TcpNetwork Stop ")
 }
 
 //Send network sendmsg
-func (c TCPNetwork) Send(msg []byte) {
+func (c *TCPNetwork) Send(msg []byte) {
 	fmt.Printf("TcpNetwork send ")
 	//outpb proto.Message
 	//EncodeSend(1,1,outpb)
