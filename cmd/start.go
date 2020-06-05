@@ -14,7 +14,8 @@ var startCmd = &cobra.Command{
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//msg.ProtobufTest()
-		net.StartNetWorkServer(ServerCfg.NetWork, ServerCfg.Port)
+		nw := net.NewNetWorkX()
+		nw.Start()
 
 		//"server/web"
 		//web.Start()

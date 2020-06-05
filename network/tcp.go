@@ -68,8 +68,6 @@ func (c *TCPNetwork) Start() {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				fmt.Println("break 1")
-
 				fmt.Println(err.Error())
 				break
 			}

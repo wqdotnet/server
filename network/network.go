@@ -3,6 +3,7 @@ package network
 import (
 	"errors"
 	"fmt"
+	"net"
 
 	msg "server/proto"
 
@@ -16,26 +17,46 @@ type NetInterface interface {
 	Send(msg []byte)
 }
 
-//Send network sendmsg
-// func Send(c *NetworkInterface, msg *msg.NetworkMsg) {
-// 	fmt.Printf("NetworkMsg send ")
-// }
+//NetWorkx 网络管理
+type NetWorkx struct {
+	OnConnect func(conn net.Conn)
+	OnMessage func(conn net.Conn)
+	OnClose   func(conn net.Conn)
 
-//StartNetWorkServer 启动网络服务
-func StartNetWorkServer(nettype string, port int) {
+	//包长度0 2 4
+	Packet int32
+	//tcp kcp
+	NetType string
+	//监听端口
+	Port int32
+	src  NetInterface
+}
+
+//NewNetWorkX    instance
+func NewNetWorkX() *NetWorkx {
+	return &NetWorkx{
+		Packet:  2,
+		NetType: "TCP",
+		Port:    3344,
+	}
+}
+
+//Start 启动网络服务
+func (n *NetWorkx) Start() {
 	fmt.Println("network start")
-	var network NetInterface
-
-	switch nettype {
+	switch n.NetType {
 	case "kcp":
-		fmt.Println("start kcp port:", port)
+		fmt.Println("start kcp port:", n.Port)
 	case "tcp":
-		network = &TCPNetwork{}
+		fmt.Println("start tcp port:", n.Port)
+		n.src = &TCPNetwork{}
 	default:
-		network = new(TCPNetwork) // TCPNetwork{}
+		fmt.Println("start default tcp port:", n.Port)
+		n.src = new(TCPNetwork) // TCPNetwork{}
 	}
 
-	network.Start()
+	//start socket
+	n.src.Start()
 }
 
 //EncodeSend send msg
