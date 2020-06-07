@@ -1,13 +1,8 @@
 package network
 
 import (
-	"errors"
 	"fmt"
 	"net"
-
-	msg "server/proto"
-
-	"github.com/golang/protobuf/proto"
 )
 
 //NetInterface network
@@ -27,17 +22,19 @@ type NetWorkx struct {
 	Packet int32
 	//tcp kcp
 	NetType string
-	//监听端口
-	Port int32
-	src  NetInterface
+	//监听端口.
+	Port     int32
+	src      NetInterface
+	handlers map[int32]func(buf []byte)
 }
 
 //NewNetWorkX    instance
 func NewNetWorkX() *NetWorkx {
 	return &NetWorkx{
-		Packet:  2,
-		NetType: "TCP",
-		Port:    3344,
+		Packet:   2,
+		NetType:  "TCP",
+		Port:     3344,
+		handlers: make(map[int32]func(buf []byte)),
 	}
 }
 
@@ -59,42 +56,58 @@ func (n *NetWorkx) Start() {
 	n.src.Start(n)
 }
 
-//EncodeSend send msg
-func EncodeSend(network NetInterface, module int32, method int32, pb proto.Message) {
-	// encode
-	data, err := proto.Marshal(pb)
-	if err != nil {
-		fmt.Printf("proto encode error[%s]\n", err.Error())
-		return
-	}
-
-	msg := &msg.NetworkMsg{}
-	msg.MsgBytes = data
-	msg.Module = module
-	msg.Method = method
-	msgdata, err := proto.Marshal(msg)
-	if err != nil {
-		fmt.Printf("NetworkMsg encode error[%s]\n", err.Error())
-		return
-	}
-	network.Send(msgdata)
+//RegisteredMethod 方法注册
+func (n *NetWorkx) RegisteredMethod(method int32, handler func(buf []byte)) {
+	n.handlers[method] = handler
 }
 
-//Decode  decode  msg
-func Decode(msgdata []byte, outpb proto.Message) (int32, int32, error) {
-	msginfo := &msg.NetworkMsg{}
-
-	err := proto.Unmarshal(msgdata, msginfo)
-	if err != nil {
-		fmt.Printf("msg decode error[%s]\n", err.Error())
-		return 0, 0, errors.New("proto: msg.NetworkMsg decode error")
+//OnMessage2 消息路由
+func (n *NetWorkx) OnMessage2(module int, method int32, buf []byte) {
+	handler, ok := n.handlers[method]
+	if !ok {
+		fmt.Println(fmt.Sprintf("method %d handler not found", method))
+		return
 	}
-
-	protoerr := proto.Unmarshal(msginfo.MsgBytes, outpb)
-	if err != nil {
-		fmt.Printf("proto decode error[%s]\n", protoerr.Error())
-		return 0, 0, err
-	}
-
-	return msginfo.Module, msginfo.Method, nil
+	//module  method 方法合法过滤验证
+	handler(buf)
 }
+
+// //EncodeSend send msg
+// func EncodeSend(network NetInterface, module int32, method int32, pb proto.Message) {
+// 	// encode
+// 	data, err := proto.Marshal(pb)
+// 	if err != nil {
+// 		fmt.Printf("proto encode error[%s]\n", err.Error())
+// 		return
+// 	}
+
+// 	msg := &msg.NetworkMsg{}
+// 	msg.MsgBytes = data
+// 	msg.Module = module
+// 	msg.Method = method
+// 	msgdata, err := proto.Marshal(msg)
+// 	if err != nil {
+// 		fmt.Printf("NetworkMsg encode error[%s]\n", err.Error())
+// 		return
+// 	}
+// 	network.Send(msgdata)
+// }
+
+// //Decode  decode  msg
+// func Decode(msgdata []byte, outpb proto.Message) (int32, int32, error) {
+// 	msginfo := &msg.NetworkMsg{}
+
+// 	err := proto.Unmarshal(msgdata, msginfo)
+// 	if err != nil {
+// 		fmt.Printf("msg decode error[%s]\n", err.Error())
+// 		return 0, 0, errors.New("proto: msg.NetworkMsg decode error")
+// 	}
+
+// 	protoerr := proto.Unmarshal(msginfo.MsgBytes, outpb)
+// 	if err != nil {
+// 		fmt.Printf("proto decode error[%s]\n", protoerr.Error())
+// 		return 0, 0, err
+// 	}
+
+// 	return msginfo.Module, msginfo.Method, nil
+// }
