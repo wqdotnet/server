@@ -2,9 +2,17 @@ package msg
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/golang/protobuf/proto"
 )
+
+func test() {
+	p := &sync.Pool{
+		//New: connectToService,
+	}
+	p.Get()
+}
 
 func testMarshal(pb proto.Message, outpb proto.Message) {
 	// encode  msg

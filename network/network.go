@@ -12,16 +12,16 @@ import (
 
 //NetInterface network
 type NetInterface interface {
-	Start()
+	Start(n *NetWorkx)
 	Stop()
 	Send(msg []byte)
 }
 
 //NetWorkx 网络管理
 type NetWorkx struct {
-	OnConnect func(conn net.Conn)
-	OnMessage func(conn net.Conn)
-	OnClose   func(conn net.Conn)
+	OnConnect func(conn *net.Conn)
+	OnMessage func(conn *net.Conn, buf []byte)
+	OnClose   func(conn *net.Conn)
 
 	//包长度0 2 4
 	Packet int32
@@ -56,7 +56,7 @@ func (n *NetWorkx) Start() {
 	}
 
 	//start socket
-	n.src.Start()
+	n.src.Start(n)
 }
 
 //EncodeSend send msg

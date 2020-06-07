@@ -60,9 +60,10 @@ func readUntil(reader io.Reader, buf []byte) error {
 }
 
 //Start start
-func (c *TCPNetwork) Start() {
+func (c *TCPNetwork) Start(nw *NetWorkx) {
 	fmt.Println("tcp run on localhost:7123")
 	listener, err := net.Listen("tcp", ":7123")
+	defer listener.Close()
 	checkError(err)
 	go func() {
 		for {
@@ -71,16 +72,22 @@ func (c *TCPNetwork) Start() {
 				fmt.Println(err.Error())
 				break
 			}
-			go handleClient(conn)
+
+			if nw.OnConnect != nil {
+				nw.OnConnect(&conn)
+			}
+			go handleClient(conn, nw)
 		}
 	}()
 	select {}
-
 }
 
-func handleClient(conn net.Conn) {
+func handleClient(conn net.Conn, nw *NetWorkx) {
 	// close connection on exit
 	defer conn.Close()
+	if nw.OnClose != nil {
+		defer nw.OnClose(&conn)
+	}
 	var oneRead innerBuffer
 	var e error
 	for {
@@ -100,8 +107,11 @@ func handleClient(conn net.Conn) {
 		fmt.Println("receive from client:", binary.BigEndian.Uint16(buf))
 		fmt.Println(fmt.Sprintf("receive from client: %v", string(oneRead)))
 
-		// _, err2 := conn.Write(NewByte(1, 2, 3, 4, 5, 6, 7, 8, 9))
+		if nw.OnMessage != nil {
+			nw.OnMessage(&conn, buf)
+		}
 
+		// _, err2 := conn.Write(NewByte(1, 2, 3, 4, 5, 6, 7, 8, 9))
 		// if err2 != nil {
 		// 	fmt.Println(err2.Error())
 		// 	return
