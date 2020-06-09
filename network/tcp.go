@@ -73,22 +73,19 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 				fmt.Println(err.Error())
 				break
 			}
-
-			// if nw.ClientHander != nil {
-			// 	nw.ClientHander.OnConnect()
-			// }
-			go handleClient(conn, nw)
+			c := nw.UserPool.Get().(ClientInterface)
+			go handleClient(conn, c)
 		}
 	}()
 	select {}
 }
 
-func handleClient(conn net.Conn, nw *NetWorkx) {
+func handleClient(conn net.Conn, client ClientInterface) {
 	// close connection on exit
 	defer conn.Close()
-	// if nw.ClientHander != nil {
-	// 	defer nw.ClientHander.OnClose()
-	// }
+	defer client.OnClose()
+
+	client.OnConnect()
 	var oneRead innerBuffer
 	var e error
 	for {
@@ -105,8 +102,9 @@ func handleClient(conn net.Conn, nw *NetWorkx) {
 			fmt.Println("socket error:", err)
 		}
 
+		client.OnMessage(1, 2, oneRead)
 		fmt.Println("receive from client:", binary.BigEndian.Uint16(buf))
-		fmt.Println(fmt.Sprintf("receive from client: %v", string(oneRead)))
+		//fmt.Println(fmt.Sprintf("receive from client: %v", string(oneRead)))
 
 		//next 消息处理
 

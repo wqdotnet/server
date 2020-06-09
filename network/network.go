@@ -9,8 +9,7 @@ import (
 type ClientInterface interface {
 	OnConnect()
 	OnClose()
-	// OnMessage(module int32, method int, buf []byte)
-	// Addhandler(method int32, handler func(buf []byte))
+	OnMessage(module int32, method int32, buf []byte)
 }
 
 //NetInterface network

@@ -18,8 +18,6 @@ var startCmd = &cobra.Command{
 		// nw := net.NewNetWorkX()
 		// nw.Start()
 
-		//"server/web"
-		//web.Start()
 	},
 }
 
