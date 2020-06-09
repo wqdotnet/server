@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"sync"
 )
 
 //ClientInterface client hander
@@ -16,28 +17,35 @@ type ClientInterface interface {
 type NetInterface interface {
 	Start(n *NetWorkx)
 	Stop()
-	Send(msg []byte)
+	//Send(msg []byte)
 }
 
 //NetWorkx 网络管理
 type NetWorkx struct {
-	ClientHander ClientInterface
+	//tcp/udp/kcp
+	src NetInterface
+
+	//ClientHander ClientInterface
 	//包长度0 2 4
 	Packet int32
 	//tcp kcp
 	NetType string
 	//监听端口.
 	Port int32
-	src  NetInterface
 	//handlers map[int32]func(buf []byte)
+	//当前连接用户数量
+	UserNumber int32
+	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
+	UserPool *sync.Pool
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX() *NetWorkx {
+func NewNetWorkX(pool *sync.Pool) *NetWorkx {
 	return &NetWorkx{
-		Packet:  2,
-		NetType: "TCP",
-		Port:    3344,
+		Packet:   2,
+		NetType:  "TCP",
+		Port:     3344,
+		UserPool: pool,
 	}
 }
 
@@ -57,6 +65,13 @@ func (n *NetWorkx) Start() {
 
 	//start socket
 	n.src.Start(n)
+}
+
+func (n *NetWorkx) onConnect() {
+	n.UserNumber++
+}
+func (n *NetWorkx) onClose() {
+	n.UserNumber--
 }
 
 // //RegisteredMethod 方法注册

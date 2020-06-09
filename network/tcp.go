@@ -74,9 +74,9 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 				break
 			}
 
-			if nw.ClientHander != nil {
-				nw.ClientHander.OnConnect()
-			}
+			// if nw.ClientHander != nil {
+			// 	nw.ClientHander.OnConnect()
+			// }
 			go handleClient(conn, nw)
 		}
 	}()
@@ -86,9 +86,9 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 func handleClient(conn net.Conn, nw *NetWorkx) {
 	// close connection on exit
 	defer conn.Close()
-	if nw.ClientHander != nil {
-		defer nw.ClientHander.OnClose()
-	}
+	// if nw.ClientHander != nil {
+	// 	defer nw.ClientHander.OnClose()
+	// }
 	var oneRead innerBuffer
 	var e error
 	for {
