@@ -2,8 +2,15 @@ package network
 
 import (
 	"fmt"
-	"net"
 )
+
+//ClientInterface client hander
+type ClientInterface interface {
+	OnConnect()
+	OnClose()
+	// OnMessage(module int32, method int, buf []byte)
+	// Addhandler(method int32, handler func(buf []byte))
+}
 
 //NetInterface network
 type NetInterface interface {
@@ -14,10 +21,7 @@ type NetInterface interface {
 
 //NetWorkx 网络管理
 type NetWorkx struct {
-	OnConnect func(conn *net.Conn)
-	OnMessage func(conn *net.Conn, buf []byte)
-	OnClose   func(conn *net.Conn)
-
+	ClientHander ClientInterface
 	//包长度0 2 4
 	Packet int32
 	//tcp kcp
@@ -61,8 +65,8 @@ func (n *NetWorkx) RegisteredMethod(method int32, handler func(buf []byte)) {
 	n.handlers[method] = handler
 }
 
-//OnMessage2 消息路由
-func (n *NetWorkx) OnMessage2(module int, method int32, buf []byte) {
+//OnMessage 消息路由
+func (n *NetWorkx) OnMessage(module int32, method int32, buf []byte) {
 	handler, ok := n.handlers[method]
 	if !ok {
 		fmt.Println(fmt.Sprintf("method %d handler not found", method))

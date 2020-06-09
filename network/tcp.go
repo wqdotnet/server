@@ -73,8 +73,8 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 				break
 			}
 
-			if nw.OnConnect != nil {
-				nw.OnConnect(&conn)
+			if nw.ClientHander != nil {
+				nw.ClientHander.OnConnect()
 			}
 			go handleClient(conn, nw)
 		}
@@ -85,8 +85,8 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 func handleClient(conn net.Conn, nw *NetWorkx) {
 	// close connection on exit
 	defer conn.Close()
-	if nw.OnClose != nil {
-		defer nw.OnClose(&conn)
+	if nw.ClientHander != nil {
+		defer nw.ClientHander.OnClose()
 	}
 	var oneRead innerBuffer
 	var e error
@@ -107,9 +107,8 @@ func handleClient(conn net.Conn, nw *NetWorkx) {
 		fmt.Println("receive from client:", binary.BigEndian.Uint16(buf))
 		fmt.Println(fmt.Sprintf("receive from client: %v", string(oneRead)))
 
-		if nw.OnMessage != nil {
-			nw.OnMessage(&conn, buf)
-		}
+		//next 消息处理
+		nw.OnMessage(0, 0, buf)
 
 		// _, err2 := conn.Write(NewByte(1, 2, 3, 4, 5, 6, 7, 8, 9))
 		// if err2 != nil {
