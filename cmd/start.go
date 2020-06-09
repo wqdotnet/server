@@ -15,9 +15,6 @@ var startCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		gserver.StartGServer()
 		//msg.ProtobufTest()
-		// nw := net.NewNetWorkX()
-		// nw.Start()
-
 	},
 }
 

@@ -10,9 +10,9 @@ import (
 
 //StartGServer 启动game server
 func StartGServer() {
+	fmt.Println("start game server ")
 
-	web.Start()
-	fmt.Println("start game server [success]")
+	go web.Start()
 
 	//启动网络
 	nw := net.NewNetWorkX(&sync.Pool{
