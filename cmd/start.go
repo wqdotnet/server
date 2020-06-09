@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	net "server/network"
+	gserver "server/gserver"
 	//msg "server/proto"
 )
 
@@ -13,9 +13,10 @@ var startCmd = &cobra.Command{
 	Short: "Short",
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
+		gserver.StartGServer()
 		//msg.ProtobufTest()
-		nw := net.NewNetWorkX()
-		nw.Start()
+		// nw := net.NewNetWorkX()
+		// nw.Start()
 
 		//"server/web"
 		//web.Start()

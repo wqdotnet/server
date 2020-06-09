@@ -27,18 +27,17 @@ type NetWorkx struct {
 	//tcp kcp
 	NetType string
 	//监听端口.
-	Port     int32
-	src      NetInterface
-	handlers map[int32]func(buf []byte)
+	Port int32
+	src  NetInterface
+	//handlers map[int32]func(buf []byte)
 }
 
 //NewNetWorkX    instance
 func NewNetWorkX() *NetWorkx {
 	return &NetWorkx{
-		Packet:   2,
-		NetType:  "TCP",
-		Port:     3344,
-		handlers: make(map[int32]func(buf []byte)),
+		Packet:  2,
+		NetType: "TCP",
+		Port:    3344,
 	}
 }
 
@@ -52,7 +51,7 @@ func (n *NetWorkx) Start() {
 		fmt.Println("start tcp port:", n.Port)
 		n.src = &TCPNetwork{}
 	default:
-		fmt.Println("start default tcp port:", n.Port)
+		fmt.Println("start default [tcp] port:", n.Port)
 		n.src = new(TCPNetwork) // TCPNetwork{}
 	}
 
@@ -60,21 +59,21 @@ func (n *NetWorkx) Start() {
 	n.src.Start(n)
 }
 
-//RegisteredMethod 方法注册
-func (n *NetWorkx) RegisteredMethod(method int32, handler func(buf []byte)) {
-	n.handlers[method] = handler
-}
+// //RegisteredMethod 方法注册
+// func (n *NetWorkx) RegisteredMethod(method int32, handler func(buf []byte)) {
+// 	n.handlers[method] = handler
+// }
 
-//OnMessage 消息路由
-func (n *NetWorkx) OnMessage(module int32, method int32, buf []byte) {
-	handler, ok := n.handlers[method]
-	if !ok {
-		fmt.Println(fmt.Sprintf("method %d handler not found", method))
-		return
-	}
-	//module  method 方法合法过滤验证
-	handler(buf)
-}
+// //OnMessage 消息路由
+// func (n *NetWorkx) OnMessage(module int32, method int32, buf []byte) {
+// 	handler, ok := n.handlers[method]
+// 	if !ok {
+// 		fmt.Println(fmt.Sprintf("method %d handler not found", method))
+// 		return
+// 	}
+// 	//module  method 方法合法过滤验证
+// 	handler(buf)
+// }
 
 // //EncodeSend send msg
 // func EncodeSend(network NetInterface, module int32, method int32, pb proto.Message) {

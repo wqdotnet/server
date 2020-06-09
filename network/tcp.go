@@ -61,8 +61,9 @@ func readUntil(reader io.Reader, buf []byte) error {
 
 //Start start
 func (c *TCPNetwork) Start(nw *NetWorkx) {
-	fmt.Println("tcp run on localhost:7123")
-	listener, err := net.Listen("tcp", ":7123")
+	fmt.Println(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
+
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", nw.Port))
 	defer listener.Close()
 	checkError(err)
 	go func() {
@@ -108,7 +109,6 @@ func handleClient(conn net.Conn, nw *NetWorkx) {
 		fmt.Println(fmt.Sprintf("receive from client: %v", string(oneRead)))
 
 		//next 消息处理
-		nw.OnMessage(0, 0, buf)
 
 		// _, err2 := conn.Write(NewByte(1, 2, 3, 4, 5, 6, 7, 8, 9))
 		// if err2 != nil {
