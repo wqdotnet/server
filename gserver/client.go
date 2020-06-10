@@ -11,11 +11,11 @@ type client struct {
 }
 
 //NewClient
-func NewClient() *client {
-	return &client{
-		Connect: make(chan interface{}),
-	}
-}
+// func NewClient() *client {
+// 	return &client{
+// 		Connect: make(chan interface{}),
+// 	}
+// }
 
 func (c *client) OnConnect() {
 	fmt.Println("client object connect msg")
