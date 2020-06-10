@@ -97,14 +97,21 @@ func handleClient(conn net.Conn, client ClientInterface) {
 			fmt.Println(errorx.Wrap(e).Error())
 			return
 		}
+		fmt.Println("socket []byte len: ", len(oneRead))
+
 		buf, err := oneRead.readN(2)
 		if err != nil {
 			fmt.Println("socket error:", err)
 		}
 
+		head := binary.BigEndian.Uint16(buf)
+		fmt.Println(fmt.Sprintf("head: [%v]  body： [%v]", int(head), len(oneRead)))
+		// if int(blen) == len(buf) {
+
+		// }
+
 		client.OnMessage(1, 2, oneRead)
-		fmt.Println("receive from client:", binary.BigEndian.Uint16(buf))
-		//fmt.Println(fmt.Sprintf("receive from client: %v", string(oneRead)))
+		fmt.Println(fmt.Sprintf("receive from client: %v", string(oneRead)))
 
 		//next 消息处理
 
@@ -130,7 +137,6 @@ func readOnce(reader io.Reader) ([]byte, error) {
 
 	n, e = reader.Read(buffer)
 	if e != nil {
-
 		return nil, e
 	}
 
