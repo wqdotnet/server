@@ -18,7 +18,7 @@ type client struct {
 // }
 
 func (c *client) OnConnect() {
-	fmt.Println("client object connect msg")
+	fmt.Println("client OnConnect")
 }
 
 func (c *client) OnMessage(module int32, method int32, buf []byte) {
@@ -26,7 +26,7 @@ func (c *client) OnMessage(module int32, method int32, buf []byte) {
 }
 
 func (c *client) OnClose() {
-
+	fmt.Println("client OnClose")
 }
 
 //UserLogin 用户登陆

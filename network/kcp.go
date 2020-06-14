@@ -1,15 +1,39 @@
 package network
 
-// import (
-// 	"crypto/sha1"
-// 	"io"
-// 	"log"
-// 	"time"
+import (
+	"crypto/sha1"
+	"fmt"
+	"log"
 
-// 	"github.com/xtaci/kcp-go"
-// 	"golang.org/x/crypto/pbkdf2"
-// )
+	"github.com/xtaci/kcp-go"
+	"golang.org/x/crypto/pbkdf2"
+)
 
+//KCPNetwork  kcp
+type KCPNetwork struct {
+}
+
+//Start start
+func (c *KCPNetwork) Start(nw *NetWorkx) {
+	key := pbkdf2.Key([]byte("demo pass"), []byte("demo salt"), 1024, 32, sha1.New)
+	block, _ := kcp.NewAESBlockCrypt(key)
+
+	connstr := fmt.Sprintf("127.0.0.1:%v", nw.Port)
+	if listener, err := kcp.ListenWithOptions(connstr, block, 10, 3); err == nil {
+		for {
+			s, err := listener.AcceptKCP()
+			if err != nil {
+				log.Fatal(err)
+			}
+			go nw.HandleClient(s)
+		}
+
+	} else {
+		log.Fatal(err)
+	}
+}
+
+//demo :
 // func startDemo() {
 // 	key := pbkdf2.Key([]byte("demo pass"), []byte("demo salt"), 1024, 32, sha1.New)
 // 	block, _ := kcp.NewAESBlockCrypt(key)

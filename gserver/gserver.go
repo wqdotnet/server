@@ -3,7 +3,6 @@ package gserver
 import (
 	"fmt"
 	net "server/network"
-	"server/web"
 	"sync"
 	//msg "server/proto"
 )
@@ -12,7 +11,7 @@ import (
 func StartGServer() {
 	fmt.Println("start game server ")
 
-	go web.Start()
+	//go web.Start()
 
 	//启动网络
 	nw := net.NewNetWorkX(&sync.Pool{

@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/DeanThompson/ginpprof v0.0.0-20190408063150-3be636683586
+	github.com/coreos/etcd v3.3.10+incompatible
 	github.com/davyxu/cellnet v4.1.0+incompatible
 	github.com/davyxu/goobjfmt v0.1.0 // indirect
 	github.com/fwhezfwhez/errorx v0.0.0-20200106103634-5bceb7ccfe70

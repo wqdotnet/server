@@ -1,7 +1,12 @@
 package network
 
 import (
+	"encoding/binary"
+	"errors"
 	"fmt"
+	"io"
+	"net"
+	"os"
 	"sync"
 )
 
@@ -15,9 +20,18 @@ type ClientInterface interface {
 //NetInterface network
 type NetInterface interface {
 	Start(n *NetWorkx)
-	Stop()
+	//Stop()
 	//Send(msg []byte)
 }
+
+//ConnInterface 消息处理
+// type ConnInterface interface {
+// 	Read(b []byte) (n int, err error)
+// 	Write(b []byte) (n int, err error)
+// 	Close() error
+// 	LocalAddr() net.Addr
+// 	RemoteAddr() net.Addr
+// }
 
 //NetWorkx 网络管理
 type NetWorkx struct {
@@ -54,6 +68,7 @@ func (n *NetWorkx) Start() {
 	switch n.NetType {
 	case "kcp":
 		fmt.Println("start kcp port:", n.Port)
+		n.src = &KCPNetwork{}
 	case "tcp":
 		fmt.Println("start tcp port:", n.Port)
 		n.src = &TCPNetwork{}
@@ -64,6 +79,36 @@ func (n *NetWorkx) Start() {
 
 	//start socket
 	n.src.Start(n)
+
+}
+
+//HandleClient 消息处理
+func (n *NetWorkx) HandleClient(conn net.Conn) {
+	c := n.UserPool.Get().(ClientInterface)
+	c.OnConnect()
+	defer c.OnClose()
+	defer conn.Close()
+	for {
+		_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
+		if e != nil {
+			fmt.Println("socket error:", e.Error())
+			return
+		}
+
+		//[:n]
+		c.OnMessage(1, 1, buf[n.Packet:])
+
+		// oneRead = buf
+		// _, _ = oneRead.readN(int(packet))
+		// client.OnMessage(1, 2, oneRead)
+
+		//next 消息处理
+		// _, err2 := conn.Write(NewByte(1, 2, 3, 4, 5, 6, 7, 8, 9))
+		// if err2 != nil {
+		// 	fmt.Println(err2.Error())
+		// 	return
+		// }
+	}
 }
 
 func (n *NetWorkx) onConnect() {
@@ -71,6 +116,109 @@ func (n *NetWorkx) onConnect() {
 }
 func (n *NetWorkx) onClose() {
 	n.UserNumber--
+}
+
+// UnpackToBlockFromReader -> unpack the first block from the reader.
+// protocol is PackWithMarshaller().
+// [4]byte -- length             fixed_size,binary big endian encode
+// [4]byte -- messageID          fixed_size,binary big endian encode
+// [4]byte -- headerLength       fixed_size,binary big endian encode
+// [4]byte -- bodyLength         fixed_size,binary big endian encode
+// []byte -- header              marshal by json
+// []byte -- body                marshal by marshaller
+// ussage:
+// for {
+//     blockBuf, e:= UnpackToBlockFromReader(reader)
+// 	   go func(buf []byte){
+//         // handle a message block apart
+//     }(blockBuf)
+//     continue
+// }
+func UnpackToBlockFromReader(reader io.Reader, packet int32) (int32, []byte, error) {
+	if reader == nil {
+		return 0, nil, errors.New("reader is nil")
+	}
+	var info = make([]byte, packet, packet)
+	if e := readUntil(reader, info); e != nil {
+		if e == io.EOF {
+			return 0, nil, e
+		}
+		return 0, nil, e //errorx.Wrap(e)
+	}
+
+	length, e := LengthOf(info, packet)
+	if e != nil {
+		return 0, nil, e
+	}
+	var content = make([]byte, length, length)
+	if e := readUntil(reader, content); e != nil {
+		if e == io.EOF {
+			return 0, nil, e
+		}
+		return 0, nil, e //errorx.Wrap(e)
+	}
+
+	return length, append(info, content...), nil
+}
+
+//LengthOf Length of the stream starting validly.
+//Length doesn't include length flag itself, it refers to a valid message length after it.
+func LengthOf(stream []byte, packet int32) (int32, error) {
+	if len(stream) < int(packet) {
+		return 0, errors.New(fmt.Sprint("stream lenth should be bigger than ", packet))
+	}
+
+	switch packet {
+	case 2:
+		return int32(binary.BigEndian.Uint16(stream[0:2])), nil
+	case 4:
+		return int32(binary.BigEndian.Uint32(stream[0:4])), nil
+	default:
+		errstr := fmt.Sprintf("stream lenth seting error  [packet: %v]", packet)
+		return 0, errors.New(errstr)
+	}
+
+}
+
+func readUntil(reader io.Reader, buf []byte) error {
+	if len(buf) == 0 {
+		return nil
+	}
+	var offset int
+	for {
+		n, e := reader.Read(buf[offset:])
+		if e != nil {
+			if e == io.EOF {
+				return e
+			}
+			return e //errorx.Wrap(e)
+		}
+		offset += n
+		if offset >= len(buf) {
+			break
+		}
+	}
+	return nil
+}
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		os.Exit(1)
+	}
+}
+
+func readOnce(reader io.Reader) ([]byte, error) {
+	var buffer = make([]byte, 512, 512)
+	var n int
+	var e error
+
+	n, e = reader.Read(buffer)
+	if e != nil {
+		return nil, e
+	}
+
+	return buffer[0:n], nil
 }
 
 // //RegisteredMethod 方法注册
