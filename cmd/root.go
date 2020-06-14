@@ -3,41 +3,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"server/gserver"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	//"github.com/joho/godotenv"
 )
-
-// ServerConfig  server cfg
-type ServerConfig struct {
-	OpenHTTP string
-	HTTPPort int
-
-	NetWork string
-	Port    int
-
-	//proto_path=%s  --go_out
-
-	ProtoPath string
-	GoOut     string
-}
-
-// ServerCfg  Program overall configuration
-var ServerCfg = ServerConfig{
-
-	OpenHTTP: "localhost",
-	HTTPPort: 8080,
-
-	// #network : tcp/udp
-	NetWork: "tcp",
-	Port:    3344,
-
-	// #protobuf path
-	ProtoPath: "/proto",
-	GoOut:     "/proto",
-}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -77,7 +49,6 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-
 	if cfgfile != "" {
 		fmt.Println("initConfig config :", cfgfile)
 		// Use config file from the flag.
@@ -91,7 +62,6 @@ func initConfig() {
 		}
 
 		fmt.Println("initConfig config home:", home)
-
 		// Search config in home directory with name ".demo" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName("cfg")
@@ -100,6 +70,7 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
+		viper.Unmarshal(&gserver.ServerCfg)
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }

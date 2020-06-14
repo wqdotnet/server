@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"server/gserver"
 
-	gserver "server/gserver"
+	"github.com/spf13/cobra"
 	//msg "server/proto"
 )
 

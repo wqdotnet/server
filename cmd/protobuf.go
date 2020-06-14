@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"server/gserver"
 
 	"github.com/spf13/cobra"
 )
@@ -29,18 +30,20 @@ var protobufCmd = &cobra.Command{
 		// 	fmt.Println("error:", err)
 		// 	return
 		// }
+		pbpath := gserver.ServerCfg.ProtoPath
+		outpath := gserver.ServerCfg.GoOut
 
-		if !PathExists(ServerCfg.ProtoPath) || !PathExists(ServerCfg.GoOut) {
-			fmt.Println("文件夹不存在:", ServerCfg.ProtoPath, ServerCfg.GoOut)
+		if !PathExists(pbpath) || !PathExists(outpath) {
+			fmt.Println("文件夹不存在:", pbpath, outpath)
 			return
 		}
 
 		execstr := "protoc --proto_path=%s  --go_out=%s %s"
 
-		files, _ := ioutil.ReadDir(ServerCfg.ProtoPath)
+		files, _ := ioutil.ReadDir(pbpath)
 		for _, onefile := range files {
 			if !onefile.IsDir() && path.Ext(onefile.Name()) == ".proto" {
-				execstr = fmt.Sprintf(execstr, ServerCfg.ProtoPath, ServerCfg.GoOut, onefile.Name())
+				execstr = fmt.Sprintf(execstr, pbpath, outpath, onefile.Name())
 				_, errout, err := Shellout(execstr)
 				if err != nil {
 					fmt.Printf("protoc [%s] ==>: %v\n", onefile.Name(), errout)
