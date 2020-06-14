@@ -7,7 +7,10 @@ import (
 	"io"
 	"net"
 	"os"
+	msg "server/proto"
 	"sync"
+
+	"github.com/golang/protobuf/proto"
 )
 
 //ClientInterface client hander
@@ -23,15 +26,6 @@ type NetInterface interface {
 	//Stop()
 	//Send(msg []byte)
 }
-
-//ConnInterface 消息处理
-// type ConnInterface interface {
-// 	Read(b []byte) (n int, err error)
-// 	Write(b []byte) (n int, err error)
-// 	Close() error
-// 	LocalAddr() net.Addr
-// 	RemoteAddr() net.Addr
-// }
 
 //NetWorkx 网络管理
 type NetWorkx struct {
@@ -95,19 +89,25 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 			return
 		}
 
-		//[:n]
-		c.OnMessage(1, 1, buf[n.Packet:])
+		// module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
+		// method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
+		// c.OnMessage(module, method, buf[n.Packet+4:])
 
-		// oneRead = buf
-		// _, _ = oneRead.readN(int(packet))
-		// client.OnMessage(1, 2, oneRead)
+		//pb 消息拆包
+		//Decode protobuf -> buf[n.Packet:]
+		msginfo := &msg.NetworkMsg{}
+		e = proto.Unmarshal(buf[n.Packet:], msginfo)
+		if e != nil {
+			fmt.Printf("msg decode error[%s]\n", e.Error())
+			msgdata, _ := proto.Marshal(&msg.NetworkMsg{
+				Module: 0,
+				Method: 1,
+			})
+			conn.Write(msgdata)
+		} else {
+			c.OnMessage(msginfo.Module, msginfo.Method, msginfo.MsgBytes)
+		}
 
-		//next 消息处理
-		// _, err2 := conn.Write(NewByte(1, 2, 3, 4, 5, 6, 7, 8, 9))
-		// if err2 != nil {
-		// 	fmt.Println(err2.Error())
-		// 	return
-		// }
 	}
 }
 
@@ -118,13 +118,16 @@ func (n *NetWorkx) onClose() {
 	n.UserNumber--
 }
 
+func checkError(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		os.Exit(1)
+	}
+}
+
 // UnpackToBlockFromReader -> unpack the first block from the reader.
 // protocol is PackWithMarshaller().
-// [4]byte -- length             fixed_size,binary big endian encode
-// [4]byte -- messageID          fixed_size,binary big endian encode
-// [4]byte -- headerLength       fixed_size,binary big endian encode
-// [4]byte -- bodyLength         fixed_size,binary big endian encode
-// []byte -- header              marshal by json
+// [2/4]byte -- length             fixed_size,binary big endian encode
 // []byte -- body                marshal by marshaller
 // ussage:
 // for {
@@ -200,42 +203,6 @@ func readUntil(reader io.Reader, buf []byte) error {
 	}
 	return nil
 }
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		os.Exit(1)
-	}
-}
-
-func readOnce(reader io.Reader) ([]byte, error) {
-	var buffer = make([]byte, 512, 512)
-	var n int
-	var e error
-
-	n, e = reader.Read(buffer)
-	if e != nil {
-		return nil, e
-	}
-
-	return buffer[0:n], nil
-}
-
-// //RegisteredMethod 方法注册
-// func (n *NetWorkx) RegisteredMethod(method int32, handler func(buf []byte)) {
-// 	n.handlers[method] = handler
-// }
-
-// //OnMessage 消息路由
-// func (n *NetWorkx) OnMessage(module int32, method int32, buf []byte) {
-// 	handler, ok := n.handlers[method]
-// 	if !ok {
-// 		fmt.Println(fmt.Sprintf("method %d handler not found", method))
-// 		return
-// 	}
-// 	//module  method 方法合法过滤验证
-// 	handler(buf)
-// }
 
 // //EncodeSend send msg
 // func EncodeSend(network NetInterface, module int32, method int32, pb proto.Message) {
