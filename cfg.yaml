@@ -4,9 +4,11 @@ name: firstServer
 OpenHTTP: true
 HTTPPort: 8080
 
-#network : tcp/udp
-NetWork: tcp
+
+#NetType : tcp/kcp
+NetType: tcp
 Port: 3344
+Packet : 2
 
 #protobuf path
 ProtoPath: "E:/gopath/src/server/proto"
