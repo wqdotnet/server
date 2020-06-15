@@ -30,6 +30,7 @@ var ServerCfg = ServerConfig{
 	// #network : tcp/udp
 	NetType: "tcp",
 	Port:    3344,
+	Packet:  2,
 
 	// #protobuf path
 	ProtoPath: "/proto",

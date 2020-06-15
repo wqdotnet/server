@@ -15,7 +15,7 @@ import (
 
 //ClientInterface client hander
 type ClientInterface interface {
-	OnConnect()
+	OnConnect(sendmsg chan []byte)
 	OnClose()
 	OnMessage(module int32, method int32, buf []byte)
 }
@@ -79,9 +79,26 @@ func (n *NetWorkx) Start() {
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
 	c := n.UserPool.Get().(ClientInterface)
-	c.OnConnect()
+
 	defer c.OnClose()
 	defer conn.Close()
+	defer n.UserPool.Put(c)
+
+	sendc := make(chan []byte, 1)
+	c.OnConnect(sendc)
+	go func(conn net.Conn) {
+
+		for {
+			select {
+			case buf := <-sendc:
+				//bodylen := len(buf)
+				conn.Write(buf)
+			default:
+			}
+
+		}
+	}(conn)
+
 	for {
 		_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
 		if e != nil {
@@ -91,10 +108,10 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 		// module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 		// method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
-		// c.OnMessage(module, method, buf[n.Packet+4:])
+		//c.OnMessage(module, method, buf[n.Packet+4:])
 
-		//pb 消息拆包
-		//Decode protobuf -> buf[n.Packet:]
+		// pb 消息拆包
+		// Decode protobuf -> buf[n.Packet:]
 		msginfo := &msg.NetworkMsg{}
 		e = proto.Unmarshal(buf[n.Packet:], msginfo)
 		if e != nil {
@@ -132,7 +149,7 @@ func checkError(err error) {
 // ussage:
 // for {
 //     blockBuf, e:= UnpackToBlockFromReader(reader)
-// 	   go func(buf []byte){
+// 	   go func(buf []byte){k
 //         // handle a message block apart
 //     }(blockBuf)
 //     continue
