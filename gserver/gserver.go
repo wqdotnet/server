@@ -2,7 +2,7 @@ package gserver
 
 import (
 	"fmt"
-	net "server/network"
+	"server/network"
 	"server/web"
 	"sync"
 	//msg "server/proto"
@@ -37,6 +37,7 @@ var ServerCfg = ServerConfig{
 }
 
 //StartGServer 启动game server
+//go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
 	fmt.Println("start game server ")
 	//ServerConfig
@@ -44,12 +45,22 @@ func StartGServer() {
 		go web.Start(ServerCfg.HTTPPort)
 	}
 
+	// classname := reflect.TypeOf((*ServerConfig)(nil)).Elem()
+	// fmt.Println("reflect:", classname)
+	// msgt := reflect.New(classname).Interface()
+	// switch msgt.(type) {
+	// // 有新的连接
+	// case *ServerConfig:
+	// 	fmt.Println("格式解析")
+	// }
+
 	//启动网络
-	nw := net.NewNetWorkX(&sync.Pool{
+	nw := network.NewNetWorkX(&sync.Pool{
 		New: func() interface{} {
 			return new(client)
 		},
 	})
+
 	nw.Port = ServerCfg.Port
 	nw.Packet = ServerCfg.Packet
 	nw.NetType = ServerCfg.NetType
