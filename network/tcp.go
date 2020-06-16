@@ -1,38 +1,35 @@
 package network
 
 import (
-	"bytes"
-	"encoding/binary"
-	"errors"
 	"fmt"
 	"net"
 )
 
 //TCPNetwork tcp/ip
 type TCPNetwork struct {
-	network string
-	address string
+	// network string
+	// address string
 }
 
-type innerBuffer []byte
+// type innerBuffer []byte
 
-func (in *innerBuffer) readN(n int) (buf []byte, err error) {
-	if n <= 0 {
-		return nil, errors.New("zero or negative length is invalid")
-	} else if n > len(*in) {
-		return nil, errors.New("exceeding buffer length")
-	}
-	buf = (*in)[:n]
-	*in = (*in)[n:]
-	return
-}
+// func (in *innerBuffer) readN(n int) (buf []byte, err error) {
+// 	if n <= 0 {
+// 		return nil, errors.New("zero or negative length is invalid")
+// 	} else if n > len(*in) {
+// 		return nil, errors.New("exceeding buffer length")
+// 	}
+// 	buf = (*in)[:n]
+// 	*in = (*in)[n:]
+// 	return
+// }
 
-func bytesToInt(bys []byte) int {
-	bytebuff := bytes.NewBuffer(bys)
-	var data int64
-	binary.Read(bytebuff, binary.LittleEndian, &data)
-	return int(data)
-}
+// func bytesToInt(bys []byte) int {
+// 	bytebuff := bytes.NewBuffer(bys)
+// 	var data int64
+// 	binary.Read(bytebuff, binary.LittleEndian, &data)
+// 	return int(data)
+// }
 
 //Start start
 func (c *TCPNetwork) Start(nw *NetWorkx) {
@@ -48,9 +45,7 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 			fmt.Println(err.Error())
 			break
 		}
-		//c := nw.UserPool.Get().(ClientInterface)
 		go nw.HandleClient(conn)
-		//go handleClient(conn, nw.Packet, c)
 	}
 	//}()
 	//select {}

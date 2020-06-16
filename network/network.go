@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -79,9 +80,10 @@ func (n *NetWorkx) Start() {
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
 	c := n.UserPool.Get().(ClientInterface)
-
+	n.onConnect()
 	defer c.OnClose()
 	defer conn.Close()
+	defer n.onClose()
 	defer n.UserPool.Put(c)
 
 	sendc := make(chan []byte, 1)
@@ -91,8 +93,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		for {
 			select {
 			case buf := <-sendc:
-				//bodylen := len(buf)
-				conn.Write(buf)
+				le := intToBytes(len(buf), n.Packet)
+				conn.Write(bytesCombine(le, buf))
 			default:
 			}
 
@@ -108,7 +110,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 		// module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 		// method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
-		//c.OnMessage(module, method, buf[n.Packet+4:])
+		// c.OnMessage(module, method, buf[n.Packet+4:])
 
 		// pb 消息拆包
 		// Decode protobuf -> buf[n.Packet:]
@@ -130,9 +132,11 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 func (n *NetWorkx) onConnect() {
 	n.UserNumber++
+	fmt.Println("user number:", n.UserNumber)
 }
 func (n *NetWorkx) onClose() {
 	n.UserNumber--
+	fmt.Println("user number:", n.UserNumber)
 }
 
 func checkError(err error) {
@@ -142,18 +146,29 @@ func checkError(err error) {
 	}
 }
 
+// int 转换为[]byte
+func intToBytes(i int, packet int32) []byte {
+	var buf = make([]byte, 2)
+	if packet == 2 {
+		binary.BigEndian.PutUint16(buf, uint16(i))
+	} else {
+		binary.BigEndian.PutUint32(buf, uint32(i))
+	}
+	return buf
+}
+
+//BytesCombine 多个[]byte数组合并成一个[]byte
+func bytesCombine(pBytes ...[]byte) []byte {
+	len := len(pBytes)
+	s := make([][]byte, len)
+	for index := 0; index < len; index++ {
+		s[index] = pBytes[index]
+	}
+	sep := []byte("")
+	return bytes.Join(s, sep)
+}
+
 // UnpackToBlockFromReader -> unpack the first block from the reader.
-// protocol is PackWithMarshaller().
-// [2/4]byte -- length             fixed_size,binary big endian encode
-// []byte -- body                marshal by marshaller
-// ussage:
-// for {
-//     blockBuf, e:= UnpackToBlockFromReader(reader)
-// 	   go func(buf []byte){k
-//         // handle a message block apart
-//     }(blockBuf)
-//     continue
-// }
 func UnpackToBlockFromReader(reader io.Reader, packet int32) (int32, []byte, error) {
 	if reader == nil {
 		return 0, nil, errors.New("reader is nil")
@@ -220,43 +235,3 @@ func readUntil(reader io.Reader, buf []byte) error {
 	}
 	return nil
 }
-
-// //EncodeSend send msg
-// func EncodeSend(network NetInterface, module int32, method int32, pb proto.Message) {
-// 	// encode
-// 	data, err := proto.Marshal(pb)
-// 	if err != nil {
-// 		fmt.Printf("proto encode error[%s]\n", err.Error())
-// 		return
-// 	}
-
-// 	msg := &msg.NetworkMsg{}
-// 	msg.MsgBytes = data
-// 	msg.Module = module
-// 	msg.Method = method
-// 	msgdata, err := proto.Marshal(msg)
-// 	if err != nil {
-// 		fmt.Printf("NetworkMsg encode error[%s]\n", err.Error())
-// 		return
-// 	}
-// 	network.Send(msgdata)
-// }
-
-// //Decode  decode  msg
-// func Decode(msgdata []byte, outpb proto.Message) (int32, int32, error) {
-// 	msginfo := &msg.NetworkMsg{}
-
-// 	err := proto.Unmarshal(msgdata, msginfo)
-// 	if err != nil {
-// 		fmt.Printf("msg decode error[%s]\n", err.Error())
-// 		return 0, 0, errors.New("proto: msg.NetworkMsg decode error")
-// 	}
-
-// 	protoerr := proto.Unmarshal(msginfo.MsgBytes, outpb)
-// 	if err != nil {
-// 		fmt.Printf("proto decode error[%s]\n", protoerr.Error())
-// 		return 0, 0, err
-// 	}
-
-// 	return msginfo.Module, msginfo.Method, nil
-// }

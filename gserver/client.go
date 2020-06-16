@@ -9,14 +9,12 @@ import (
 
 type client struct {
 	sendchan chan []byte
-}
 
-//NewClient
-// func NewClient() *client {
-// 	return &client{
-// 		Connect: make(chan interface{}),
-// 	}
-// }
+	//用户id
+	userid int32
+	//用户名
+	username string
+}
 
 func (c *client) OnConnect(sendc chan []byte) {
 	//sendmsg <-
@@ -24,18 +22,8 @@ func (c *client) OnConnect(sendc chan []byte) {
 	fmt.Println("client OnConnect")
 }
 
-func (c *client) OnMessage(module int32, method int32, buf []byte) {
-	fmt.Println("client msg :", module, method, string(buf))
-
-}
-
 func (c *client) OnClose() {
 	fmt.Println("client OnClose")
-}
-
-//UserLogin 用户登陆
-func (c *client) UserLogin(buf []byte) {
-
 }
 
 func (c *client) Send(module int32, method int32, pb proto.Message) {
@@ -55,4 +43,22 @@ func (c *client) Send(module int32, method int32, pb proto.Message) {
 	}
 
 	c.sendchan <- msgdata
+}
+
+func (c *client) OnMessage(module int32, method int32, buf []byte) {
+	switch method {
+	case 1:
+		c.UserLogin(buf)
+	}
+
+}
+
+//UserLogin 用户登陆
+func (c *client) UserLogin(buf []byte) {
+
+	c.Send(1, 1, &msg.SearchRequest{
+		Query:         "asdf",
+		PageNumber:    3,
+		ResultPerPage: 2,
+	})
 }
