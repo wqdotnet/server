@@ -7,9 +7,26 @@ message NetworkMsg{
   bytes MsgBytes =3;
 }
 
+ 
 
-message SearchRequest {
-  string Query = 1;
-  int32 PageNumber = 2;
-  int32 ResultPerPage = 3;
+message UserLogin_tos{
+  string user_name =1;
+  int32 index =2;
+}
+
+message UserLogin_toc{
+  bool success =1;
+  string msg =2;
+}
+
+message move_tos{
+  p_status status =1;
+}
+
+
+message p_status{
+  int32 x = 1;
+  int32 y = 2;
+  int32 direction =3;
+  int32 lenght =4;
 }
