@@ -11,6 +11,6 @@ Port: 3344
 Packet : 2
 
 #protobuf path
-ProtoPath: "E:/gopath/src/server/proto"
-GoOut: "E:/gopath/src/server/proto"
+ProtoPath: "E:/worke/server/proto"
+GoOut: "E:/worke/server/proto"
 

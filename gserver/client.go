@@ -55,10 +55,16 @@ func (c *client) OnMessage(module int32, method int32, buf []byte) {
 
 //UserLogin 用户登陆
 func (c *client) UserLogin(buf []byte) {
+	msginfo := &msg.UserLoginTos{}
+	e := proto.Unmarshal(buf, msginfo)
+	if e != nil {
+		fmt.Println(e)
+		return
+	}
+	c.username = msginfo.UserName
 
-	c.Send(1, 1, &msg.SearchRequest{
-		Query:         "asdf",
-		PageNumber:    3,
-		ResultPerPage: 2,
+	c.Send(1, 1, &msg.UserLoginToc{
+		Success: true,
+		Msg:     "ok",
 	})
 }
