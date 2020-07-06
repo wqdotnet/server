@@ -6,6 +6,7 @@ require (
 	github.com/DeanThompson/ginpprof v0.0.0-20190408063150-3be636683586
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/protobuf v1.4.2
+	github.com/halturin/ergo v1.1.0 // indirect
 	github.com/klauspost/reedsolomon v1.9.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.0.0
