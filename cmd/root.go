@@ -67,7 +67,7 @@ func initConfig() {
 		// dir, _ := os.Getwd()
 		// viper.AddConfigPath(dir)
 		// fmt.Println("initConfig config dir:", dir)
-		viper.AddConfigPath("./")
+		viper.AddConfigPath(".")
 		viper.SetConfigName("cfg")
 	}
 
@@ -76,13 +76,12 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		viper.Unmarshal(&gserver.ServerCfg)
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
-		fmt.Println(viper.Get("name"))
 	}
 
-	// viper.AddConfigPath("/config")
+	// viper.AddConfigPath("./config")
 	// viper.SetConfigName("server")
-	// viper.AutomaticEnv()
-	// viper.ReadInConfig()
-	// fmt.Println(viper.Get("showmethe"))
+	// if err2 := viper.ReadInConfig(); err2 == nil {
+	// 	fmt.Println(viper.Get("showmethe"))
+	// }
 
 }
