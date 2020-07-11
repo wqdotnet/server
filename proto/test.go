@@ -48,14 +48,14 @@ func testMarshal(pb proto.Message, outpb proto.Message) {
 
 }
 
-func ProtobufTest() {
-	searchRequest := &SearchRequest{}
-	searchRequest.Query = "select *from query"
-	searchRequest.PageNumber = 4
-	searchRequest.ResultPerPage = 4
+// func ProtobufTest() {
+// 	searchRequest := &SearchRequest{}
+// 	searchRequest.Query = "select *from query"
+// 	searchRequest.PageNumber = 4
+// 	searchRequest.ResultPerPage = 4
 
-	searchRequest2 := &SearchRequest{}
-	testMarshal(searchRequest, searchRequest2)
+// 	searchRequest2 := &SearchRequest{}
+// 	testMarshal(searchRequest, searchRequest2)
 
-	fmt.Printf("proto decode searchRequest: [%s]\n", searchRequest2)
-}
+// 	fmt.Printf("proto decode searchRequest: [%s]\n", searchRequest2)
+// }

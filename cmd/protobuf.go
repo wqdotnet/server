@@ -44,6 +44,7 @@ var protobufCmd = &cobra.Command{
 		for _, onefile := range files {
 			if !onefile.IsDir() && path.Ext(onefile.Name()) == ".proto" {
 				execstr = fmt.Sprintf(execstr, pbpath, outpath, onefile.Name())
+
 				_, errout, err := Shellout(execstr)
 				if err != nil {
 					fmt.Printf("protoc [%s] ==>: %v\n", onefile.Name(), errout)

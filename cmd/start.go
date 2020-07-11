@@ -14,7 +14,6 @@ var startCmd = &cobra.Command{
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
 		gserver.StartGServer()
-		//msg.ProtobufTest()
 	},
 }
 

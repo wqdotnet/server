@@ -33,8 +33,8 @@ var ServerCfg = ServerConfig{
 	Packet:  2,
 
 	// #protobuf path
-	ProtoPath: "/proto",
-	GoOut:     "/proto",
+	ProtoPath: "./proto",
+	GoOut:     "./proto",
 }
 
 //StartGServer 启动game server

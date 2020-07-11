@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"server/gserver"
-
+	
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -60,12 +60,21 @@ func initConfig() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+	 
+	 
+		
 
 		fmt.Println("initConfig config home:", home)
 		// Search config in home directory with name ".demo" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName("cfg")
+
+		//dir,_ := os.Getwd()
+		//viper.AddConfigPath(dir)
+		//viper.AddConfigPath("./")
+		viper.SetConfigName("yaml")
 	}
+ 
+ 
 
 	viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.

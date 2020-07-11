@@ -16,4 +16,5 @@ require (
 	github.com/tjfoc/gmsm v1.3.2 // indirect
 	github.com/xtaci/kcp-go v5.4.20+incompatible
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	google.golang.org/protobuf v1.25.0 // indirect
 )
