@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 	"server/gserver"
-	
-	homedir "github.com/mitchellh/go-homedir"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	//"github.com/joho/godotenv"
@@ -55,31 +54,35 @@ func initConfig() {
 		viper.SetConfigFile(cfgfile)
 	} else {
 		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	 
-	 
-		
+		// home, err := homedir.Dir()
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	os.Exit(1)
+		// }
 
-		fmt.Println("initConfig config home:", home)
-		// Search config in home directory with name ".demo" (without extension).
-		viper.AddConfigPath(home)
+		// fmt.Println("initConfig config home:", home)
+		// // Search config in home directory with name ".demo" (without extension).
+		// viper.AddConfigPath(home)
 
-		//dir,_ := os.Getwd()
-		//viper.AddConfigPath(dir)
-		//viper.AddConfigPath("./")
-		viper.SetConfigName("yaml")
+		// dir, _ := os.Getwd()
+		// viper.AddConfigPath(dir)
+		// fmt.Println("initConfig config dir:", dir)
+		viper.AddConfigPath("./")
+		viper.SetConfigName("cfg")
 	}
- 
- 
 
 	viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		viper.Unmarshal(&gserver.ServerCfg)
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		fmt.Println(viper.Get("name"))
 	}
+
+	// viper.AddConfigPath("/config")
+	// viper.SetConfigName("server")
+	// viper.AutomaticEnv()
+	// viper.ReadInConfig()
+	// fmt.Println(viper.Get("showmethe"))
+
 }
