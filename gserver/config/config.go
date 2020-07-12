@@ -1,4 +1,4 @@
-package gserver
+package config
 
 import (
 	"fmt"
