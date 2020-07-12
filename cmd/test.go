@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // testCmd represents the test command
@@ -30,7 +31,7 @@ var testCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `test`,
 	Run: func(cmd *cobra.Command, args []string) {
-		start()
+		start2()
 	},
 }
 
@@ -46,6 +47,24 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// testCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+type cronCfg struct {
+	Cronlist map[string]string
+}
+
+func start2() {
+	viper.AddConfigPath("./config")
+	viper.SetConfigName("cron")
+
+	if err2 := viper.ReadInConfig(); err2 == nil {
+		cron := cronCfg{}
+		viper.Unmarshal(&cron)
+		for k, v := range cron.Cronlist {
+			fmt.Println(k, ":", v)
+		}
+
+	}
 }
 
 func start() {

@@ -7,7 +7,6 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-//github.com/robfig/cron/v3
 func test() {
 	p := &sync.Pool{
 		//New: connectToService,
