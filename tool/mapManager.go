@@ -1,4 +1,4 @@
-package gserver
+package tool
 
 import (
 	"image"
@@ -7,7 +7,6 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
-	"time"
 )
 
 // 下面是一组生成柏林噪声图像有关的算法函数
@@ -97,7 +96,7 @@ func GetPerlinNoise2DColor(x, y float64, alphaA, betaA float64, octavesA int, se
 }
 
 // 处理根路径请求的函数，将返回一个随机图片
-func handleImage(respA http.ResponseWriter, reqA *http.Request) {
+func HandleImage(respA http.ResponseWriter, reqA *http.Request) {
 	// 设置图片的大小
 	widthT := 480.0
 	heightT := 360.0
@@ -127,11 +126,11 @@ func handleImage(respA http.ResponseWriter, reqA *http.Request) {
 	png.Encode(respA, imageT)
 }
 
-func createMap() {
-	// 初始化随机数种子
-	rand.Seed(time.Now().Unix())
-	// 设定根路由处理函数
-	http.HandleFunc("/", handleImage)
-	// 在指定端口上监听
-	http.ListenAndServe(":8837", nil)
-}
+// func createMap() {
+// 	// 初始化随机数种子
+// 	rand.Seed(time.Now().Unix())
+// 	// 设定根路由处理函数
+// 	http.HandleFunc("/", HandleImage)
+// 	// 在指定端口上监听
+// 	http.ListenAndServe(":8837", nil)
+// }

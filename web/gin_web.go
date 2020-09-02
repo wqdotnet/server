@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"server/tool"
 
 	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,16 @@ func Start(Port int32) {
 			"message": "pong",
 		})
 	})
+
+	router.GET("/map", func(c *gin.Context) {
+
+		tool.HandleImage(c.Writer, c.Request)
+		// c.JSON(200, gin.H{
+		// 	"message": "pong",
+		// })
+	})
+	//http.ResponseWriter, reqA *http.Request
+
 	// automatically add routers for net/http/pprof
 	// e.g. /debug/pprof, /debug/pprof/heap, etc.
 	ginpprof.Wrap(router)
