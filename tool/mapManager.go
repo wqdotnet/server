@@ -98,8 +98,8 @@ func GetPerlinNoise2DColor(x, y float64, alphaA, betaA float64, octavesA int, se
 // 处理根路径请求的函数，将返回一个随机图片
 func HandleImage(respA http.ResponseWriter, reqA *http.Request) {
 	// 设置图片的大小
-	widthT := 480.0
-	heightT := 360.0
+	widthT := 1027.0
+	heightT := 768.0
 	// 设置生成柏林噪声的参数，再加入一些随机性
 	alphaT := 0.31 + rand.Float64()*0.2 - 0.1
 	betaT := 0.22 + rand.Float64()*0.2 - 0.1
