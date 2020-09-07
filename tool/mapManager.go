@@ -50,6 +50,8 @@ func interpolatedNoise(x, y float64, seedA int64) float64 {
 }
 
 // PerlinNoise2D 根据指定参数生成二维的柏林噪声
+// seedA 随机种子 alphaA(标度跨度) betaA (xy偏移量)
+// octavesA 循环次数
 func PerlinNoise2D(x, y float64, seedA int64, alphaA float64, betaA float64, octavesA int) float64 {
 	// 存放结果的变量
 	resultT := 0.0
@@ -95,7 +97,7 @@ func GetPerlinNoise2DColor(x, y float64, alphaA, betaA float64, octavesA int, se
 	return &color.RGBA{byte(r), byte(g), byte(b), byte(a)}
 }
 
-// 处理根路径请求的函数，将返回一个随机图片
+//HandleImage 处理根路径请求的函数，将返回一个随机图片
 func HandleImage(respA http.ResponseWriter, reqA *http.Request) {
 	// 设置图片的大小
 	widthT := 1027.0
@@ -124,6 +126,16 @@ func HandleImage(respA http.ResponseWriter, reqA *http.Request) {
 	respA.Header().Set("Content-Type", "image/png")
 	// 进行png格式的图形编码，并以流式方法写入http响应中
 	png.Encode(respA, imageT)
+}
+
+func createMap(x, y int, seedT int32) map[int]map[int]float64 {
+	tabmap := make(map[int]map[int]float64)
+	for i := 0; i < x; i++ {
+		for j := 0; j < y; j++ {
+			tabmap[i][j] = interpolatedNoise(float64(j), float64(i), int64(seedT))
+		}
+	}
+	return tabmap
 }
 
 // func createMap() {

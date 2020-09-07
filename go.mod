@@ -15,6 +15,7 @@ require (
 	github.com/sdgmf/go-project-sample v0.0.0-20191014021359-f7ef09b7713b // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
+	github.com/taosdata/driver-go v0.0.0-20200805030842-b79fce809137 // indirect
 	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
 	github.com/templexxx/xor v0.0.0-20191217153810-f85b25db303b // indirect
 	github.com/tjfoc/gmsm v1.3.2 // indirect

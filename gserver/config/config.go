@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/google/wire"
+	// "github.com/google/wire"
 	"github.com/spf13/viper"
 )
 
@@ -30,5 +30,3 @@ func New(cfgname string) (*viper.Viper, error) {
 
 	return v, err
 }
-
-var ProviderSet = wire.NewSet(New)
