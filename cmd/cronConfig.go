@@ -16,44 +16,42 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// testCmd represents the test command
-var testCmd = &cobra.Command{
-	Use:   "test",
+// cronConfigCmd represents the cronConfig command
+var cronConfigCmd = &cobra.Command{
+	Use:   "cronConfig",
 	Short: "A brief description of your command",
-	Long:  `test`,
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		start2()
+		cronConfig()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(testCmd)
+	rootCmd.AddCommand(cronConfigCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// testCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// cronConfigCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// testCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// cronConfigCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-type cronCfg struct {
-	Cronlist map[string]string
-}
-
-func start2() {
+func cronConfig() {
 	viper.AddConfigPath("./config")
 	viper.SetConfigName("cron")
 
@@ -63,48 +61,5 @@ func start2() {
 		for k, v := range cron.Cronlist {
 			fmt.Println(k, ":", v)
 		}
-
 	}
-}
-
-func start() {
-	ctx, cancel := context.WithCancel(context.Background())
-	eatNum := chiHanBao(ctx)
-	for n := range eatNum {
-		if n >= 10 {
-			cancel()
-			break
-		}
-	}
-
-	fmt.Println("正在统计结果。。。")
-	time.Sleep(1 * time.Second)
-}
-
-func chiHanBao(ctx context.Context) <-chan int {
-	c := make(chan int)
-	// 个数
-	n := 0
-	// 时间
-	t := 0
-	go func() {
-		for {
-			//time.Sleep(time.Second)
-			select {
-			case <-ctx.Done():
-				fmt.Printf("耗时 %d 秒，吃了 %d 个汉堡 \n", t, n)
-				return
-			case c <- n:
-				incr := rand.Intn(5)
-				n += incr
-				if n >= 10 {
-					n = 10
-				}
-				t++
-				fmt.Printf("我吃了 %d 个汉堡\n", n)
-			}
-		}
-	}()
-
-	return c
 }
