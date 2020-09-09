@@ -63,3 +63,8 @@ func cronConfig() {
 		}
 	}
 }
+
+type cronCfg struct {
+	Cronlist map[string]string
+	// cronConfigCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
