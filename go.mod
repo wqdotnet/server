@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/DeanThompson/ginpprof v0.0.0-20190408063150-3be636683586
+	github.com/aquilax/go-perlin v0.0.0-20191229124216-0af9ce917c28
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/protobuf v1.4.2
 	github.com/google/wire v0.4.0
