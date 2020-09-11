@@ -1,61 +1,71 @@
 package tool
 
 import (
-	"testing"
+	"fmt"
+	"math/rand"
 
-	perlin "github.com/aquilax/go-perlin"
+	"github.com/aquilax/go-perlin"
 )
 
 const (
-	seed = 123
+	alpha       = 2.
+	beta        = 2.
+	n           = 3
+	seed  int64 = 100
 )
 
-func TestPerlinNoise1D(t *testing.T) {
-	expected := 0.0
-	p := perlin.NewPerlin(2, 2, 3, seed)
-	noise := p.Noise1D(10)
-	if noise != expected {
-		t.Fail()
-		t.Logf("Wrong node result: given: %f, expected: %f", noise, expected)
+func ExamplePerlin_NewPerlinRandSource() {
+	p := perlin.NewPerlinRandSource(alpha, beta, n, rand.NewSource(seed))
+	for x := 0.; x < 3; x++ {
+		fmt.Printf("%0.0f\t%0.4f\n", x, p.Noise1D(x/10))
 	}
+	// Output:
+	// 0	0.0000
+	// 1	-0.1670
+	// 2	-0.2011
 }
 
-func TestPerlinNoise2D(t *testing.T) {
-	expected := 0.0
-	p := perlin.NewPerlin(2, 2, 3, seed)
-	noise := p.Noise2D(10, 10)
-	if noise != expected {
-		t.Fail()
-		t.Logf("Wrong node result: given: %f, expected: %f", noise, expected)
+func ExamplePerlin_Noise1D() {
+	p := perlin.NewPerlin(alpha, beta, n, seed)
+	for x := 0.; x < 3; x++ {
+		fmt.Printf("%0.0f\t%0.4f\n", x, p.Noise1D(x/10))
 	}
+	// Output:
+	// 0	0.0000
+	// 1	-0.1670
+	// 2	-0.2011
 }
 
-func TestPerlinNoise3D(t *testing.T) {
-	expected := 0.0
-	p := perlin.NewPerlin(2, 2, 3, seed)
-	noise := p.Noise3D(10, 10, 10)
-	if noise != expected {
-		t.Fail()
-		t.Logf("Wrong node result: given: %f, expected: %f", noise, expected)
+func ExamplePerlin_Noise2D() {
+	p := perlin.NewPerlin(alpha, beta, n, seed)
+	for x := 0.; x < 2; x++ {
+		for y := 0.; y < 2; y++ {
+			fmt.Printf("%0.0f\t%0.0f\t%0.4f\n", x, y, p.Noise2D(x/10, y/10))
+		}
 	}
+	// Output:
+	// 0	0	0.0000
+	// 0	1	-0.0060
+	// 1	0	0.1230
+	// 1	1	0.0625
 }
 
-func BenchmarkPerlinNoise1D(b *testing.B) {
-	p := perlin.NewPerlin(2, 2, 3, seed)
-	for n := 0; n < b.N; n++ {
-		p.Noise1D(10)
+func ExamplePerlin_Noise3D() {
+	p := perlin.NewPerlin(alpha, beta, n, seed)
+	for x := 0.; x < 2; x++ {
+		for y := 0.; y < 2; y++ {
+			for z := 0.; z < 2; z++ {
+				fmt.Printf("%0.0f\t%0.0f\t%0.0f\t%0.4f\n", x, y, z, p.Noise3D(x/10, y/10, z/10))
+			}
+		}
 	}
-}
-
-func BenchmarkPerlinNoise2D(b *testing.B) {
-	p := perlin.NewPerlin(2, 2, 3, seed)
-	for n := 0; n < b.N; n++ {
-		p.Noise2D(10, 10)
-	}
-}
-func BenchmarkPerlinNoise3D(b *testing.B) {
-	p := perlin.NewPerlin(2, 2, 3, seed)
-	for n := 0; n < b.N; n++ {
-		p.Noise3D(10, 10, 10)
-	}
+	// Output:
+	// 0	0	0	0.0000
+	// 0	0	1	0.1881
+	// 0	1	0	0.1384
+	// 0	1	1	0.2507
+	// 1	0	0	-0.0416
+	// 1	0	1	0.1232
+	// 1	1	0	0.0536
+	// 1	1	1	0.1826
 }
