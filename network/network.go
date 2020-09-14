@@ -10,6 +10,7 @@ import (
 	"os"
 	msg "server/proto"
 	"sync"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -85,6 +86,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	defer conn.Close()
 	defer n.onClose()
 	defer n.UserPool.Put(c)
+	//超时
+	conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
 
 	sendc := make(chan []byte, 1)
 	c.OnConnect(sendc)
