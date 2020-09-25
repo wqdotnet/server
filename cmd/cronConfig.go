@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"server/tool"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -62,6 +63,7 @@ func cronConfig() {
 			fmt.Println(k, ":", v)
 		}
 	}
+	tool.ExamplePerlin_Noise2D()
 }
 
 type cronCfg struct {
