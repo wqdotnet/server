@@ -8,7 +8,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"server/msgproto/common"
 	"sync"
 	"time"
 
@@ -18,7 +17,7 @@ import (
 
 //ClientInterface client hander
 type ClientInterface interface {
-	OnConnect(sendmsg chan []byte)
+	OnConnect(addr net.Addr, sendmsg chan []byte)
 	OnClose()
 	OnMessage(module int32, method int32, buf []byte)
 	Send(module int32, method int32, pb proto.Message)
@@ -96,14 +95,15 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	log.Info("LocalAddr:", conn.RemoteAddr().String())
 
 	sendc := make(chan []byte, 1)
-	c.OnConnect(sendc)
+
+	c.OnConnect(conn.RemoteAddr(), sendc)
 	go func(conn net.Conn) {
 
 		for {
 			select {
 			case buf := <-sendc:
-				le := intToBytes(len(buf), n.Packet)
-				conn.Write(bytesCombine(le, buf))
+				le := IntToBytes(len(buf), n.Packet)
+				conn.Write(BytesCombine(le, buf))
 			default:
 			}
 
@@ -113,28 +113,28 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	for {
 		_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
 		if e != nil {
-			log.Info("socket error:", e.Error())
+			log.Error("socket error:", e.Error())
 			return
 		}
 
-		// module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
-		// method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
-		// c.OnMessage(module, method, buf[n.Packet+4:])
+		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
+		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
+		c.OnMessage(module, method, buf[n.Packet+4:])
 
 		// pb 消息拆包
-		// Decode protobuf -> buf[n.Packet:]
-		msginfo := &common.NetworkMsg{}
-		e = proto.Unmarshal(buf[n.Packet:], msginfo)
-		if e != nil {
-			log.Infof("msg decode error[%s]", e.Error())
-			msgdata, _ := proto.Marshal(&common.NetworkMsg{
-				Module: 0,
-				Method: 1,
-			})
-			conn.Write(msgdata)
-		} else {
-			c.OnMessage(msginfo.Module, msginfo.Method, msginfo.MsgBytes)
-		}
+		// // Decode protobuf -> buf[n.Packet:]
+		// msginfo := &common.NetworkMsg{}
+		// e = proto.Unmarshal(buf[n.Packet:], msginfo)
+		// if e != nil {
+		// 	log.Errorf("msg decode error[%s]", e.Error())
+		// 	msgdata, _ := proto.Marshal(&common.NetworkMsg{
+		// 		Module: 0,
+		// 		Method: 1,
+		// 	})
+		// 	conn.Write(msgdata)
+		// } else {
+		// 	c.OnMessage(msginfo.Module, msginfo.Method, msginfo.MsgBytes)
+		// }
 
 	}
 }
@@ -155,8 +155,8 @@ func checkError(err error) {
 	}
 }
 
-// int 转换为[]byte
-func intToBytes(i int, packet int32) []byte {
+//IntToBytes int 转换为[]byte
+func IntToBytes(i int, packet int32) []byte {
 	var buf = make([]byte, 2)
 	if packet == 2 {
 		binary.BigEndian.PutUint16(buf, uint16(i))
@@ -167,7 +167,7 @@ func intToBytes(i int, packet int32) []byte {
 }
 
 //BytesCombine 多个[]byte数组合并成一个[]byte
-func bytesCombine(pBytes ...[]byte) []byte {
+func BytesCombine(pBytes ...[]byte) []byte {
 	len := len(pBytes)
 	s := make([][]byte, len)
 	for index := 0; index < len; index++ {
@@ -237,6 +237,7 @@ func readUntil(reader io.Reader, buf []byte) error {
 			}
 			return e //errorx.Wrap(e)
 		}
+		//log.Debugf("offset:[%s]  buf[%s]", offset, len(buf))
 		offset += n
 		if offset >= len(buf) {
 			break

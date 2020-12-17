@@ -17,7 +17,7 @@ func (c *Client) rount(module int32, method int32, buf []byte) {
 	switch module {
 	case int32(protocol_base.MSG_BASE_PROTOCOL_BASE):
 		switch protocol_base.MSG_BASE(method) {
-		case protocol_base.MSG_BASE_HeartBeat:
+		case protocol_base.MSG_BASE_C2SHeartBeat:
 			c.heartbeat(buf)
 		default:
 			c.EmptyMsg(module, method)
@@ -38,7 +38,7 @@ func (c *Client) heartbeat(buf []byte) {
 	}
 
 	c.Send(int32(protocol_base.MSG_BASE_PROTOCOL_BASE),
-		int32(protocol_base.MSG_BASE_HeartBeat),
+		int32(protocol_base.MSG_BASE_S2CHeartBeat),
 		&protocol_base.S2C_HeartBeat{
 			Servertime: time.Now().Unix(),
 		})

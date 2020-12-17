@@ -9,12 +9,18 @@ enum MSG_ACCOUNT {
     Module  = 1000;
     //method
     Login= 1001;//用户登陆
-    CreateRole= 1002;//创建角色
-    UpdateRoleName= 1003;//修改角色名
-    DeleteRole= 1004;//删除角色
-    EnterGame= 1005;//进入游戏
-    Reconnection= 1006;//游戏重连
-    LogOut= 1007;//登出
+
+    CreateRole= 1003;//创建角色
+    
+    UpdateRoleName= 1005;//修改角色名
+
+    DeleteRole= 1007;//删除角色
+
+    EnterGame= 1009;//进入游戏
+
+    Reconnection= 1011;//游戏重连
+
+    LogOut= 1013;//登出
 
     //地图模块
 

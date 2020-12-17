@@ -2,8 +2,15 @@ syntax = "proto3";
 
 //消息号
 enum MSG_BASE {
-    PROTOCOL_BASE=0;  //基础模块
-    HeartBeat =1;     //心跳
+    PLACEHOLDER =0;  //占位
+    
+    //模块id
+    PROTOCOL_BASE=100;  //基础模块
+
+    //消息method id
+    C2SHeartBeat =101;     //心跳
+    S2CHeartBeat =102;     
+
 
 }
 
