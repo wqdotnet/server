@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+//消息号
+enum MSG_BASE {
+    PROTOCOL_BASE=0;  //基础模块
+    HeartBeat =1;     //心跳
+
+}
+
+//心跳  1
+message c2s_HeartBeat {
+}
+
+message s2c_HeartBeat {
+    //服务器时间戳 
+    int64 servertime =1;
+}
+ 

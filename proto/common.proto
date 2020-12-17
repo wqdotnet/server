@@ -1,0 +1,11 @@
+syntax = "proto3";
+ 
+message NetworkMsg{
+  int32 Module =1;
+  int32 Method =2;
+  bytes MsgBytes =3;
+}
+
+
+
+ 

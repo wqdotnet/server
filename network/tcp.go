@@ -3,6 +3,8 @@ package network
 import (
 	"fmt"
 	"net"
+
+	log "github.com/sirupsen/logrus"
 )
 
 //TCPNetwork tcp/ip
@@ -33,7 +35,7 @@ type TCPNetwork struct {
 
 //Start start
 func (c *TCPNetwork) Start(nw *NetWorkx) {
-	fmt.Println(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
+	log.Info(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", nw.Port))
 	defer listener.Close()
@@ -42,7 +44,7 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Error(err.Error())
 			break
 		}
 		go nw.HandleClient(conn)

@@ -8,11 +8,12 @@ import (
 	"io"
 	"net"
 	"os"
-	msg "server/proto"
+	"server/msgproto/common"
 	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 )
 
 //ClientInterface client hander
@@ -20,13 +21,12 @@ type ClientInterface interface {
 	OnConnect(sendmsg chan []byte)
 	OnClose()
 	OnMessage(module int32, method int32, buf []byte)
+	Send(module int32, method int32, pb proto.Message)
 }
 
 //NetInterface network
 type NetInterface interface {
 	Start(n *NetWorkx)
-	//Stop()
-	//Send(msg []byte)
 }
 
 //NetWorkx 网络管理
@@ -41,40 +41,42 @@ type NetWorkx struct {
 	NetType string
 	//监听端口.
 	Port int32
-	//handlers map[int32]func(buf []byte)
 	//当前连接用户数量
 	UserNumber int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
 	UserPool *sync.Pool
+	//连接用户
+	userlist map[string]ClientInterface
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(pool *sync.Pool) *NetWorkx {
+func NewNetWorkX(pool *sync.Pool, port int32, packet int32, nettype string) *NetWorkx {
 	return &NetWorkx{
-		Packet:   2,
-		NetType:  "TCP",
-		Port:     3344,
+		Packet:   packet,
+		NetType:  nettype,
+		Port:     port,
 		UserPool: pool,
+		userlist: make(map[string]ClientInterface),
 	}
 }
 
 //Start 启动网络服务
 func (n *NetWorkx) Start() {
-	fmt.Println("network start")
+	log.Info("network start")
 	switch n.NetType {
 	case "kcp":
-		fmt.Println("start kcp port:", n.Port)
+		log.Info("start [kcp] port:", n.Port)
 		n.src = &KCPNetwork{}
 	case "tcp":
-		fmt.Println("start tcp port:", n.Port)
+		log.Info("start [tcp] port:", n.Port)
 		n.src = &TCPNetwork{}
 	default:
-		fmt.Println("start default [tcp] port:", n.Port)
-		n.src = new(TCPNetwork) // TCPNetwork{}
+		log.Info("start default [tcp] port:", n.Port)
+		n.src = new(TCPNetwork)
 	}
 
 	//start socket
-	n.src.Start(n)
+	go n.src.Start(n)
 
 }
 
@@ -82,12 +84,16 @@ func (n *NetWorkx) Start() {
 func (n *NetWorkx) HandleClient(conn net.Conn) {
 	c := n.UserPool.Get().(ClientInterface)
 	n.onConnect()
+
 	defer c.OnClose()
 	defer conn.Close()
 	defer n.onClose()
 	defer n.UserPool.Put(c)
+
 	//超时
 	conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
+
+	log.Info("LocalAddr:", conn.RemoteAddr().String())
 
 	sendc := make(chan []byte, 1)
 	c.OnConnect(sendc)
@@ -107,7 +113,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	for {
 		_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
 		if e != nil {
-			fmt.Println("socket error:", e.Error())
+			log.Info("socket error:", e.Error())
 			return
 		}
 
@@ -117,11 +123,11 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 		// pb 消息拆包
 		// Decode protobuf -> buf[n.Packet:]
-		msginfo := &msg.NetworkMsg{}
+		msginfo := &common.NetworkMsg{}
 		e = proto.Unmarshal(buf[n.Packet:], msginfo)
 		if e != nil {
-			fmt.Printf("msg decode error[%s]\n", e.Error())
-			msgdata, _ := proto.Marshal(&msg.NetworkMsg{
+			log.Infof("msg decode error[%s]", e.Error())
+			msgdata, _ := proto.Marshal(&common.NetworkMsg{
 				Module: 0,
 				Method: 1,
 			})
@@ -135,16 +141,16 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 func (n *NetWorkx) onConnect() {
 	n.UserNumber++
-	fmt.Println("user number:", n.UserNumber)
+	log.Info("user number:", n.UserNumber)
 }
 func (n *NetWorkx) onClose() {
 	n.UserNumber--
-	fmt.Println("user number:", n.UserNumber)
+	log.Info("user number:", n.UserNumber)
 }
 
 func checkError(err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		log.Errorf("Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
 }

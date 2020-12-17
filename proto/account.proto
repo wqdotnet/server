@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+
+//消息号
+enum MSG_ACCOUNT {
+    PLACEHOLDER =0;  //占位
+    
+    //账号模块
+    Module  = 1000;
+    //method
+    Login= 1001;//用户登陆
+    CreateRole= 1002;//创建角色
+    UpdateRoleName= 1003;//修改角色名
+    DeleteRole= 1004;//删除角色
+    EnterGame= 1005;//进入游戏
+    Reconnection= 1006;//游戏重连
+    LogOut= 1007;//登出
+
+    //地图模块
+
+    //....
+}
+
+
+//用户登陆
+message c2s_Login {
+}
+// 创建角色
+message c2s_CreateRole {
+}
+// 修改角色名
+message c2s_UpdateRoleName {
+}
+// 删除角色
+message c2s_DeleteRole {
+}
+//进入游戏
+message c2s_EnterGame {
+}
+//游戏重连
+message c2s_Reconnection {
+}
+//登出
+message c2s_LogOut {
+}
+

@@ -6,7 +6,9 @@ import (
 	"os"
 	"path"
 	"server/gserver"
+	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -17,50 +19,44 @@ var protobufCmd = &cobra.Command{
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//protoc --proto_path=d:/proto  --go_out=d:/proto  msg.pro
-		//execstr := fmt.Sprintf("protoc --proto_path=%s  --go_out=%s %s", ServerCfg.ProtoPath, ServerCfg.GoOut)
-
-		// fmt.Println(execstr)
-		// dir, _ := os.Getwd()
-		// // exPath := filepath.Dir(dir)
-
-		// fmt.Println(dir)
-		// pathstr, err := filepath.Abs(path.Join(dir, "../proto/"))
-		// if err != nil {
-		// 	fmt.Println("error:", err)
-		// 	return
-		// }
 		pbpath := gserver.ServerCfg.ProtoPath
 		outpath := gserver.ServerCfg.GoOut
+		//timeformat := "2006-01-02 15:04:05"
 
 		if !PathExists(pbpath) || !PathExists(outpath) {
 			fmt.Println("文件夹不存在:", pbpath, outpath)
 			return
 		}
-
-		execstr := "protoc --proto_path=%s  --go_out=%s %s"
-
+		execstr := "protoc -o %s/%s.pb  --proto_path=%s  --go_out=%s/%s/ %s"
 		files, _ := ioutil.ReadDir(pbpath)
 		for _, onefile := range files {
-			if !onefile.IsDir() && path.Ext(onefile.Name()) == ".proto" {
-				execstr = fmt.Sprintf(execstr, pbpath, outpath, onefile.Name())
+			filename := onefile.Name()
+			filebase := filename[0 : len(filename)-len(path.Ext(filename))]
+			if !onefile.IsDir() && path.Ext(filename) == ".proto" {
 
-				_, errout, err := Shellout(execstr)
+				// diff := getHourDiffer(onefile.ModTime().Format(timeformat), time.Now().Format(timeformat))
+				// //只重新编译5分钟内修改过的文件
+				// if diff < 60*5 {
+
+				Shellout(fmt.Sprintf("mkdir %s/%s/", outpath, filebase))
+				execstrpro := fmt.Sprintf(execstr, outpath, filebase, pbpath, outpath, filebase, filename)
+				log.Info(execstrpro)
+				_, errout, err := Shellout(execstrpro)
 				if err != nil {
-					fmt.Printf("protoc [%s] ==>: %v\n", onefile.Name(), errout)
+					log.Errorf("protoc [%s] ==>: %v errout:%v", filename, err, errout)
 				} else {
-					fmt.Printf("protoc [%s] ==>success", onefile.Name())
+					log.Infof("protoc [%s] ==> success", filename)
 				}
+
+				//}
 
 			}
 		}
-
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(protobufCmd)
-
 }
 
 // PathExists 判断文件夹是否存在
@@ -71,4 +67,18 @@ func PathExists(path string) bool {
 	//return err == nil || !os.IsNotExist(err)
 	// 或者
 	//return !os.IsNotExist(err)
+}
+
+//获取相差时间
+func getHourDiffer(startTime, endTime string) int64 {
+	var hour int64
+	t1, err := time.ParseInLocation("2006-01-02 15:04:05", startTime, time.Local)
+	t2, err := time.ParseInLocation("2006-01-02 15:04:05", endTime, time.Local)
+
+	if err == nil && t1.Before(t2) {
+		diff := t2.Unix() - t1.Unix() //
+		hour = diff
+		return hour
+	}
+	return hour
 }

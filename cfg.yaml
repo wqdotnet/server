@@ -1,9 +1,8 @@
-name: firstServer
+name: slgServer
 
 ##web htpp port
-OpenHTTP: true
+OpenHTTP: false
 HTTPPort: 8080
-
 
 #NetType : tcp/kcp
 NetType: tcp
@@ -11,6 +10,23 @@ Port: 3344
 Packet : 2
 
 #protobuf path
-ProtoPath: "E:/worke/server/proto"
-GoOut: "E:/worke/server/proto"
+ProtoPath: "./proto"
+GoOut: "./msgproto"
 
+#mongodb
+MongoConnStr: "mongodb://localhost:27017"
+Mongodb: "slggame"
+
+#redis
+redisConnStr: "127.0.0.1"
+redisProt: 6379
+
+#game confg
+CfgPath: "./config"
+CfgType: "json"
+
+#log
+LogWrite: false
+Loglevel: "debug"  
+LogPath:  "./log"
+LogName: "log"
