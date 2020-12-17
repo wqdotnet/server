@@ -104,9 +104,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 			case buf := <-sendc:
 				le := IntToBytes(len(buf), n.Packet)
 				conn.Write(BytesCombine(le, buf))
-			default:
+				//default:
 			}
-
 		}
 	}(conn)
 

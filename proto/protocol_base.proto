@@ -2,7 +2,7 @@ syntax = "proto3";
 
 //消息号
 enum MSG_BASE {
-    PLACEHOLDER =0;  //占位
+    PLACEHOLDER_BASE =0;  //占位
     
     //模块id
     PROTOCOL_BASE=100;  //基础模块

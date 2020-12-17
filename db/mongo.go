@@ -78,24 +78,62 @@ func InsertOne(tbname string, document interface{}) {
 	clientPool.ReturnObject(context.Background(), client)
 }
 
-//FindOneObject 查询数据
-func FindOneObject(tbname string, field string, value interface{}, document interface{}) {
+//FindOneBson 查询数据
+//filter := bson.D{{field, value}}
+func FindOneBson(document interface{}, tbname string, filter interface{}) error {
 	client, collection := getCollection(tbname)
-	filter := bson.D{{field, value}}
+	defer clientPool.ReturnObject(context.Background(), client)
+	return collection.FindOne(context.TODO(), filter).Decode(document)
+}
 
-	err := collection.FindOne(context.TODO(), filter).Decode(document)
+//FindOneObject select object
+func FindOneObject(document interface{}, tbname string, filter map[string]interface{}) error {
+	client, collection := getCollection(tbname)
+	defer clientPool.ReturnObject(context.Background(), client)
+	return collection.FindOne(context.TODO(), filter).Decode(document)
+}
 
-	if err != nil {
-		log.Fatal("FindObject error:", err)
-	}
+//FindBson 查找数据
+func FindBson(tbname string, filter interface{}) (*mongo.Cursor, error) {
+	client, collection := getCollection(tbname)
+	defer clientPool.ReturnObject(context.Background(), client)
 
-	log.Debugf("Found a single document: %+v\n", document)
-	clientPool.ReturnObject(context.Background(), client)
+	findOptions := options.Find()
+
+	return collection.Find(context.TODO(), filter, findOptions)
+	// cur, err := collection.Find(context.TODO(), filter, findOptions)
+	// if err != nil {
+	// 	return 0, err
+	// }
+
+	// // Finding multiple documents returns a cursor
+	// // Iterating through the cursor allows us to decode documents one at a time
+	// for cur.Next(context.TODO()) {
+
+	// 	// create a value into which the single document can be decoded
+	// 	var elem Trainer
+	// 	err := cur.Decode(&amp;elem)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 	results = append(results, &amp;elem)
+	// }
+
+	// if err := cur.Err(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// // Close the cursor once finished
+	// cur.Close(context.TODO())
+
+	//return len(cur.Current), nil
 }
 
 //Delete 删除
 func Delete(tbname string, field string, value interface{}) int64 {
 	client, collection := getCollection(tbname)
+	defer clientPool.ReturnObject(context.Background(), client)
 	filter := bson.D{{field, value}}
 	//删除所有
 	deleteResult, err := collection.DeleteMany(context.TODO(), filter)
@@ -103,6 +141,6 @@ func Delete(tbname string, field string, value interface{}) int64 {
 		log.Fatal(err)
 	}
 	log.Debugf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
-	clientPool.ReturnObject(context.Background(), client)
+
 	return deleteResult.DeletedCount
 }

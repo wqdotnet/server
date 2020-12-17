@@ -33,13 +33,20 @@ const (
 	//账号模块
 	MSG_ACCOUNT_Module MSG_ACCOUNT = 1000
 	//method
-	MSG_ACCOUNT_Login          MSG_ACCOUNT = 1001 //用户登陆
-	MSG_ACCOUNT_CreateRole     MSG_ACCOUNT = 1003 //创建角色
-	MSG_ACCOUNT_UpdateRoleName MSG_ACCOUNT = 1005 //修改角色名
-	MSG_ACCOUNT_DeleteRole     MSG_ACCOUNT = 1007 //删除角色
-	MSG_ACCOUNT_EnterGame      MSG_ACCOUNT = 1009 //进入游戏
-	MSG_ACCOUNT_Reconnection   MSG_ACCOUNT = 1011 //游戏重连
-	MSG_ACCOUNT_LogOut         MSG_ACCOUNT = 1013 //登出
+	MSG_ACCOUNT_C2S_Login          MSG_ACCOUNT = 1001 //用户登陆
+	MSG_ACCOUNT_S2C_Login          MSG_ACCOUNT = 1002
+	MSG_ACCOUNT_C2S_CreateRole     MSG_ACCOUNT = 1003 //创建角色
+	MSG_ACCOUNT_S2C_CreateRole     MSG_ACCOUNT = 1004
+	MSG_ACCOUNT_C2S_UpdateRoleName MSG_ACCOUNT = 1005 //修改角色名
+	MSG_ACCOUNT_S2C_UpdateRoleName MSG_ACCOUNT = 1006
+	MSG_ACCOUNT_C2S_DeleteRole     MSG_ACCOUNT = 1007 //删除角色
+	MSG_ACCOUNT_S2C_DeleteRole     MSG_ACCOUNT = 1008
+	MSG_ACCOUNT_C2S_EnterGame      MSG_ACCOUNT = 1009 //进入游戏
+	MSG_ACCOUNT_S2C_EnterGame      MSG_ACCOUNT = 1010
+	MSG_ACCOUNT_C2S_Reconnection   MSG_ACCOUNT = 1011 //游戏重连
+	MSG_ACCOUNT_S2C_Reconnection   MSG_ACCOUNT = 1012
+	MSG_ACCOUNT_C2S_LogOut         MSG_ACCOUNT = 1013 //登出
+	MSG_ACCOUNT_S2C_LogOut         MSG_ACCOUNT = 1014
 )
 
 // Enum value maps for MSG_ACCOUNT.
@@ -47,24 +54,38 @@ var (
 	MSG_ACCOUNT_name = map[int32]string{
 		0:    "PLACEHOLDER",
 		1000: "Module",
-		1001: "Login",
-		1003: "CreateRole",
-		1005: "UpdateRoleName",
-		1007: "DeleteRole",
-		1009: "EnterGame",
-		1011: "Reconnection",
-		1013: "LogOut",
+		1001: "C2S_Login",
+		1002: "S2C_Login",
+		1003: "C2S_CreateRole",
+		1004: "S2C_CreateRole",
+		1005: "C2S_UpdateRoleName",
+		1006: "S2C_UpdateRoleName",
+		1007: "C2S_DeleteRole",
+		1008: "S2C_DeleteRole",
+		1009: "C2S_EnterGame",
+		1010: "S2C_EnterGame",
+		1011: "C2S_Reconnection",
+		1012: "S2C_Reconnection",
+		1013: "C2S_LogOut",
+		1014: "S2C_LogOut",
 	}
 	MSG_ACCOUNT_value = map[string]int32{
-		"PLACEHOLDER":    0,
-		"Module":         1000,
-		"Login":          1001,
-		"CreateRole":     1003,
-		"UpdateRoleName": 1005,
-		"DeleteRole":     1007,
-		"EnterGame":      1009,
-		"Reconnection":   1011,
-		"LogOut":         1013,
+		"PLACEHOLDER":        0,
+		"Module":             1000,
+		"C2S_Login":          1001,
+		"S2C_Login":          1002,
+		"C2S_CreateRole":     1003,
+		"S2C_CreateRole":     1004,
+		"C2S_UpdateRoleName": 1005,
+		"S2C_UpdateRoleName": 1006,
+		"C2S_DeleteRole":     1007,
+		"S2C_DeleteRole":     1008,
+		"C2S_EnterGame":      1009,
+		"S2C_EnterGame":      1010,
+		"C2S_Reconnection":   1011,
+		"S2C_Reconnection":   1012,
+		"C2S_LogOut":         1013,
+		"S2C_LogOut":         1014,
 	}
 )
 
@@ -95,17 +116,76 @@ func (MSG_ACCOUNT) EnumDescriptor() ([]byte, []int) {
 	return file_account_proto_rawDescGZIP(), []int{0}
 }
 
+//用户游戏信息
+type P_RoleInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleName string `protobuf:"bytes,1,opt,name=roleName,proto3" json:"roleName,omitempty"`
+	Level    int32  `protobuf:"varint,2,opt,name=level,proto3" json:"level,omitempty"`
+}
+
+func (x *P_RoleInfo) Reset() {
+	*x = P_RoleInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_account_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *P_RoleInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*P_RoleInfo) ProtoMessage() {}
+
+func (x *P_RoleInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_account_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use P_RoleInfo.ProtoReflect.Descriptor instead.
+func (*P_RoleInfo) Descriptor() ([]byte, []int) {
+	return file_account_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *P_RoleInfo) GetRoleName() string {
+	if x != nil {
+		return x.RoleName
+	}
+	return ""
+}
+
+func (x *P_RoleInfo) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
 //用户登陆
 type C2S_Login struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Account  string `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 }
 
 func (x *C2S_Login) Reset() {
 	*x = C2S_Login{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_account_proto_msgTypes[0]
+		mi := &file_account_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -118,7 +198,7 @@ func (x *C2S_Login) String() string {
 func (*C2S_Login) ProtoMessage() {}
 
 func (x *C2S_Login) ProtoReflect() protoreflect.Message {
-	mi := &file_account_proto_msgTypes[0]
+	mi := &file_account_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -131,20 +211,101 @@ func (x *C2S_Login) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use C2S_Login.ProtoReflect.Descriptor instead.
 func (*C2S_Login) Descriptor() ([]byte, []int) {
-	return file_account_proto_rawDescGZIP(), []int{0}
+	return file_account_proto_rawDescGZIP(), []int{1}
 }
 
-// 创建角色
+func (x *C2S_Login) GetAccount() string {
+	if x != nil {
+		return x.Account
+	}
+	return ""
+}
+
+func (x *C2S_Login) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+type S2C_Login struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Success  bool        `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Msg      string      `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	RoleInfo *P_RoleInfo `protobuf:"bytes,3,opt,name=RoleInfo,proto3" json:"RoleInfo,omitempty"`
+}
+
+func (x *S2C_Login) Reset() {
+	*x = S2C_Login{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_account_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_Login) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_Login) ProtoMessage() {}
+
+func (x *S2C_Login) ProtoReflect() protoreflect.Message {
+	mi := &file_account_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_Login.ProtoReflect.Descriptor instead.
+func (*S2C_Login) Descriptor() ([]byte, []int) {
+	return file_account_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *S2C_Login) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *S2C_Login) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+func (x *S2C_Login) GetRoleInfo() *P_RoleInfo {
+	if x != nil {
+		return x.RoleInfo
+	}
+	return nil
+}
+
+// 创建账号角色
 type C2S_CreateRole struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Account  string `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	RoleName string `protobuf:"bytes,3,opt,name=RoleName,proto3" json:"RoleName,omitempty"`
 }
 
 func (x *C2S_CreateRole) Reset() {
 	*x = C2S_CreateRole{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_account_proto_msgTypes[1]
+		mi := &file_account_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -157,7 +318,7 @@ func (x *C2S_CreateRole) String() string {
 func (*C2S_CreateRole) ProtoMessage() {}
 
 func (x *C2S_CreateRole) ProtoReflect() protoreflect.Message {
-	mi := &file_account_proto_msgTypes[1]
+	mi := &file_account_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -170,7 +331,83 @@ func (x *C2S_CreateRole) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use C2S_CreateRole.ProtoReflect.Descriptor instead.
 func (*C2S_CreateRole) Descriptor() ([]byte, []int) {
-	return file_account_proto_rawDescGZIP(), []int{1}
+	return file_account_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *C2S_CreateRole) GetAccount() string {
+	if x != nil {
+		return x.Account
+	}
+	return ""
+}
+
+func (x *C2S_CreateRole) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *C2S_CreateRole) GetRoleName() string {
+	if x != nil {
+		return x.RoleName
+	}
+	return ""
+}
+
+type S2C_CreateRole struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Success bool   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Msg     string `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+}
+
+func (x *S2C_CreateRole) Reset() {
+	*x = S2C_CreateRole{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_account_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_CreateRole) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_CreateRole) ProtoMessage() {}
+
+func (x *S2C_CreateRole) ProtoReflect() protoreflect.Message {
+	mi := &file_account_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_CreateRole.ProtoReflect.Descriptor instead.
+func (*S2C_CreateRole) Descriptor() ([]byte, []int) {
+	return file_account_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *S2C_CreateRole) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *S2C_CreateRole) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
 }
 
 // 修改角色名
@@ -183,7 +420,7 @@ type C2S_UpdateRoleName struct {
 func (x *C2S_UpdateRoleName) Reset() {
 	*x = C2S_UpdateRoleName{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_account_proto_msgTypes[2]
+		mi := &file_account_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -196,7 +433,7 @@ func (x *C2S_UpdateRoleName) String() string {
 func (*C2S_UpdateRoleName) ProtoMessage() {}
 
 func (x *C2S_UpdateRoleName) ProtoReflect() protoreflect.Message {
-	mi := &file_account_proto_msgTypes[2]
+	mi := &file_account_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -209,123 +446,6 @@ func (x *C2S_UpdateRoleName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use C2S_UpdateRoleName.ProtoReflect.Descriptor instead.
 func (*C2S_UpdateRoleName) Descriptor() ([]byte, []int) {
-	return file_account_proto_rawDescGZIP(), []int{2}
-}
-
-// 删除角色
-type C2S_DeleteRole struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *C2S_DeleteRole) Reset() {
-	*x = C2S_DeleteRole{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_account_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *C2S_DeleteRole) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*C2S_DeleteRole) ProtoMessage() {}
-
-func (x *C2S_DeleteRole) ProtoReflect() protoreflect.Message {
-	mi := &file_account_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use C2S_DeleteRole.ProtoReflect.Descriptor instead.
-func (*C2S_DeleteRole) Descriptor() ([]byte, []int) {
-	return file_account_proto_rawDescGZIP(), []int{3}
-}
-
-//进入游戏
-type C2S_EnterGame struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *C2S_EnterGame) Reset() {
-	*x = C2S_EnterGame{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_account_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *C2S_EnterGame) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*C2S_EnterGame) ProtoMessage() {}
-
-func (x *C2S_EnterGame) ProtoReflect() protoreflect.Message {
-	mi := &file_account_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use C2S_EnterGame.ProtoReflect.Descriptor instead.
-func (*C2S_EnterGame) Descriptor() ([]byte, []int) {
-	return file_account_proto_rawDescGZIP(), []int{4}
-}
-
-//游戏重连
-type C2S_Reconnection struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *C2S_Reconnection) Reset() {
-	*x = C2S_Reconnection{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_account_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *C2S_Reconnection) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*C2S_Reconnection) ProtoMessage() {}
-
-func (x *C2S_Reconnection) ProtoReflect() protoreflect.Message {
-	mi := &file_account_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use C2S_Reconnection.ProtoReflect.Descriptor instead.
-func (*C2S_Reconnection) Descriptor() ([]byte, []int) {
 	return file_account_proto_rawDescGZIP(), []int{5}
 }
 
@@ -372,25 +492,54 @@ var File_account_proto protoreflect.FileDescriptor
 
 var file_account_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0x0b, 0x0a, 0x09, 0x63, 0x32, 0x73, 0x5f, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x22, 0x10, 0x0a, 0x0e,
-	0x63, 0x32, 0x73, 0x5f, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x22, 0x14,
-	0x0a, 0x12, 0x63, 0x32, 0x73, 0x5f, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65,
-	0x4e, 0x61, 0x6d, 0x65, 0x22, 0x10, 0x0a, 0x0e, 0x63, 0x32, 0x73, 0x5f, 0x44, 0x65, 0x6c, 0x65,
-	0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x22, 0x0f, 0x0a, 0x0d, 0x63, 0x32, 0x73, 0x5f, 0x45, 0x6e,
-	0x74, 0x65, 0x72, 0x47, 0x61, 0x6d, 0x65, 0x22, 0x12, 0x0a, 0x10, 0x63, 0x32, 0x73, 0x5f, 0x52,
-	0x65, 0x63, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x0c, 0x0a, 0x0a, 0x63,
-	0x32, 0x73, 0x5f, 0x4c, 0x6f, 0x67, 0x4f, 0x75, 0x74, 0x2a, 0x9e, 0x01, 0x0a, 0x0b, 0x4d, 0x53,
-	0x47, 0x5f, 0x41, 0x43, 0x43, 0x4f, 0x55, 0x4e, 0x54, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x4c, 0x41,
-	0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x06, 0x4d, 0x6f,
-	0x64, 0x75, 0x6c, 0x65, 0x10, 0xe8, 0x07, 0x12, 0x0a, 0x0a, 0x05, 0x4c, 0x6f, 0x67, 0x69, 0x6e,
-	0x10, 0xe9, 0x07, 0x12, 0x0f, 0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c,
-	0x65, 0x10, 0xeb, 0x07, 0x12, 0x13, 0x0a, 0x0e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x6f,
-	0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x10, 0xed, 0x07, 0x12, 0x0f, 0x0a, 0x0a, 0x44, 0x65, 0x6c,
-	0x65, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x10, 0xef, 0x07, 0x12, 0x0e, 0x0a, 0x09, 0x45, 0x6e,
-	0x74, 0x65, 0x72, 0x47, 0x61, 0x6d, 0x65, 0x10, 0xf1, 0x07, 0x12, 0x11, 0x0a, 0x0c, 0x52, 0x65,
-	0x63, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x10, 0xf3, 0x07, 0x12, 0x0b, 0x0a,
-	0x06, 0x4c, 0x6f, 0x67, 0x4f, 0x75, 0x74, 0x10, 0xf5, 0x07, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x3e, 0x0a, 0x0a, 0x50, 0x5f, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1a, 0x0a,
+	0x08, 0x72, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x08, 0x72, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x65, 0x76,
+	0x65, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x22,
+	0x41, 0x0a, 0x09, 0x63, 0x32, 0x73, 0x5f, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x18, 0x0a, 0x07,
+	0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61,
+	0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f,
+	0x72, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f,
+	0x72, 0x64, 0x22, 0x60, 0x0a, 0x09, 0x73, 0x32, 0x63, 0x5f, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12,
+	0x18, 0x0a, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x73, 0x67,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6d, 0x73, 0x67, 0x12, 0x27, 0x0a, 0x08, 0x52,
+	0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e,
+	0x50, 0x5f, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x08, 0x52, 0x6f, 0x6c, 0x65,
+	0x49, 0x6e, 0x66, 0x6f, 0x22, 0x62, 0x0a, 0x0e, 0x63, 0x32, 0x73, 0x5f, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e,
+	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74,
+	0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x1a, 0x0a, 0x08,
+	0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x3c, 0x0a, 0x0e, 0x73, 0x32, 0x63, 0x5f,
+	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75,
+	0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x73, 0x75, 0x63,
+	0x63, 0x65, 0x73, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x03, 0x6d, 0x73, 0x67, 0x22, 0x14, 0x0a, 0x12, 0x63, 0x32, 0x73, 0x5f, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x0c, 0x0a, 0x0a,
+	0x63, 0x32, 0x73, 0x5f, 0x4c, 0x6f, 0x67, 0x4f, 0x75, 0x74, 0x2a, 0xc9, 0x02, 0x0a, 0x0b, 0x4d,
+	0x53, 0x47, 0x5f, 0x41, 0x43, 0x43, 0x4f, 0x55, 0x4e, 0x54, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x4c,
+	0x41, 0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x06, 0x4d,
+	0x6f, 0x64, 0x75, 0x6c, 0x65, 0x10, 0xe8, 0x07, 0x12, 0x0e, 0x0a, 0x09, 0x43, 0x32, 0x53, 0x5f,
+	0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x10, 0xe9, 0x07, 0x12, 0x0e, 0x0a, 0x09, 0x53, 0x32, 0x43, 0x5f,
+	0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x10, 0xea, 0x07, 0x12, 0x13, 0x0a, 0x0e, 0x43, 0x32, 0x53, 0x5f,
+	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x10, 0xeb, 0x07, 0x12, 0x13, 0x0a,
+	0x0e, 0x53, 0x32, 0x43, 0x5f, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x10,
+	0xec, 0x07, 0x12, 0x17, 0x0a, 0x12, 0x43, 0x32, 0x53, 0x5f, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x10, 0xed, 0x07, 0x12, 0x17, 0x0a, 0x12, 0x53,
+	0x32, 0x43, 0x5f, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d,
+	0x65, 0x10, 0xee, 0x07, 0x12, 0x13, 0x0a, 0x0e, 0x43, 0x32, 0x53, 0x5f, 0x44, 0x65, 0x6c, 0x65,
+	0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x10, 0xef, 0x07, 0x12, 0x13, 0x0a, 0x0e, 0x53, 0x32, 0x43,
+	0x5f, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x10, 0xf0, 0x07, 0x12, 0x12,
+	0x0a, 0x0d, 0x43, 0x32, 0x53, 0x5f, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x47, 0x61, 0x6d, 0x65, 0x10,
+	0xf1, 0x07, 0x12, 0x12, 0x0a, 0x0d, 0x53, 0x32, 0x43, 0x5f, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x47,
+	0x61, 0x6d, 0x65, 0x10, 0xf2, 0x07, 0x12, 0x15, 0x0a, 0x10, 0x43, 0x32, 0x53, 0x5f, 0x52, 0x65,
+	0x63, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x10, 0xf3, 0x07, 0x12, 0x15, 0x0a,
+	0x10, 0x53, 0x32, 0x43, 0x5f, 0x52, 0x65, 0x63, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x10, 0xf4, 0x07, 0x12, 0x0f, 0x0a, 0x0a, 0x43, 0x32, 0x53, 0x5f, 0x4c, 0x6f, 0x67, 0x4f,
+	0x75, 0x74, 0x10, 0xf5, 0x07, 0x12, 0x0f, 0x0a, 0x0a, 0x53, 0x32, 0x43, 0x5f, 0x4c, 0x6f, 0x67,
+	0x4f, 0x75, 0x74, 0x10, 0xf6, 0x07, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -409,20 +558,21 @@ var file_account_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_account_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_account_proto_goTypes = []interface{}{
 	(MSG_ACCOUNT)(0),           // 0: MSG_ACCOUNT
-	(*C2S_Login)(nil),          // 1: c2s_Login
-	(*C2S_CreateRole)(nil),     // 2: c2s_CreateRole
-	(*C2S_UpdateRoleName)(nil), // 3: c2s_UpdateRoleName
-	(*C2S_DeleteRole)(nil),     // 4: c2s_DeleteRole
-	(*C2S_EnterGame)(nil),      // 5: c2s_EnterGame
-	(*C2S_Reconnection)(nil),   // 6: c2s_Reconnection
+	(*P_RoleInfo)(nil),         // 1: P_RoleInfo
+	(*C2S_Login)(nil),          // 2: c2s_Login
+	(*S2C_Login)(nil),          // 3: s2c_Login
+	(*C2S_CreateRole)(nil),     // 4: c2s_CreateRole
+	(*S2C_CreateRole)(nil),     // 5: s2c_CreateRole
+	(*C2S_UpdateRoleName)(nil), // 6: c2s_UpdateRoleName
 	(*C2S_LogOut)(nil),         // 7: c2s_LogOut
 }
 var file_account_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: s2c_Login.RoleInfo:type_name -> P_RoleInfo
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_account_proto_init() }
@@ -432,7 +582,7 @@ func file_account_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_account_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_Login); i {
+			switch v := v.(*P_RoleInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -444,7 +594,7 @@ func file_account_proto_init() {
 			}
 		}
 		file_account_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_CreateRole); i {
+			switch v := v.(*C2S_Login); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -456,7 +606,7 @@ func file_account_proto_init() {
 			}
 		}
 		file_account_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_UpdateRoleName); i {
+			switch v := v.(*S2C_Login); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -468,7 +618,7 @@ func file_account_proto_init() {
 			}
 		}
 		file_account_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_DeleteRole); i {
+			switch v := v.(*C2S_CreateRole); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -480,7 +630,7 @@ func file_account_proto_init() {
 			}
 		}
 		file_account_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_EnterGame); i {
+			switch v := v.(*S2C_CreateRole); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -492,7 +642,7 @@ func file_account_proto_init() {
 			}
 		}
 		file_account_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_Reconnection); i {
+			switch v := v.(*C2S_UpdateRoleName); i {
 			case 0:
 				return &v.state
 			case 1:

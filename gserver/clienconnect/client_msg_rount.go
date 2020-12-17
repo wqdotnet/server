@@ -44,11 +44,6 @@ func (c *Client) heartbeat(buf []byte) {
 		})
 }
 
-//防火墙
-func (c *Client) breakWall(buf []byte) {
-
-}
-
 //EmptyMsg 接收到未识别的消息号
 func (c *Client) EmptyMsg(module int32, method int32) {
 	log.Warnf("Receive Empty Msg => [%v][%v] username:[%v]", module, method, c.username)

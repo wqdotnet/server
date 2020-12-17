@@ -40,7 +40,7 @@ var protobufCmd = &cobra.Command{
 
 				Shellout(fmt.Sprintf("mkdir %s/%s/", outpath, filebase))
 				execstrpro := fmt.Sprintf(execstr, outpath, filebase, pbpath, outpath, filebase, filename)
-				log.Info(execstrpro)
+
 				_, errout, err := Shellout(execstrpro)
 				if err != nil {
 					log.Errorf("protoc [%s] ==>: %v errout:%v", filename, err, errout)

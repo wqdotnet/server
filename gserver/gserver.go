@@ -126,7 +126,7 @@ func StartGServer() {
 			default:
 				log.Warn("command:", command)
 			}
-		default:
+			//default:
 		}
 	}
 

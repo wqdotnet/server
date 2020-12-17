@@ -14,12 +14,24 @@ type Client struct {
 	addr     net.Addr
 	sendchan chan []byte
 	//用户id
-	userid int32
+	//userid int32
+	account string
 	//用户名
 	username string
 	//用户 连接状态 [0:连接] [1:已登陆] [2:下线]
-	userstatus int32
+	status userStatus
 }
+
+type userStatus int32
+
+const (
+	//StatusSockert socker 连接状态
+	StatusSockert userStatus = 0
+	//StatusLogin 已登陆成功
+	StatusLogin userStatus = 1
+)
+
+//------------------------------------------------------------------------
 
 //OnConnect 连接接入
 func (c *Client) OnConnect(addr net.Addr, sendc chan []byte) {
@@ -38,10 +50,10 @@ func (c *Client) OnClose() {
 
 //Send 发送消息
 func (c *Client) Send(module int32, method int32, pb proto.Message) {
-	log.Debugf("client send msg [%s] [%s] [%s]", module, method, pb)
+	log.Debugf("client send msg [%v] [%v] [%v]", module, method, pb)
 	data, err := proto.Marshal(pb)
 	if err != nil {
-		log.Errorf("proto encode error[%s]\n", err.Error())
+		log.Errorf("proto encode error[%v]\n", err.Error())
 		return
 	}
 	mldulebuf := network.IntToBytes(int(module), 2)
@@ -63,11 +75,15 @@ func (c *Client) Send(module int32, method int32, pb proto.Message) {
 //OnMessage 接受消息
 func (c *Client) OnMessage(module int32, method int32, buf []byte) {
 	//module 过滤模块
-	log.Debugf("c2s : [%s] [%s] buf:[%s]", module, method, len(buf))
+	log.Debugf("c2s : [%v] [%v] buf:[%v]", module, method, len(buf))
 	c.rount(module, method, buf)
 }
 
 //GetSPType SPInterface
 func (c *Client) GetSPType() cservice.CSType {
 	return cservice.ClientConnect
+}
+
+func (c *Client) setLoginStatus() {
+	c.status = StatusLogin
 }
