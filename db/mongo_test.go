@@ -9,35 +9,48 @@ import (
 )
 
 func TestConnectPool(t *testing.T) {
-	InitMongodb("slggame", "mongodb://localhost:27017")
+	StartMongodb("slggame", "mongodb://localhost:27017")
 }
 
 func TestInsertOne(t *testing.T) {
 	InsertOne("cron_log", Testdata{
 		Name: "Ash",
-		Age:  18,
+		Age:  17,
 	})
 
 	data := &Testdata{Name: "wq", Age: 18}
 	InsertOne("cron_log", &data)
-
 	log.Info("TestInsertOne")
+}
+
+func TestFindFieldMax(t *testing.T) {
+	var obj Testdata
+	FindFieldMax("cron_log", "age", &obj)
+	log.Info("TestFindFieldMax:", obj.Age)
 }
 
 func TestFindBson(t *testing.T) {
 	var obj Testdata
 	filter := bson.D{{"name", "wq"}, {"age", 18}}
-	FindOneBson(&obj, "cron_log", filter)
-
+	FindOneBson("cron_log", &obj, filter)
 	log.Info("TestFindObject", obj)
+
+}
+
+func TestUpdate(t *testing.T) {
+	filter := bson.D{{"name", "Ash"}}
+	// $inc 加减
+	updatefilter := bson.D{{"$set", bson.D{{"age", 18}}}}
+	Update("cron_log", filter, updatefilter)
+
 }
 
 func TestFindOne(t *testing.T) {
 	var obj Testdata
 	list := make(map[string]interface{})
 	list["name"] = "Ash"
-	list["age"] = 18
-	FindOneObject(&obj, "cron_log", list)
+	//list["age"] = 18
+	FindOneObject("cron_log", &obj, list)
 	log.Info("TestFindObject", obj)
 }
 
@@ -50,7 +63,6 @@ func TestFind(t *testing.T) {
 		log.Fatal(err)
 	}
 	for cur.Next(context.TODO()) {
-
 		var elem Testdata
 		err := cur.Decode(&elem)
 		if err != nil {
@@ -72,6 +84,16 @@ func TestDelete(t *testing.T) {
 	log.Info("TestDelete num:", num)
 	num = Delete("cron_log", "name", "wq")
 	log.Info("TestDelete num:", num)
+}
+
+func TestGetAutoID(t *testing.T) {
+	StartRedis("127.0.0.1:6379")
+	log.Info("log autoid:", GetAutoID("log"))
+	log.Info("log autoid:", GetAutoID("log"))
+	log.Info("log autoid:", GetAutoID("log"))
+	log.Info("log1 autoid:", GetAutoID("log1"))
+	log.Info("log1 autoid:", GetAutoID("log1"))
+
 }
 
 type Testdata struct {

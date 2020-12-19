@@ -15,11 +15,13 @@ import (
 //账号信息
 type accountInfo struct {
 	Account            string
+	AccountID          int32 //账号id
 	Password           string
 	Equipment          string //设备信息
 	RegistrationSource string //注册来源(平台)
 	RegistrationTime   time.Time
-	Rolename           string //角色名
+	RoleID             int32 //角色id
+
 }
 
 //module 用户登陆模块
@@ -41,6 +43,15 @@ func (c *Client) loginModule(method int32, buf []byte) {
 			return
 		}
 		c.createRole(createMsg)
+	case account.MSG_ACCOUNT_C2S_UpdateRoleName:
+		upName := &account.C2S_UpdateRoleName{}
+		e := proto.Unmarshal(buf, upName)
+		if e != nil {
+			log.Error(e)
+			return
+		}
+		c.updateRole(upName)
+
 	default:
 		log.Info("loginModule null methodID:", method)
 	}
@@ -54,72 +65,97 @@ func (c *Client) userLogin(userlogin *account.C2S_Login) {
 		{"password", userlogin.Password},
 	}
 
-	var accountinfo accountInfo
-	if err := db.FindOneBson(&accountinfo, db.AccountTable, filter); err != nil {
+	if userlogin.GetAccount() == "" || userlogin.Password == "" {
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login),
-			&account.S2C_Login{
-				Success: false,
-				Msg:     cfg.ERROR_AccountNull,
-			})
+			&account.S2C_Login{Success: false, Msg: cfg.ERROR_PARAMETER_EMPTY})
 	}
+
+	log.Debugf("login %v %v", userlogin.Account, userlogin.Password)
+	var accountinfo accountInfo
+	if err := db.FindOneBson(db.AccountTable, &accountinfo, filter); err != nil {
+		accountid := db.GetAutoID(db.AccountTable)
+		c.accountid = accountid
+		//创建账号
+		db.InsertOne(db.AccountTable, &accountInfo{
+			AccountID:        accountid,
+			Account:          userlogin.Account,
+			Password:         userlogin.Password,
+			RegistrationTime: time.Now(),
+		})
+	} else {
+		c.accountid = accountinfo.AccountID
+	}
+	//连接状态
+	c.setLoginStatus()
 
 	var userinfo account.P_RoleInfo
-	filter = bson.D{{"rolename", accountinfo.Rolename}}
-	if err := db.FindOneBson(&userinfo, db.UserTable, filter); err != nil {
-		//账号下没角色则创建，角色名与账号相同
-		userinfo.RoleName = userlogin.Account
-		db.InsertOne(db.UserTable, &userinfo)
+	filter = bson.D{{"roleid", accountinfo.RoleID}}
+	if err := db.FindOneBson(db.UserTable, &userinfo, filter); err != nil {
+		log.Debug("未找到 角色ID:", accountinfo.RoleID)
+		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login), &account.S2C_Login{Success: true})
+		return
 	}
 
-	//成功登陆
-	c.setLoginStatus()
 	//登陆成功后注册进程
 	cservice.Register(userinfo.RoleName, c)
-	c.username = userinfo.RoleName
-	c.account = userlogin.GetAccount()
-
-	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login),
-		&account.S2C_Login{
-			Success:  true,
-			RoleInfo: &userinfo})
+	c.rolename = userinfo.RoleName
+	c.roleid = userinfo.RoleID
+	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login), &account.S2C_Login{Success: true, RoleInfo: &userinfo})
 }
 
 func (c *Client) createRole(userlogin *account.C2S_CreateRole) {
 	returnmsg := &account.S2C_CreateRole{Success: false}
 
-	var accountinfo accountInfo
-	if err := db.FindOneBson(&accountinfo, db.AccountTable, bson.D{{"account", userlogin.GetAccount()}}); err == nil &&
-		accountinfo.Account == userlogin.GetAccount() {
-		returnmsg.Msg = cfg.ERROR_AccountExists
+	if userlogin.GetRoleName() == "" {
+		returnmsg.Msg = cfg.ERROR_PARAMETER_EMPTY
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
 		return
 	}
 
 	var roleinfo account.P_RoleInfo
-	if err := db.FindOneBson(&roleinfo, db.UserTable, bson.D{{"rolename", userlogin.GetRoleName()}}); err == nil &&
+	if err := db.FindOneBson(db.UserTable, &roleinfo, bson.D{{"rolename", userlogin.GetRoleName()}}); err == nil &&
 		roleinfo.GetRoleName() == userlogin.GetRoleName() {
 		returnmsg.Msg = cfg.ERROR_RoleNameExists
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
 	}
 
-	initRoleData(userlogin.GetAccount(),
-		userlogin.GetPassword(),
-		userlogin.GetRoleName())
+	roleid := db.GetAutoID(db.UserTable)
+	//角色游戏信息
+	db.InsertOne(db.UserTable, &account.P_RoleInfo{
+		RoleID:   roleid,
+		RoleName: userlogin.GetRoleName(),
+		Country:  userlogin.GetCountry(),
+		Level:    0,
+	})
+
+	//更新账号信息里角色id
+	db.Update(db.AccountTable,
+		bson.D{{"accountid", c.accountid}},
+		bson.D{{"$set", bson.D{{"roleid", roleid}}}},
+	)
+
+	log.Info("update [%v] [%v]", c.accountid, roleid)
+
+	//登陆成功后注册进程
+	cservice.Register(userlogin.GetRoleName(), c)
+	c.rolename = userlogin.GetRoleName()
+	c.roleid = roleid
 
 	returnmsg.Success = true
+	returnmsg.Roleid = roleid
 	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
 }
 
-func initRoleData(accountName string, password string, rolename string) {
+func (c *Client) updateRole(userlogin *account.C2S_UpdateRoleName) {
+	returnmsg := &account.S2C_UpdateRoleName{Success: false}
+	filter := bson.D{{"rolename", c.rolename}}
+	updatefilter := bson.D{{"$set", bson.D{{"rolename", userlogin.UpdateName}}}}
+	if _, err := db.Update(db.UserTable, filter, updatefilter); err != nil {
+		log.Error(err)
+		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_UpdateRoleName), returnmsg)
+	}
 
-	//账号信息
-	db.InsertOne(db.AccountTable, &accountInfo{
-		Account:          accountName,
-		Password:         password,
-		Rolename:         rolename,
-		RegistrationTime: time.Now(),
-	})
-
-	//角色游戏信息
-	db.InsertOne(db.UserTable, &account.P_RoleInfo{RoleName: rolename, Level: 0})
+	returnmsg.Success = true
+	returnmsg.Msg = userlogin.UpdateName
+	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_UpdateRoleName), returnmsg)
 }

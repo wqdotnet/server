@@ -17,21 +17,17 @@ enum MSG_ACCOUNT {
     C2S_UpdateRoleName= 1005;//修改角色名
     S2C_UpdateRoleName= 1006;
 
-    C2S_DeleteRole= 1007;//删除角色
-    S2C_DeleteRole= 1008;
+    //C2S_DeleteRole= 1007;//删除角色
+    //S2C_DeleteRole= 1008;
 
-    C2S_EnterGame= 1009;//进入游戏
-    S2C_EnterGame= 1010;
+    //C2S_EnterGame= 1009;//进入游戏
+    //S2C_EnterGame= 1010;
 
-    C2S_Reconnection= 1011;//游戏重连
-    S2C_Reconnection= 1012;
+    //C2S_Reconnection= 1011;//游戏重连
+    //S2C_Reconnection= 1012;
 
-    C2S_LogOut= 1013;//登出
-    S2C_LogOut= 1014;
-
-    //地图模块
-
-    //....
+    //C2S_LogOut= 1013;//登出
+    //S2C_LogOut= 1014;
 }
 
 
@@ -47,8 +43,10 @@ enum MSG_ACCOUNT {
 
 //用户游戏信息
 message P_RoleInfo {
-    string roleName =1;    
-    int32 level =2;
+    int32 roleID = 1;
+    string roleName =2;    
+    int32 level =3;
+    int32 country =4; //所属国家
 }
 
 //用户登陆
@@ -63,21 +61,27 @@ message  s2c_Login {
     P_RoleInfo RoleInfo =3;
 }
  
-// 创建账号角色
+// 创建角色
 message c2s_CreateRole {
-    string account  =1;
-    string password =2;
-    string RoleName =3;
+    string RoleName =1;
+    int32 country =2;
 }
 
 message  s2c_CreateRole {
     bool success =1;
     string msg = 2;
+    int32 roleid =3;
 }
 
 
 // 修改角色名
 message c2s_UpdateRoleName {
+    string UpdateName =1;
+}
+
+message s2c_UpdateRoleName {
+    bool success =1;
+    string msg = 2;
 }
 
 // 删除角色
@@ -90,6 +94,6 @@ message c2s_UpdateRoleName {
 //message c2s_Reconnection {}
 
 //登出
-message c2s_LogOut {
-}
+//message c2s_LogOut {
+//}
 

@@ -16,9 +16,9 @@ var (
 	clientPool *pool.ObjectPool
 )
 
-//InitMongodb mongodb init
-func InitMongodb(dbname string, url string) {
-	log.Info("init mongodb sync.pool")
+//StartMongodb mongodb init
+func StartMongodb(dbname string, url string) {
+	log.Infof("StartMongodb  create sync.pool:[%v]   dbname:[%v]", url, dbname)
 	database = dbname
 	urlstr = url
 
@@ -71,23 +71,24 @@ func InsertOne(tbname string, document interface{}) {
 	insertResult, err := collection.InsertOne(context.TODO(), document)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	log.Info("Inserted a single document: ", insertResult)
 
 	clientPool.ReturnObject(context.Background(), client)
+
 }
 
 //FindOneBson 查询数据
 //filter := bson.D{{field, value}}
-func FindOneBson(document interface{}, tbname string, filter interface{}) error {
+func FindOneBson(tbname string, document interface{}, filter interface{}) error {
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)
 	return collection.FindOne(context.TODO(), filter).Decode(document)
 }
 
 //FindOneObject select object
-func FindOneObject(document interface{}, tbname string, filter map[string]interface{}) error {
+func FindOneObject(tbname string, document interface{}, filter map[string]interface{}) error {
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)
 	return collection.FindOne(context.TODO(), filter).Decode(document)
@@ -130,6 +131,21 @@ func FindBson(tbname string, filter interface{}) (*mongo.Cursor, error) {
 	//return len(cur.Current), nil
 }
 
+//Update 更新数据
+//	Findfield := bson.D{{"name", "Ash"}}
+//	Upfield := bson.D{{"$inc", bson.D{{"age", 1}}}}
+func Update(tbname string, Findfield interface{}, Upfield interface{}) (int64, error) {
+	client, collection := getCollection(tbname)
+	defer clientPool.ReturnObject(context.Background(), client)
+
+	updateResult, err := collection.UpdateOne(context.TODO(), Findfield, Upfield)
+	if err != nil {
+		return 0, err
+	}
+	log.Infof("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+	return updateResult.ModifiedCount, nil
+}
+
 //Delete 删除
 func Delete(tbname string, field string, value interface{}) int64 {
 	client, collection := getCollection(tbname)
@@ -138,9 +154,18 @@ func Delete(tbname string, field string, value interface{}) int64 {
 	//删除所有
 	deleteResult, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	log.Debugf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
 
 	return deleteResult.DeletedCount
+}
+
+func FindFieldMax(tbname string, fieldkey string, document interface{}) error {
+	client, collection := getCollection(tbname)
+	defer clientPool.ReturnObject(context.Background(), client)
+
+	filter := bson.D{{}}
+	findOptions := options.FindOne().SetSort(bson.D{{fieldkey, -1}}).SetSkip(0)
+	return collection.FindOne(context.TODO(), filter, findOptions).Decode(document)
 }

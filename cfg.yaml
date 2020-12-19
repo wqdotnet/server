@@ -18,8 +18,8 @@ MongoConnStr: "mongodb://localhost:27017"
 Mongodb: "slggame"
 
 #redis
-redisConnStr: "127.0.0.1"
-redisProt: 6379
+RedisConnStr: "127.0.0.1:6379"
+
 
 #game confg
 CfgPath: "./config"

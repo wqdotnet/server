@@ -26,12 +26,13 @@ func init() {
 }
 
 func exectest(cmd *cobra.Command, args []string) {
+
 	mongodb()
 	//objectPool()
+
 }
 
 func mongodb() {
-
 	type trainer struct {
 		Name string
 		Age  int

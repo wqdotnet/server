@@ -27,7 +27,7 @@ const (
 //Register 注册协程
 func Register(key string, info CSInterface) {
 	if _, ok := cslist.Load(key); ok {
-		log.Errorf("error: sp [%s] is Register\n", key)
+		log.Warn("sp [%s] is Register\n", key)
 	} else {
 		cslist.Store(key, info)
 	}

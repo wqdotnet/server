@@ -9,7 +9,6 @@ import (
 	"net"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
@@ -61,7 +60,6 @@ func NewNetWorkX(pool *sync.Pool, port int32, packet int32, nettype string) *Net
 
 //Start 启动网络服务
 func (n *NetWorkx) Start() {
-	log.Info("network start")
 	switch n.NetType {
 	case "kcp":
 		log.Info("start [kcp] port:", n.Port)
@@ -90,7 +88,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	defer n.UserPool.Put(c)
 
 	//超时
-	conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
+	//conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
 
 	log.Info("LocalAddr:", conn.RemoteAddr().String())
 

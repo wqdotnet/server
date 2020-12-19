@@ -29,8 +29,7 @@ type ServerConfig struct {
 	MongoConnStr string
 	Mongodb      string
 
-	redisConnStr string
-	redisProt    int32
+	RedisConnStr string
 
 	CfgPath string
 	CfgType string
@@ -59,8 +58,7 @@ var ServerCfg = ServerConfig{
 	MongoConnStr: "mongodb://localhost:27017",
 	Mongodb:      "mygame",
 
-	redisConnStr: "127.0.0.1",
-	redisProt:    6379,
+	RedisConnStr: "127.0.0.1:6379",
 
 	CfgPath: "./config",
 	CfgType: "",
@@ -106,7 +104,10 @@ func StartGServer() {
 	log.Info("start game server ")
 
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
-	db.InitMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
+	db.StartMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
+	db.StartRedis(ServerCfg.RedisConnStr)
+	clienconnect.InitAutoID()
+
 	if ServerCfg.OpenHTTP {
 		go web.Start(ServerCfg.HTTPPort)
 	}
@@ -126,7 +127,6 @@ func StartGServer() {
 			default:
 				log.Warn("command:", command)
 			}
-			//default:
 		}
 	}
 

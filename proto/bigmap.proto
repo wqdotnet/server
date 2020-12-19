@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+
+//消息号
+enum MSG_BIGMAP {
+    PLACEHOLDER_MAP =0;  //占位
+
+    //账号模块
+    Module_BIGMAP  = 2000;
+
+    //模块信息
+    C2S_GetMapInfo = 2001;//
+
+}
+
+//地图信息
+message P_MapInfo {
+}
+
+//获取地图信息
+message  c2s_GetMapInfo {
+
+}
+
+message s2c_GetMapInfo{
+}
+
+//移动
+message c2s_Move {
+}
+
+message s2c_Move {
+}
