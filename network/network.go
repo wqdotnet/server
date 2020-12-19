@@ -136,6 +136,94 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	}
 }
 
+//HandleClient 消息处理
+func (n *NetWorkx) HandleClient_v2(conn net.Conn) {
+	c := n.UserPool.Get().(ClientInterface)
+	n.onConnect()
+
+	defer c.OnClose()
+	defer conn.Close()
+	defer n.onClose()
+	defer n.UserPool.Put(c)
+
+	//超时
+	//conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
+
+	log.Info("LocalAddr:", conn.RemoteAddr().String())
+
+	sendc := make(chan []byte, 1)
+	readc := make(chan []byte, 1)
+	c.OnConnect(conn.RemoteAddr(), sendc)
+
+	rootContext := context.Background()
+	ctx, cancelFunc := context.WithCancel(rootContext)
+
+	go func(conn net.Conn) {
+		for {
+			select {
+			case buf := <-sendc:
+				le := IntToBytes(len(buf), n.Packet)
+				conn.Write(BytesCombine(le, buf))
+			case <-ctx.Done():
+				log.Debug("exit role sendGO:", tool.GoID())
+				return
+			}
+		}
+	}(conn)
+
+	// for {
+	// 	_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
+	// 	if e != nil {
+	// 		log.Error("socket error:", e.Error())
+	// 		return
+	// 	}
+	// 	module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
+	// 	method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
+	// 	c.OnMessage(module, method, buf[n.Packet+4:])
+	// 	//pb 消息拆包
+	// 	// Decode protobuf -> buf[n.Packet:]
+	// 	msginfo := &common.NetworkMsg{}
+	// 	e = proto.Unmarshal(buf[n.Packet:], msginfo)
+	// 	if e != nil {
+	// 		log.Errorf("msg decode error[%s]", e.Error())
+	// 		msgdata, _ := proto.Marshal(&common.NetworkMsg{
+	// 			Module: 0,
+	// 			Method: 1,
+	// 		})
+	// 		conn.Write(msgdata)
+	// 	} else {
+	// 		c.OnMessage(msginfo.Module, msginfo.Method, msginfo.MsgBytes)
+	// 	}
+	// }
+
+	go func(conn net.Conn, cancelfunc context.CancelFunc) {
+		for {
+			_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
+			if e != nil {
+				log.Error("socket error:", e.Error(), "   goid:", tool.GoID())
+				cancelfunc()
+				return
+			}
+			readc <- buf
+		}
+	}(conn, cancelFunc)
+
+	for {
+		select {
+		case buf := <-readc:
+			module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
+			method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
+			c.OnMessage(module, method, buf[n.Packet+4:])
+		case <-ctx.Done():
+			log.Debug("exit role readGO:", tool.GoID())
+			return
+		}
+
+	}
+
+}
+
+
 func (n *NetWorkx) onConnect() {
 	n.UserNumber++
 	log.Info("user number:", n.UserNumber)
