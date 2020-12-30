@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"server/tool"
 
 	pool "github.com/jolestar/go-commons-pool/v2"
 	log "github.com/sirupsen/logrus"
@@ -27,8 +28,18 @@ func init() {
 
 func exectest(cmd *cobra.Command, args []string) {
 
-	mongodb()
+	num := 1
+	log.Info(tool.GoID(), "-> :", num)
+	go func(n int) {
+		n++
+		log.Info(tool.GoID(), "-> :", n)
+	}(num)
+
+	//mongodb()
 	//objectPool()
+
+	//time.Sleep(3000000000)
+	//log.Info(tool.GoID(), "-> :", num)
 
 }
 

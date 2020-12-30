@@ -1,4 +1,7 @@
 syntax = "proto3";
+package account;
+option go_package = "server/msgproto/account";
+
 
 
 //消息号
@@ -47,7 +50,10 @@ message P_RoleInfo {
     string roleName =2;    
     int32 level =3;
     int32 country =4; //所属国家
+    map<int32, int32>  TesourcesList = 5;//玩家资源列表
 }
+
+
 
 //用户登陆
 message c2s_Login {

@@ -1,4 +1,4 @@
-name: slgServer
+name: server
 
 ##web htpp port
 OpenHTTP: false

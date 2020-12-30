@@ -1,4 +1,8 @@
 syntax = "proto3";
+package protocol_base;
+option go_package = "server/msgproto/protocol_base";
+
+ 
 
 //消息号
 enum MSG_BASE {

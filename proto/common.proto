@@ -1,5 +1,11 @@
 syntax = "proto3";
+package common;
+option go_package = "server/msgproto/common";
+
  
+
+
+
 message NetworkMsg{
   int32 Module =1;
   int32 Method =2;
@@ -8,4 +14,11 @@ message NetworkMsg{
 
 
 
- 
+//部队状态
+enum TroopsState{
+  StandBy = 0; //等待命令
+  Move =1;  //移动中
+  Pause =2; //暂停
+  Stationed =3;//原地驻扎
+  fight =4; //战斗
+}

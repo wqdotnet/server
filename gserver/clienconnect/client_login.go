@@ -3,50 +3,38 @@ package clienconnect
 import (
 	"server/db"
 	"server/gserver/cfg"
-	"server/gserver/cservice"
+	"server/gserver/commonstruct"
+	"server/gserver/process"
 	"server/msgproto/account"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
-
-//账号信息
-type accountInfo struct {
-	Account            string
-	AccountID          int32 //账号id
-	Password           string
-	Equipment          string //设备信息
-	RegistrationSource string //注册来源(平台)
-	RegistrationTime   time.Time
-	RoleID             int32 //角色id
-
-}
 
 //module 用户登陆模块
 func (c *Client) loginModule(method int32, buf []byte) {
 	switch account.MSG_ACCOUNT(method) {
 	case account.MSG_ACCOUNT_C2S_Login:
 		userlogin := &account.C2S_Login{}
-		e := proto.Unmarshal(buf, userlogin)
-		if e != nil {
+		if e := proto.Unmarshal(buf, userlogin); e != nil {
 			log.Error(e)
 			return
 		}
 		c.userLogin(userlogin)
 	case account.MSG_ACCOUNT_C2S_CreateRole:
 		createMsg := &account.C2S_CreateRole{}
-		e := proto.Unmarshal(buf, createMsg)
-		if e != nil {
+		if e := proto.Unmarshal(buf, createMsg); e != nil {
 			log.Error(e)
 			return
 		}
 		c.createRole(createMsg)
 	case account.MSG_ACCOUNT_C2S_UpdateRoleName:
 		upName := &account.C2S_UpdateRoleName{}
-		e := proto.Unmarshal(buf, upName)
-		if e != nil {
+		if e := proto.Unmarshal(buf, upName); e != nil {
 			log.Error(e)
 			return
 		}
@@ -57,12 +45,20 @@ func (c *Client) loginModule(method int32, buf []byte) {
 	}
 }
 
+func (c *Client) unmarshalExec(b []byte, m protoreflect.ProtoMessage, exec func(m protoreflect.ProtoMessage)) {
+	e := proto.Unmarshal(b, m)
+	if e != nil {
+		log.Error(e)
+		return
+	}
+	exec(m)
+}
+
 //用户登陆
 func (c *Client) userLogin(userlogin *account.C2S_Login) {
-
 	filter := bson.D{
-		{"account", userlogin.Account},
-		{"password", userlogin.Password},
+		primitive.E{Key: "account", Value: userlogin.Account},
+		primitive.E{Key: "password", Value: userlogin.Password},
 	}
 
 	if userlogin.GetAccount() == "" || userlogin.Password == "" {
@@ -71,12 +67,13 @@ func (c *Client) userLogin(userlogin *account.C2S_Login) {
 	}
 
 	log.Debugf("login %v %v", userlogin.Account, userlogin.Password)
-	var accountinfo accountInfo
+	var accountinfo commonstruct.AccountInfoStruct
 	if err := db.FindOneBson(db.AccountTable, &accountinfo, filter); err != nil {
 		accountid := db.GetAutoID(db.AccountTable)
+		c.account = userlogin.Account
 		c.accountid = accountid
 		//创建账号
-		db.InsertOne(db.AccountTable, &accountInfo{
+		db.InsertOne(db.AccountTable, &commonstruct.AccountInfoStruct{
 			AccountID:        accountid,
 			Account:          userlogin.Account,
 			Password:         userlogin.Password,
@@ -84,72 +81,99 @@ func (c *Client) userLogin(userlogin *account.C2S_Login) {
 		})
 	} else {
 		c.accountid = accountinfo.AccountID
+		c.account = accountinfo.Account
 	}
-	//连接状态
+	//设置连接状态为已登陆
 	c.setLoginStatus()
 
 	var userinfo account.P_RoleInfo
-	filter = bson.D{{"roleid", accountinfo.RoleID}}
+	filter = bson.D{primitive.E{Key: "roleid", Value: accountinfo.RoleID}}
 	if err := db.FindOneBson(db.UserTable, &userinfo, filter); err != nil {
 		log.Debug("未找到 角色ID:", accountinfo.RoleID)
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login), &account.S2C_Login{Success: true})
 		return
 	}
-
-	//登陆成功后注册进程
-	cservice.Register(userinfo.RoleName, c)
-	c.rolename = userinfo.RoleName
-	c.roleid = userinfo.RoleID
+	//登陆成功
+	c.hookLogin(userinfo.RoleName, userinfo.RoleID)
 	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login), &account.S2C_Login{Success: true, RoleInfo: &userinfo})
 }
 
 func (c *Client) createRole(userlogin *account.C2S_CreateRole) {
 	returnmsg := &account.S2C_CreateRole{Success: false}
-
-	if userlogin.GetRoleName() == "" {
+	log.Debug(userlogin)
+	if userlogin.GetRoleName() == "" || userlogin.GetCountry() == 0 || userlogin.GetCountry() > 3 {
 		returnmsg.Msg = cfg.ERROR_PARAMETER_EMPTY
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
 		return
 	}
 
 	var roleinfo account.P_RoleInfo
-	if err := db.FindOneBson(db.UserTable, &roleinfo, bson.D{{"rolename", userlogin.GetRoleName()}}); err == nil &&
+	if err := db.FindOneBson(db.UserTable, &roleinfo, bson.D{primitive.E{Key: "rolename", Value: userlogin.GetRoleName()}}); err == nil &&
 		roleinfo.GetRoleName() == userlogin.GetRoleName() {
 		returnmsg.Msg = cfg.ERROR_RoleNameExists
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
 	}
 
 	roleid := db.GetAutoID(db.UserTable)
+
 	//角色游戏信息
 	db.InsertOne(db.UserTable, &account.P_RoleInfo{
-		RoleID:   roleid,
-		RoleName: userlogin.GetRoleName(),
-		Country:  userlogin.GetCountry(),
-		Level:    0,
+		RoleID:        roleid,
+		RoleName:      userlogin.GetRoleName(),
+		Country:       userlogin.GetCountry(),
+		Level:         0,
+		TesourcesList: map[int32]int32{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
 	})
+
+	//查找国家起启坐标
+	var areasindex int32 = 0
+	for _, arecfg := range cfg.GlobalCfg.MapInfo.Areas {
+		if arecfg.Type == int(userlogin.GetCountry()) {
+			areasindex = int32(arecfg.Setindex)
+		}
+	}
+
+	//创建部队信息
+	for i := 0; i < 5; i++ {
+		db.InsertOne(db.TroopsTable, commonstruct.TroopsStruct{
+			TroopsID:   db.GetAutoID(db.TroopsTable),
+			Country:    userlogin.GetCountry(),
+			AreasIndex: areasindex,
+			Roleid:     roleid})
+	}
 
 	//更新账号信息里角色id
 	db.Update(db.AccountTable,
-		bson.D{{"accountid", c.accountid}},
-		bson.D{{"$set", bson.D{{"roleid", roleid}}}},
+		bson.D{primitive.E{Key: "accountid", Value: c.accountid}},
+		bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "roleid", Value: roleid}}}},
 	)
 
-	log.Info("update [%v] [%v]", c.accountid, roleid)
-
-	//登陆成功后注册进程
-	cservice.Register(userlogin.GetRoleName(), c)
-	c.rolename = userlogin.GetRoleName()
-	c.roleid = roleid
+	//登陆成功
+	c.hookLogin(userlogin.GetRoleName(), roleid)
 
 	returnmsg.Success = true
 	returnmsg.Roleid = roleid
 	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
+
+}
+
+//登陆成功后需要发给客户端的信息
+func (c *Client) hookLogin(rolename string, roleid int32) {
+	//登陆成功后注册进程
+	process.Register(roleid, c.msgChan)
+	c.rolename = rolename
+	c.roleid = roleid
+
+	//地图区域信息
+	c.sendAllArease()
+	//部队信息
+	c.sendTroopsList()
 }
 
 func (c *Client) updateRole(userlogin *account.C2S_UpdateRoleName) {
 	returnmsg := &account.S2C_UpdateRoleName{Success: false}
-	filter := bson.D{{"rolename", c.rolename}}
-	updatefilter := bson.D{{"$set", bson.D{{"rolename", userlogin.UpdateName}}}}
+	filter := bson.D{primitive.E{Key: "rolename", Value: c.rolename}}
+	updatefilter := bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "rolename", Value: userlogin.UpdateName}}}}
 	if _, err := db.Update(db.UserTable, filter, updatefilter); err != nil {
 		log.Error(err)
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_UpdateRoleName), returnmsg)

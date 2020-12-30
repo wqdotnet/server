@@ -4,6 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
+	//"github.com/go-playground/assert/v2"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -27,6 +30,7 @@ func TestFindFieldMax(t *testing.T) {
 	var obj Testdata
 	FindFieldMax("cron_log", "age", &obj)
 	log.Info("TestFindFieldMax:", obj.Age)
+	assert.Equal(t, obj.Age, int32(18))
 }
 
 func TestFindBson(t *testing.T) {
@@ -50,7 +54,7 @@ func TestFindOne(t *testing.T) {
 	list := make(map[string]interface{})
 	list["name"] = "Ash"
 	//list["age"] = 18
-	FindOneObject("cron_log", &obj, list)
+	FindOneBson("cron_log", &obj, list)
 	log.Info("TestFindObject", obj)
 }
 
@@ -84,16 +88,6 @@ func TestDelete(t *testing.T) {
 	log.Info("TestDelete num:", num)
 	num = Delete("cron_log", "name", "wq")
 	log.Info("TestDelete num:", num)
-}
-
-func TestGetAutoID(t *testing.T) {
-	StartRedis("127.0.0.1:6379")
-	log.Info("log autoid:", GetAutoID("log"))
-	log.Info("log autoid:", GetAutoID("log"))
-	log.Info("log autoid:", GetAutoID("log"))
-	log.Info("log1 autoid:", GetAutoID("log1"))
-	log.Info("log1 autoid:", GetAutoID("log1"))
-
 }
 
 type Testdata struct {

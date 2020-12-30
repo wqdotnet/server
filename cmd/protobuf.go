@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"server/gserver"
+	"strconv"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -18,37 +19,45 @@ var protobufCmd = &cobra.Command{
 	Short: "Short",
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var filetime int64 = 0
+
+		if len(args) > 0 {
+			i, err := strconv.ParseInt(args[0], 10, 64)
+			if err == nil {
+				filetime = i
+			}
+		}
 
 		pbpath := gserver.ServerCfg.ProtoPath
 		outpath := gserver.ServerCfg.GoOut
-		//timeformat := "2006-01-02 15:04:05"
+		timeformat := "2006-01-02 15:04:05"
 
 		if !PathExists(pbpath) || !PathExists(outpath) {
 			fmt.Println("文件夹不存在:", pbpath, outpath)
 			return
 		}
-		execstr := "protoc -o %s/%s.pb  --proto_path=%s  --go_out=%s/%s/ %s"
+		//execstr := "protoc  --proto_path=%s   --go_out=../ %s"
+		execstr := "protoc -o %s/%s.pb  --proto_path=%s   --go_out=../ %s"
+
 		files, _ := ioutil.ReadDir(pbpath)
 		for _, onefile := range files {
 			filename := onefile.Name()
 			filebase := filename[0 : len(filename)-len(path.Ext(filename))]
 			if !onefile.IsDir() && path.Ext(filename) == ".proto" {
 
-				// diff := getHourDiffer(onefile.ModTime().Format(timeformat), time.Now().Format(timeformat))
-				// //只重新编译5分钟内修改过的文件
-				// if diff < 60*5 {
+				diff := getHourDiffer(onefile.ModTime().Format(timeformat), time.Now().Format(timeformat))
+				if filetime == 0 || diff < 60*filetime {
 
-				Shellout(fmt.Sprintf("mkdir %s/%s/", outpath, filebase))
-				execstrpro := fmt.Sprintf(execstr, outpath, filebase, pbpath, outpath, filebase, filename)
+					//execstrpro := fmt.Sprintf(execstr, pbpath, filename)
+					execstrpro := fmt.Sprintf(execstr, outpath, filebase, pbpath, filename)
 
-				_, errout, err := Shellout(execstrpro)
-				if err != nil {
-					log.Errorf("protoc [%s] ==>: %v errout:%v", filename, err, errout)
-				} else {
-					log.Infof("protoc [%s] ==> success", filename)
+					_, errout, err := Shellout(execstrpro)
+					if err != nil {
+						log.Errorf("protoc [%s] ==>: %v errout:%v", filename, err, errout)
+					} else {
+						log.Infof("protoc [%s] ==> success", filename)
+					}
 				}
-
-				//}
 
 			}
 		}

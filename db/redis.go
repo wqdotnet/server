@@ -1,6 +1,7 @@
 package db
 
 import (
+	"encoding/json"
 	"time"
 
 	red "github.com/gomodule/redigo/redis"
@@ -53,6 +54,7 @@ func RedisExec(cmd string, key interface{}, args ...interface{}) (interface{}, e
 			parmas = append(parmas, v)
 		}
 	}
+	con.Do("select", 0)
 	return con.Do(cmd, parmas...)
 }
 
@@ -63,4 +65,30 @@ func GetAutoID(tabname string) int32 {
 		log.Error(err)
 	}
 	return int32(autoid)
+}
+
+//SetStruct save struct
+func SetStruct(key string, v interface{}) (interface{}, error) {
+	conn := redis.pool.Get()
+	conn.Do("select", 1)
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return conn.Do("SET", key, string(b))
+}
+
+//GetStruct get
+func GetStruct(key string, obj interface{}) error {
+	conn := redis.pool.Get()
+	conn.Do("select", 1)
+
+	objStr, err := red.String(conn.Do("GET", key))
+	if err != nil {
+		return err
+	}
+	b := []byte(objStr)
+
+	err = json.Unmarshal(b, obj)
+	return err
 }

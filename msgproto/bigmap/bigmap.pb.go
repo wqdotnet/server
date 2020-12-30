@@ -11,6 +11,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
+	common "server/msgproto/common"
 	sync "sync"
 )
 
@@ -30,10 +31,19 @@ type MSG_BIGMAP int32
 
 const (
 	MSG_BIGMAP_PLACEHOLDER_MAP MSG_BIGMAP = 0 //占位
-	//账号模块
+	//大地图模块
 	MSG_BIGMAP_Module_BIGMAP MSG_BIGMAP = 2000
-	//模块信息
-	MSG_BIGMAP_C2S_GetMapInfo MSG_BIGMAP = 2001 //
+	//区域信息
+	MSG_BIGMAP_S2C_AreasInfo MSG_BIGMAP = 2010 //
+	//部队信息
+	MSG_BIGMAP_S2C_AreasTroops      MSG_BIGMAP = 2020 //
+	MSG_BIGMAP_S2C_UpdateTroopsInfo MSG_BIGMAP = 2021 //
+	//移动
+	MSG_BIGMAP_C2S_Move MSG_BIGMAP = 2030
+	MSG_BIGMAP_S2C_Move MSG_BIGMAP = 2031
+	//暂停移动
+	MSG_BIGMAP_C2S_StopMoving MSG_BIGMAP = 2032
+	MSG_BIGMAP_S2C_StopMoving MSG_BIGMAP = 2033
 )
 
 // Enum value maps for MSG_BIGMAP.
@@ -41,12 +51,24 @@ var (
 	MSG_BIGMAP_name = map[int32]string{
 		0:    "PLACEHOLDER_MAP",
 		2000: "Module_BIGMAP",
-		2001: "C2S_GetMapInfo",
+		2010: "S2C_AreasInfo",
+		2020: "S2C_AreasTroops",
+		2021: "S2C_UpdateTroopsInfo",
+		2030: "C2S_Move",
+		2031: "S2C_Move",
+		2032: "C2S_StopMoving",
+		2033: "S2C_StopMoving",
 	}
 	MSG_BIGMAP_value = map[string]int32{
-		"PLACEHOLDER_MAP": 0,
-		"Module_BIGMAP":   2000,
-		"C2S_GetMapInfo":  2001,
+		"PLACEHOLDER_MAP":      0,
+		"Module_BIGMAP":        2000,
+		"S2C_AreasInfo":        2010,
+		"S2C_AreasTroops":      2020,
+		"S2C_UpdateTroopsInfo": 2021,
+		"C2S_Move":             2030,
+		"S2C_Move":             2031,
+		"C2S_StopMoving":       2032,
+		"S2C_StopMoving":       2033,
 	}
 )
 
@@ -77,15 +99,17 @@ func (MSG_BIGMAP) EnumDescriptor() ([]byte, []int) {
 	return file_bigmap_proto_rawDescGZIP(), []int{0}
 }
 
-//地图信息
-type P_MapInfo struct {
+type P_RoleTroops struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Roleid     int32       `protobuf:"varint,1,opt,name=roleid,proto3" json:"roleid,omitempty"`
+	TroopsList []*P_Troops `protobuf:"bytes,2,rep,name=TroopsList,proto3" json:"TroopsList,omitempty"`
 }
 
-func (x *P_MapInfo) Reset() {
-	*x = P_MapInfo{}
+func (x *P_RoleTroops) Reset() {
+	*x = P_RoleTroops{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_bigmap_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -93,13 +117,13 @@ func (x *P_MapInfo) Reset() {
 	}
 }
 
-func (x *P_MapInfo) String() string {
+func (x *P_RoleTroops) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*P_MapInfo) ProtoMessage() {}
+func (*P_RoleTroops) ProtoMessage() {}
 
-func (x *P_MapInfo) ProtoReflect() protoreflect.Message {
+func (x *P_RoleTroops) ProtoReflect() protoreflect.Message {
 	mi := &file_bigmap_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -111,20 +135,45 @@ func (x *P_MapInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use P_MapInfo.ProtoReflect.Descriptor instead.
-func (*P_MapInfo) Descriptor() ([]byte, []int) {
+// Deprecated: Use P_RoleTroops.ProtoReflect.Descriptor instead.
+func (*P_RoleTroops) Descriptor() ([]byte, []int) {
 	return file_bigmap_proto_rawDescGZIP(), []int{0}
 }
 
-//获取地图信息
-type C2S_GetMapInfo struct {
+func (x *P_RoleTroops) GetRoleid() int32 {
+	if x != nil {
+		return x.Roleid
+	}
+	return 0
+}
+
+func (x *P_RoleTroops) GetTroopsList() []*P_Troops {
+	if x != nil {
+		return x.TroopsList
+	}
+	return nil
+}
+
+//部队信息
+type P_Troops struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	TroopsID   int32              `protobuf:"varint,1,opt,name=TroopsID,proto3" json:"TroopsID,omitempty"`                   //部队名/id
+	Country    int32              `protobuf:"varint,2,opt,name=country,proto3" json:"country,omitempty"`                     //国家归属
+	AreasList  []int32            `protobuf:"varint,3,rep,packed,name=AreasList,proto3" json:"AreasList,omitempty"`          //移动路径 区域id list
+	AreasIndex int32              `protobuf:"varint,4,opt,name=AreasIndex,proto3" json:"AreasIndex,omitempty"`               //当前区域ID
+	State      common.TroopsState `protobuf:"varint,5,opt,name=State,proto3,enum=common.TroopsState" json:"State,omitempty"` //状态 0:未出动    1:移动  2:驻扎(暂停)  3:战斗
+	//兵种组成
+	Type   int32 `protobuf:"varint,6,opt,name=Type,proto3" json:"Type,omitempty"`     //部队类型
+	Number int32 `protobuf:"varint,7,opt,name=Number,proto3" json:"Number,omitempty"` //数量
+	Level  int32 `protobuf:"varint,8,opt,name=Level,proto3" json:"Level,omitempty"`   //等级
+	Roleid int32 `protobuf:"varint,9,opt,name=roleid,proto3" json:"roleid,omitempty"`
 }
 
-func (x *C2S_GetMapInfo) Reset() {
-	*x = C2S_GetMapInfo{}
+func (x *P_Troops) Reset() {
+	*x = P_Troops{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_bigmap_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -132,13 +181,13 @@ func (x *C2S_GetMapInfo) Reset() {
 	}
 }
 
-func (x *C2S_GetMapInfo) String() string {
+func (x *P_Troops) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*C2S_GetMapInfo) ProtoMessage() {}
+func (*P_Troops) ProtoMessage() {}
 
-func (x *C2S_GetMapInfo) ProtoReflect() protoreflect.Message {
+func (x *P_Troops) ProtoReflect() protoreflect.Message {
 	mi := &file_bigmap_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -150,19 +199,87 @@ func (x *C2S_GetMapInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use C2S_GetMapInfo.ProtoReflect.Descriptor instead.
-func (*C2S_GetMapInfo) Descriptor() ([]byte, []int) {
+// Deprecated: Use P_Troops.ProtoReflect.Descriptor instead.
+func (*P_Troops) Descriptor() ([]byte, []int) {
 	return file_bigmap_proto_rawDescGZIP(), []int{1}
 }
 
-type S2C_GetMapInfo struct {
+func (x *P_Troops) GetTroopsID() int32 {
+	if x != nil {
+		return x.TroopsID
+	}
+	return 0
+}
+
+func (x *P_Troops) GetCountry() int32 {
+	if x != nil {
+		return x.Country
+	}
+	return 0
+}
+
+func (x *P_Troops) GetAreasList() []int32 {
+	if x != nil {
+		return x.AreasList
+	}
+	return nil
+}
+
+func (x *P_Troops) GetAreasIndex() int32 {
+	if x != nil {
+		return x.AreasIndex
+	}
+	return 0
+}
+
+func (x *P_Troops) GetState() common.TroopsState {
+	if x != nil {
+		return x.State
+	}
+	return common.TroopsState_StandBy
+}
+
+func (x *P_Troops) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *P_Troops) GetNumber() int32 {
+	if x != nil {
+		return x.Number
+	}
+	return 0
+}
+
+func (x *P_Troops) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *P_Troops) GetRoleid() int32 {
+	if x != nil {
+		return x.Roleid
+	}
+	return 0
+}
+
+//区域信息
+type P_AreasInfo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	AreasIndex int32 `protobuf:"varint,1,opt,name=AreasIndex,proto3" json:"AreasIndex,omitempty"` //区域ID
+	Type       int32 `protobuf:"varint,2,opt,name=Type,proto3" json:"Type,omitempty"`             //0 中立  1-3 国家KEY
+	State      int32 `protobuf:"varint,3,opt,name=State,proto3" json:"State,omitempty"`           //区域状态 0:无  1:战斗中
 }
 
-func (x *S2C_GetMapInfo) Reset() {
-	*x = S2C_GetMapInfo{}
+func (x *P_AreasInfo) Reset() {
+	*x = P_AreasInfo{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_bigmap_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -170,13 +287,13 @@ func (x *S2C_GetMapInfo) Reset() {
 	}
 }
 
-func (x *S2C_GetMapInfo) String() string {
+func (x *P_AreasInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*S2C_GetMapInfo) ProtoMessage() {}
+func (*P_AreasInfo) ProtoMessage() {}
 
-func (x *S2C_GetMapInfo) ProtoReflect() protoreflect.Message {
+func (x *P_AreasInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_bigmap_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -188,9 +305,222 @@ func (x *S2C_GetMapInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use S2C_GetMapInfo.ProtoReflect.Descriptor instead.
-func (*S2C_GetMapInfo) Descriptor() ([]byte, []int) {
+// Deprecated: Use P_AreasInfo.ProtoReflect.Descriptor instead.
+func (*P_AreasInfo) Descriptor() ([]byte, []int) {
 	return file_bigmap_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *P_AreasInfo) GetAreasIndex() int32 {
+	if x != nil {
+		return x.AreasIndex
+	}
+	return 0
+}
+
+func (x *P_AreasInfo) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *P_AreasInfo) GetState() int32 {
+	if x != nil {
+		return x.State
+	}
+	return 0
+}
+
+//区域占领信息
+type S2C_AreasInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AreasInfoList []*P_AreasInfo `protobuf:"bytes,1,rep,name=AreasInfoList,proto3" json:"AreasInfoList,omitempty"`
+}
+
+func (x *S2C_AreasInfo) Reset() {
+	*x = S2C_AreasInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bigmap_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_AreasInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_AreasInfo) ProtoMessage() {}
+
+func (x *S2C_AreasInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_bigmap_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_AreasInfo.ProtoReflect.Descriptor instead.
+func (*S2C_AreasInfo) Descriptor() ([]byte, []int) {
+	return file_bigmap_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *S2C_AreasInfo) GetAreasInfoList() []*P_AreasInfo {
+	if x != nil {
+		return x.AreasInfoList
+	}
+	return nil
+}
+
+//区域部队信息
+type C2S_GetAreasTroops struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AreasIndex []int32 `protobuf:"varint,1,rep,packed,name=AreasIndex,proto3" json:"AreasIndex,omitempty"` // 区域id
+}
+
+func (x *C2S_GetAreasTroops) Reset() {
+	*x = C2S_GetAreasTroops{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bigmap_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2S_GetAreasTroops) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2S_GetAreasTroops) ProtoMessage() {}
+
+func (x *C2S_GetAreasTroops) ProtoReflect() protoreflect.Message {
+	mi := &file_bigmap_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2S_GetAreasTroops.ProtoReflect.Descriptor instead.
+func (*C2S_GetAreasTroops) Descriptor() ([]byte, []int) {
+	return file_bigmap_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *C2S_GetAreasTroops) GetAreasIndex() []int32 {
+	if x != nil {
+		return x.AreasIndex
+	}
+	return nil
+}
+
+//部队信息
+type S2C_TroopsList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TroopsList []*P_Troops `protobuf:"bytes,1,rep,name=TroopsList,proto3" json:"TroopsList,omitempty"`
+}
+
+func (x *S2C_TroopsList) Reset() {
+	*x = S2C_TroopsList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bigmap_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_TroopsList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_TroopsList) ProtoMessage() {}
+
+func (x *S2C_TroopsList) ProtoReflect() protoreflect.Message {
+	mi := &file_bigmap_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_TroopsList.ProtoReflect.Descriptor instead.
+func (*S2C_TroopsList) Descriptor() ([]byte, []int) {
+	return file_bigmap_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *S2C_TroopsList) GetTroopsList() []*P_Troops {
+	if x != nil {
+		return x.TroopsList
+	}
+	return nil
+}
+
+//单个部队信息更新
+type S2C_UpdateTroopsInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TroopsInfo *P_Troops `protobuf:"bytes,1,opt,name=TroopsInfo,proto3" json:"TroopsInfo,omitempty"`
+}
+
+func (x *S2C_UpdateTroopsInfo) Reset() {
+	*x = S2C_UpdateTroopsInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bigmap_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_UpdateTroopsInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_UpdateTroopsInfo) ProtoMessage() {}
+
+func (x *S2C_UpdateTroopsInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_bigmap_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_UpdateTroopsInfo.ProtoReflect.Descriptor instead.
+func (*S2C_UpdateTroopsInfo) Descriptor() ([]byte, []int) {
+	return file_bigmap_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *S2C_UpdateTroopsInfo) GetTroopsInfo() *P_Troops {
+	if x != nil {
+		return x.TroopsInfo
+	}
+	return nil
 }
 
 //移动
@@ -198,12 +528,15 @@ type C2S_Move struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	TroopsID  int32   `protobuf:"varint,1,opt,name=TroopsID,proto3" json:"TroopsID,omitempty"`          //部队ID
+	AreasList []int32 `protobuf:"varint,2,rep,packed,name=AreasList,proto3" json:"AreasList,omitempty"` //路径 区域ID
 }
 
 func (x *C2S_Move) Reset() {
 	*x = C2S_Move{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bigmap_proto_msgTypes[3]
+		mi := &file_bigmap_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -216,7 +549,7 @@ func (x *C2S_Move) String() string {
 func (*C2S_Move) ProtoMessage() {}
 
 func (x *C2S_Move) ProtoReflect() protoreflect.Message {
-	mi := &file_bigmap_proto_msgTypes[3]
+	mi := &file_bigmap_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -229,19 +562,37 @@ func (x *C2S_Move) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use C2S_Move.ProtoReflect.Descriptor instead.
 func (*C2S_Move) Descriptor() ([]byte, []int) {
-	return file_bigmap_proto_rawDescGZIP(), []int{3}
+	return file_bigmap_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *C2S_Move) GetTroopsID() int32 {
+	if x != nil {
+		return x.TroopsID
+	}
+	return 0
+}
+
+func (x *C2S_Move) GetAreasList() []int32 {
+	if x != nil {
+		return x.AreasList
+	}
+	return nil
 }
 
 type S2C_Move struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	TroopsID    int32 `protobuf:"varint,1,opt,name=TroopsID,proto3" json:"TroopsID,omitempty"`       //部队ID
+	AreasIndex  int32 `protobuf:"varint,2,opt,name=AreasIndex,proto3" json:"AreasIndex,omitempty"`   //当前行进区域ID
+	ArrivalTime int64 `protobuf:"varint,3,opt,name=ArrivalTime,proto3" json:"ArrivalTime,omitempty"` //预计到达时间时间戳
 }
 
 func (x *S2C_Move) Reset() {
 	*x = S2C_Move{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bigmap_proto_msgTypes[4]
+		mi := &file_bigmap_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -254,7 +605,7 @@ func (x *S2C_Move) String() string {
 func (*S2C_Move) ProtoMessage() {}
 
 func (x *S2C_Move) ProtoReflect() protoreflect.Message {
-	mi := &file_bigmap_proto_msgTypes[4]
+	mi := &file_bigmap_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -267,23 +618,217 @@ func (x *S2C_Move) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use S2C_Move.ProtoReflect.Descriptor instead.
 func (*S2C_Move) Descriptor() ([]byte, []int) {
-	return file_bigmap_proto_rawDescGZIP(), []int{4}
+	return file_bigmap_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *S2C_Move) GetTroopsID() int32 {
+	if x != nil {
+		return x.TroopsID
+	}
+	return 0
+}
+
+func (x *S2C_Move) GetAreasIndex() int32 {
+	if x != nil {
+		return x.AreasIndex
+	}
+	return 0
+}
+
+func (x *S2C_Move) GetArrivalTime() int64 {
+	if x != nil {
+		return x.ArrivalTime
+	}
+	return 0
+}
+
+//暂停移动
+type C2S_StopMoving struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TroopsID int32 `protobuf:"varint,1,opt,name=TroopsID,proto3" json:"TroopsID,omitempty"` //部队ID
+}
+
+func (x *C2S_StopMoving) Reset() {
+	*x = C2S_StopMoving{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bigmap_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2S_StopMoving) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2S_StopMoving) ProtoMessage() {}
+
+func (x *C2S_StopMoving) ProtoReflect() protoreflect.Message {
+	mi := &file_bigmap_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2S_StopMoving.ProtoReflect.Descriptor instead.
+func (*C2S_StopMoving) Descriptor() ([]byte, []int) {
+	return file_bigmap_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *C2S_StopMoving) GetTroopsID() int32 {
+	if x != nil {
+		return x.TroopsID
+	}
+	return 0
+}
+
+type S2C_StopMoving struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TroopsID       int32 `protobuf:"varint,1,opt,name=TroopsID,proto3" json:"TroopsID,omitempty"`             //部队ID
+	StopAreasIndex int32 `protobuf:"varint,2,opt,name=StopAreasIndex,proto3" json:"StopAreasIndex,omitempty"` //暂停点移动
+}
+
+func (x *S2C_StopMoving) Reset() {
+	*x = S2C_StopMoving{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bigmap_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_StopMoving) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_StopMoving) ProtoMessage() {}
+
+func (x *S2C_StopMoving) ProtoReflect() protoreflect.Message {
+	mi := &file_bigmap_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_StopMoving.ProtoReflect.Descriptor instead.
+func (*S2C_StopMoving) Descriptor() ([]byte, []int) {
+	return file_bigmap_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *S2C_StopMoving) GetTroopsID() int32 {
+	if x != nil {
+		return x.TroopsID
+	}
+	return 0
+}
+
+func (x *S2C_StopMoving) GetStopAreasIndex() int32 {
+	if x != nil {
+		return x.StopAreasIndex
+	}
+	return 0
 }
 
 var File_bigmap_proto protoreflect.FileDescriptor
 
 var file_bigmap_proto_rawDesc = []byte{
-	0x0a, 0x0c, 0x62, 0x69, 0x67, 0x6d, 0x61, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x0b,
-	0x0a, 0x09, 0x50, 0x5f, 0x4d, 0x61, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x10, 0x0a, 0x0e, 0x63,
-	0x32, 0x73, 0x5f, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x10, 0x0a,
-	0x0e, 0x73, 0x32, 0x63, 0x5f, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x22,
-	0x0a, 0x0a, 0x08, 0x63, 0x32, 0x73, 0x5f, 0x4d, 0x6f, 0x76, 0x65, 0x22, 0x0a, 0x0a, 0x08, 0x73,
-	0x32, 0x63, 0x5f, 0x4d, 0x6f, 0x76, 0x65, 0x2a, 0x4a, 0x0a, 0x0a, 0x4d, 0x53, 0x47, 0x5f, 0x42,
-	0x49, 0x47, 0x4d, 0x41, 0x50, 0x12, 0x13, 0x0a, 0x0f, 0x50, 0x4c, 0x41, 0x43, 0x45, 0x48, 0x4f,
-	0x4c, 0x44, 0x45, 0x52, 0x5f, 0x4d, 0x41, 0x50, 0x10, 0x00, 0x12, 0x12, 0x0a, 0x0d, 0x4d, 0x6f,
-	0x64, 0x75, 0x6c, 0x65, 0x5f, 0x42, 0x49, 0x47, 0x4d, 0x41, 0x50, 0x10, 0xd0, 0x0f, 0x12, 0x13,
-	0x0a, 0x0e, 0x43, 0x32, 0x53, 0x5f, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x70, 0x49, 0x6e, 0x66, 0x6f,
-	0x10, 0xd1, 0x0f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x0a, 0x0c, 0x62, 0x69, 0x67, 0x6d, 0x61, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06,
+	0x62, 0x69, 0x67, 0x6d, 0x61, 0x70, 0x1a, 0x0c, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x22, 0x58, 0x0a, 0x0c, 0x50, 0x5f, 0x52, 0x6f, 0x6c, 0x65, 0x54, 0x72,
+	0x6f, 0x6f, 0x70, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x69, 0x64, 0x12, 0x30, 0x0a, 0x0a,
+	0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x10, 0x2e, 0x62, 0x69, 0x67, 0x6d, 0x61, 0x70, 0x2e, 0x50, 0x5f, 0x54, 0x72, 0x6f, 0x6f,
+	0x70, 0x73, 0x52, 0x0a, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x83,
+	0x02, 0x0a, 0x08, 0x50, 0x5f, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x54,
+	0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x54,
+	0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74,
+	0x72, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72,
+	0x79, 0x12, 0x1c, 0x0a, 0x09, 0x41, 0x72, 0x65, 0x61, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x03,
+	0x20, 0x03, 0x28, 0x05, 0x52, 0x09, 0x41, 0x72, 0x65, 0x61, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x12,
+	0x1e, 0x0a, 0x0a, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x0a, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x12,
+	0x29, 0x0a, 0x05, 0x53, 0x74, 0x61, 0x74, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x13,
+	0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x53, 0x74,
+	0x61, 0x74, 0x65, 0x52, 0x05, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x54, 0x79,
+	0x70, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x54, 0x79, 0x70, 0x65, 0x12, 0x16,
+	0x0a, 0x06, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06,
+	0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x14, 0x0a, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x18,
+	0x08, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x16, 0x0a, 0x06,
+	0x72, 0x6f, 0x6c, 0x65, 0x69, 0x64, 0x18, 0x09, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x6f,
+	0x6c, 0x65, 0x69, 0x64, 0x22, 0x57, 0x0a, 0x0b, 0x50, 0x5f, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49,
+	0x6e, 0x66, 0x6f, 0x12, 0x1e, 0x0a, 0x0a, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65,
+	0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e,
+	0x64, 0x65, 0x78, 0x12, 0x12, 0x0a, 0x04, 0x54, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x04, 0x54, 0x79, 0x70, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x53, 0x74, 0x61, 0x74, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x53, 0x74, 0x61, 0x74, 0x65, 0x22, 0x4a, 0x0a,
+	0x0d, 0x73, 0x32, 0x63, 0x5f, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x39,
+	0x0a, 0x0d, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x4c, 0x69, 0x73, 0x74, 0x18,
+	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x62, 0x69, 0x67, 0x6d, 0x61, 0x70, 0x2e, 0x50,
+	0x5f, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0d, 0x41, 0x72, 0x65, 0x61,
+	0x73, 0x49, 0x6e, 0x66, 0x6f, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x34, 0x0a, 0x12, 0x63, 0x32, 0x73,
+	0x5f, 0x47, 0x65, 0x74, 0x41, 0x72, 0x65, 0x61, 0x73, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x12,
+	0x1e, 0x0a, 0x0a, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x05, 0x52, 0x0a, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x22,
+	0x42, 0x0a, 0x0e, 0x73, 0x32, 0x63, 0x5f, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x4c, 0x69, 0x73,
+	0x74, 0x12, 0x30, 0x0a, 0x0a, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x18,
+	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x62, 0x69, 0x67, 0x6d, 0x61, 0x70, 0x2e, 0x50,
+	0x5f, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x52, 0x0a, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x4c,
+	0x69, 0x73, 0x74, 0x22, 0x48, 0x0a, 0x14, 0x73, 0x32, 0x63, 0x5f, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x30, 0x0a, 0x0a, 0x54,
+	0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x10, 0x2e, 0x62, 0x69, 0x67, 0x6d, 0x61, 0x70, 0x2e, 0x50, 0x5f, 0x54, 0x72, 0x6f, 0x6f, 0x70,
+	0x73, 0x52, 0x0a, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x44, 0x0a,
+	0x08, 0x63, 0x32, 0x73, 0x5f, 0x4d, 0x6f, 0x76, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x54, 0x72, 0x6f,
+	0x6f, 0x70, 0x73, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x54, 0x72, 0x6f,
+	0x6f, 0x70, 0x73, 0x49, 0x44, 0x12, 0x1c, 0x0a, 0x09, 0x41, 0x72, 0x65, 0x61, 0x73, 0x4c, 0x69,
+	0x73, 0x74, 0x18, 0x02, 0x20, 0x03, 0x28, 0x05, 0x52, 0x09, 0x41, 0x72, 0x65, 0x61, 0x73, 0x4c,
+	0x69, 0x73, 0x74, 0x22, 0x68, 0x0a, 0x08, 0x73, 0x32, 0x63, 0x5f, 0x4d, 0x6f, 0x76, 0x65, 0x12,
+	0x1a, 0x0a, 0x08, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x08, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x12, 0x1e, 0x0a, 0x0a, 0x41,
+	0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x0a, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x20, 0x0a, 0x0b, 0x41,
+	0x72, 0x72, 0x69, 0x76, 0x61, 0x6c, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x0b, 0x41, 0x72, 0x72, 0x69, 0x76, 0x61, 0x6c, 0x54, 0x69, 0x6d, 0x65, 0x22, 0x2c, 0x0a,
+	0x0e, 0x63, 0x32, 0x73, 0x5f, 0x53, 0x74, 0x6f, 0x70, 0x4d, 0x6f, 0x76, 0x69, 0x6e, 0x67, 0x12,
+	0x1a, 0x0a, 0x08, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x08, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x22, 0x54, 0x0a, 0x0e, 0x73,
+	0x32, 0x63, 0x5f, 0x53, 0x74, 0x6f, 0x70, 0x4d, 0x6f, 0x76, 0x69, 0x6e, 0x67, 0x12, 0x1a, 0x0a,
+	0x08, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x08, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x44, 0x12, 0x26, 0x0a, 0x0e, 0x53, 0x74, 0x6f,
+	0x70, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x0e, 0x53, 0x74, 0x6f, 0x70, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x64, 0x65,
+	0x78, 0x2a, 0xc2, 0x01, 0x0a, 0x0a, 0x4d, 0x53, 0x47, 0x5f, 0x42, 0x49, 0x47, 0x4d, 0x41, 0x50,
+	0x12, 0x13, 0x0a, 0x0f, 0x50, 0x4c, 0x41, 0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x5f,
+	0x4d, 0x41, 0x50, 0x10, 0x00, 0x12, 0x12, 0x0a, 0x0d, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x5f,
+	0x42, 0x49, 0x47, 0x4d, 0x41, 0x50, 0x10, 0xd0, 0x0f, 0x12, 0x12, 0x0a, 0x0d, 0x53, 0x32, 0x43,
+	0x5f, 0x41, 0x72, 0x65, 0x61, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x10, 0xda, 0x0f, 0x12, 0x14, 0x0a,
+	0x0f, 0x53, 0x32, 0x43, 0x5f, 0x41, 0x72, 0x65, 0x61, 0x73, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73,
+	0x10, 0xe4, 0x0f, 0x12, 0x19, 0x0a, 0x14, 0x53, 0x32, 0x43, 0x5f, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x10, 0xe5, 0x0f, 0x12, 0x0d,
+	0x0a, 0x08, 0x43, 0x32, 0x53, 0x5f, 0x4d, 0x6f, 0x76, 0x65, 0x10, 0xee, 0x0f, 0x12, 0x0d, 0x0a,
+	0x08, 0x53, 0x32, 0x43, 0x5f, 0x4d, 0x6f, 0x76, 0x65, 0x10, 0xef, 0x0f, 0x12, 0x13, 0x0a, 0x0e,
+	0x43, 0x32, 0x53, 0x5f, 0x53, 0x74, 0x6f, 0x70, 0x4d, 0x6f, 0x76, 0x69, 0x6e, 0x67, 0x10, 0xf0,
+	0x0f, 0x12, 0x13, 0x0a, 0x0e, 0x53, 0x32, 0x43, 0x5f, 0x53, 0x74, 0x6f, 0x70, 0x4d, 0x6f, 0x76,
+	0x69, 0x6e, 0x67, 0x10, 0xf1, 0x0f, 0x42, 0x1b, 0x5a, 0x19, 0x73, 0x6c, 0x67, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2f, 0x6d, 0x73, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x62, 0x69, 0x67,
+	0x6d, 0x61, 0x70, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -299,21 +844,33 @@ func file_bigmap_proto_rawDescGZIP() []byte {
 }
 
 var file_bigmap_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_bigmap_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_bigmap_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_bigmap_proto_goTypes = []interface{}{
-	(MSG_BIGMAP)(0),        // 0: MSG_BIGMAP
-	(*P_MapInfo)(nil),      // 1: P_MapInfo
-	(*C2S_GetMapInfo)(nil), // 2: c2s_GetMapInfo
-	(*S2C_GetMapInfo)(nil), // 3: s2c_GetMapInfo
-	(*C2S_Move)(nil),       // 4: c2s_Move
-	(*S2C_Move)(nil),       // 5: s2c_Move
+	(MSG_BIGMAP)(0),              // 0: bigmap.MSG_BIGMAP
+	(*P_RoleTroops)(nil),         // 1: bigmap.P_RoleTroops
+	(*P_Troops)(nil),             // 2: bigmap.P_Troops
+	(*P_AreasInfo)(nil),          // 3: bigmap.P_AreasInfo
+	(*S2C_AreasInfo)(nil),        // 4: bigmap.s2c_AreasInfo
+	(*C2S_GetAreasTroops)(nil),   // 5: bigmap.c2s_GetAreasTroops
+	(*S2C_TroopsList)(nil),       // 6: bigmap.s2c_TroopsList
+	(*S2C_UpdateTroopsInfo)(nil), // 7: bigmap.s2c_UpdateTroopsInfo
+	(*C2S_Move)(nil),             // 8: bigmap.c2s_Move
+	(*S2C_Move)(nil),             // 9: bigmap.s2c_Move
+	(*C2S_StopMoving)(nil),       // 10: bigmap.c2s_StopMoving
+	(*S2C_StopMoving)(nil),       // 11: bigmap.s2c_StopMoving
+	(common.TroopsState)(0),      // 12: common.TroopsState
 }
 var file_bigmap_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2,  // 0: bigmap.P_RoleTroops.TroopsList:type_name -> bigmap.P_Troops
+	12, // 1: bigmap.P_Troops.State:type_name -> common.TroopsState
+	3,  // 2: bigmap.s2c_AreasInfo.AreasInfoList:type_name -> bigmap.P_AreasInfo
+	2,  // 3: bigmap.s2c_TroopsList.TroopsList:type_name -> bigmap.P_Troops
+	2,  // 4: bigmap.s2c_UpdateTroopsInfo.TroopsInfo:type_name -> bigmap.P_Troops
+	5,  // [5:5] is the sub-list for method output_type
+	5,  // [5:5] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_bigmap_proto_init() }
@@ -323,7 +880,7 @@ func file_bigmap_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_bigmap_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*P_MapInfo); i {
+			switch v := v.(*P_RoleTroops); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -335,7 +892,7 @@ func file_bigmap_proto_init() {
 			}
 		}
 		file_bigmap_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_GetMapInfo); i {
+			switch v := v.(*P_Troops); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -347,7 +904,7 @@ func file_bigmap_proto_init() {
 			}
 		}
 		file_bigmap_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*S2C_GetMapInfo); i {
+			switch v := v.(*P_AreasInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -359,7 +916,7 @@ func file_bigmap_proto_init() {
 			}
 		}
 		file_bigmap_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2S_Move); i {
+			switch v := v.(*S2C_AreasInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -371,7 +928,79 @@ func file_bigmap_proto_init() {
 			}
 		}
 		file_bigmap_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2S_GetAreasTroops); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bigmap_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2C_TroopsList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bigmap_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2C_UpdateTroopsInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bigmap_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2S_Move); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bigmap_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*S2C_Move); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bigmap_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2S_StopMoving); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bigmap_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2C_StopMoving); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -389,7 +1018,7 @@ func file_bigmap_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_bigmap_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   5,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

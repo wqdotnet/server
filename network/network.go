@@ -2,12 +2,14 @@ package network
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"net"
 	"os"
+	"server/gserver/commonstruct"
 	"sync"
 
 	"github.com/golang/protobuf/proto"
@@ -16,10 +18,12 @@ import (
 
 //ClientInterface client hander
 type ClientInterface interface {
-	OnConnect(addr net.Addr, sendmsg chan []byte)
+	OnConnect(netconn net.Conn, packet int32, msgchan chan commonstruct.ProcessMsg)
 	OnClose()
 	OnMessage(module int32, method int32, buf []byte)
 	Send(module int32, method int32, pb proto.Message)
+	ProcessMessage(msg commonstruct.ProcessMsg)
+	SendMsg(msg commonstruct.ProcessMsg)
 }
 
 //NetInterface network
@@ -31,7 +35,6 @@ type NetInterface interface {
 type NetWorkx struct {
 	//tcp/udp/kcp
 	src NetInterface
-
 	//ClientHander ClientInterface
 	//包长度0 2 4
 	Packet int32
@@ -90,86 +93,28 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	//超时
 	//conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
 
-	log.Info("LocalAddr:", conn.RemoteAddr().String())
+	log.Infof("sockert connect LocalAddr:[%v]", conn.RemoteAddr().String())
 
-	sendc := make(chan []byte, 1)
+	// sendc := make(chan []byte, 1)
+	//c.OnConnect(conn.RemoteAddr(), sendc)// go func(conn net.Conn) {
+	// 	for {
+	// 		select {
+	// 		case buf := <-sendc:
+	// 			le := IntToBytes(len(buf), n.Packet)
+	// 			conn.Write(BytesCombine(le, buf))
+	// 		case <-ctx.Done():
+	// 			log.Debug("exit role sendGO")
+	// 			return
+	// 		}
+	// 	}
+	// }(conn)
 
-	c.OnConnect(conn.RemoteAddr(), sendc)
-	go func(conn net.Conn) {
-
-		for {
-			select {
-			case buf := <-sendc:
-				le := IntToBytes(len(buf), n.Packet)
-				conn.Write(BytesCombine(le, buf))
-				//default:
-			}
-		}
-	}(conn)
-
-	for {
-		_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
-		if e != nil {
-			log.Error("socket error:", e.Error())
-			return
-		}
-
-		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
-		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
-		c.OnMessage(module, method, buf[n.Packet+4:])
-
-		// pb 消息拆包
-		// // Decode protobuf -> buf[n.Packet:]
-		// msginfo := &common.NetworkMsg{}
-		// e = proto.Unmarshal(buf[n.Packet:], msginfo)
-		// if e != nil {
-		// 	log.Errorf("msg decode error[%s]", e.Error())
-		// 	msgdata, _ := proto.Marshal(&common.NetworkMsg{
-		// 		Module: 0,
-		// 		Method: 1,
-		// 	})
-		// 	conn.Write(msgdata)
-		// } else {
-		// 	c.OnMessage(msginfo.Module, msginfo.Method, msginfo.MsgBytes)
-		// }
-
-	}
-}
-
-//HandleClient 消息处理
-func (n *NetWorkx) HandleClient_v2(conn net.Conn) {
-	c := n.UserPool.Get().(ClientInterface)
-	n.onConnect()
-
-	defer c.OnClose()
-	defer conn.Close()
-	defer n.onClose()
-	defer n.UserPool.Put(c)
-
-	//超时
-	//conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
-
-	log.Info("LocalAddr:", conn.RemoteAddr().String())
-
-	sendc := make(chan []byte, 1)
 	readc := make(chan []byte, 1)
-	c.OnConnect(conn.RemoteAddr(), sendc)
+	gamechan := make(chan commonstruct.ProcessMsg)
+	c.OnConnect(conn, n.Packet, gamechan)
 
 	rootContext := context.Background()
 	ctx, cancelFunc := context.WithCancel(rootContext)
-
-	go func(conn net.Conn) {
-		for {
-			select {
-			case buf := <-sendc:
-				le := IntToBytes(len(buf), n.Packet)
-				conn.Write(BytesCombine(le, buf))
-			case <-ctx.Done():
-				log.Debug("exit role sendGO:", tool.GoID())
-				return
-			}
-		}
-	}(conn)
 
 	// for {
 	// 	_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
@@ -200,8 +145,12 @@ func (n *NetWorkx) HandleClient_v2(conn net.Conn) {
 		for {
 			_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
 			if e != nil {
-				log.Error("socket error:", e.Error(), "   goid:", tool.GoID())
-				cancelfunc()
+				switch e {
+				case io.EOF:
+					cancelfunc()
+				default:
+					log.Error("socket error:", e.Error())
+				}
 				return
 			}
 			readc <- buf
@@ -214,23 +163,22 @@ func (n *NetWorkx) HandleClient_v2(conn net.Conn) {
 			module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 			method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
 			c.OnMessage(module, method, buf[n.Packet+4:])
+		case msg := <-gamechan:
+			c.ProcessMessage(msg)
 		case <-ctx.Done():
-			log.Debug("exit role readGO:", tool.GoID())
+			log.Debug("exit role goroutine")
 			return
 		}
-
 	}
-
 }
-
 
 func (n *NetWorkx) onConnect() {
 	n.UserNumber++
-	log.Info("user number:", n.UserNumber)
+	log.Debug("user number:", n.UserNumber)
 }
 func (n *NetWorkx) onClose() {
 	n.UserNumber--
-	log.Info("user number:", n.UserNumber)
+	log.Debug("user number:", n.UserNumber)
 }
 
 func checkError(err error) {

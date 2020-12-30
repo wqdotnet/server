@@ -3,8 +3,10 @@ package clienconnect
 import (
 	"net"
 	"server/db"
-	"server/gserver/cservice"
+	"server/gserver/commonstruct"
+	"server/gserver/process"
 	"server/msgproto/account"
+	"server/msgproto/bigmap"
 	"server/network"
 
 	"github.com/golang/protobuf/proto"
@@ -13,8 +15,15 @@ import (
 
 //Client 客户端连接
 type Client struct {
-	addr     *net.Addr
-	sendchan chan []byte
+	//addr     *net.Addr
+	//sendchan chan []byte
+	conn   net.Conn
+	packet int32
+	//用户 连接状态 [0:连接] [1:已登陆] [2:下线]
+	status userStatus
+	//接收内部消息
+	msgChan chan commonstruct.ProcessMsg
+
 	//用户id
 	accountid int32
 	//userid int32
@@ -24,8 +33,9 @@ type Client struct {
 	roleid int32
 	//角色名
 	rolename string
-	//用户 连接状态 [0:连接] [1:已登陆] [2:下线]
-	status userStatus
+
+	//部队信息
+	troopslist map[int32]commonstruct.TroopsStruct
 }
 
 type userStatus int32
@@ -37,21 +47,55 @@ const (
 	StatusLogin userStatus = 1
 )
 
+//NewClient create client
+func NewClient() *Client {
+	return &Client{
+		troopslist: make(map[int32]commonstruct.TroopsStruct),
+		msgChan:    make(chan commonstruct.ProcessMsg),
+	}
+}
+
+//InitAutoID 初始化自增id
+func InitAutoID() {
+	//账号表
+	var accountinfo commonstruct.AccountInfoStruct
+	db.FindFieldMax(db.AccountTable, "accountid", &accountinfo)
+	db.RedisExec("SET", db.AccountTable, accountinfo.AccountID+1)
+	log.Infof("initAutoID  table:[%v] autoid:[%v]", db.AccountTable, accountinfo.AccountID+1)
+
+	//用户表
+	var userinfo account.P_RoleInfo
+	db.FindFieldMax(db.UserTable, "roleid", &userinfo)
+	db.RedisExec("SET", db.UserTable, userinfo.RoleID+1)
+	log.Infof("initAutoID  table:[%v] autoid:[%v]", db.UserTable, userinfo.RoleID+1)
+
+	//部队表
+	var troops bigmap.P_Troops
+	db.FindFieldMax(db.TroopsTable, "troopsid", &troops)
+	db.RedisExec("SET", db.TroopsTable, troops.TroopsID+1)
+	log.Infof("initAutoID  table:[%v] autoid:[%v]", db.TroopsTable, troops.TroopsID+1)
+
+}
+
 //------------------------------------------------------------------------
 
 //OnConnect 连接接入
-func (c *Client) OnConnect(addr net.Addr, sendc chan []byte) {
-	//sendmsg <-
-	c.sendchan = sendc
-	c.addr = &addr
-
-	log.Debugf("client OnConnect [%s][%s]", addr.Network(), addr.String())
+// func (c *Client) OnConnect(addr net.Addr, sendc chan []byte) {
+// 	//sendmsg <-
+// 	c.sendchan = sendc
+// 	c.addr = &addr
+// 	log.Debugf("client OnConnect [%s][%s]", addr.Network(), addr.String())
+// }
+func (c *Client) OnConnect(netconn net.Conn, packet int32, msgchan chan commonstruct.ProcessMsg) {
+	c.conn = netconn
+	c.packet = packet
+	c.msgChan = msgchan
 }
 
 //OnClose 连接关闭
 func (c *Client) OnClose() {
-	cservice.UnRegister(c.rolename)
-	log.Debugf("client OnClose  add:%s   %v", *c.addr, c)
+	process.UnRegister(c.roleid)
+	log.Debugf("client OnClose  add:[%s]   account:[%v] ", c.conn.RemoteAddr(), c.account)
 }
 
 //Send 发送消息
@@ -62,10 +106,6 @@ func (c *Client) Send(module int32, method int32, pb proto.Message) {
 		log.Errorf("proto encode error[%v]\n", err.Error())
 		return
 	}
-	mldulebuf := network.IntToBytes(int(module), 2)
-	methodbuf := network.IntToBytes(int(method), 2)
-	c.sendchan <- network.BytesCombine(mldulebuf, methodbuf, data)
-
 	// msginfo := &common.NetworkMsg{}
 	// msginfo.Module = module
 	// msginfo.Method = method
@@ -76,23 +116,26 @@ func (c *Client) Send(module int32, method int32, pb proto.Message) {
 	// }
 
 	// c.sendchan <- msgdata
+	mldulebuf := network.IntToBytes(int(module), 2)
+	methodbuf := network.IntToBytes(int(method), 2)
+	//c.sendchan <- network.BytesCombine(mldulebuf, methodbuf, data)
+
+	buf := network.BytesCombine(mldulebuf, methodbuf, data)
+	le := network.IntToBytes(len(buf), c.packet)
+	c.conn.Write(network.BytesCombine(le, buf))
 }
 
-//OnMessage 接受消息
+//OnMessage  socker接受到的消息
 func (c *Client) OnMessage(module int32, method int32, buf []byte) {
 	//module 过滤模块
 	//log.Debugf("c2s : [%v] [%v] buf:[%v]", module, method, len(buf))
 
-	if c.status == StatusSockert && module > int32(account.MSG_ACCOUNT_C2S_CreateRole) {
-		log.Warn("用户未登陆  调用模块id:[%s][%s]", module, method)
+	if c.status == StatusSockert && method > int32(account.MSG_ACCOUNT_C2S_CreateRole) {
+		log.Warnf("用户未登陆  调用模块id:[%v][%v]", module, method)
+		return
 	}
 
 	c.rount(module, method, buf)
-}
-
-//GetSPType SPInterface
-func (c *Client) GetSPType() cservice.CSType {
-	return cservice.ClientConnect
 }
 
 func (c *Client) setLoginStatus() {
@@ -100,26 +143,35 @@ func (c *Client) setLoginStatus() {
 }
 
 // //protobuf 解码
-// func decode[T proto.Message](s []T) {
+// func decode[T proto.Message](s T,buf []byte) T,err {
 // 	hearbeat := &T{}
 // 	if err:= proto.Unmarshal(buf, hearbeat); err!=nil{
 // 		log.Error("decode error")
 // 	}
 // }
 
-//InitAutoID 初始化自增id
-func InitAutoID() {
-	//账号表
-	var accountinfo accountInfo
-	db.FindFieldMax(db.AccountTable, "accountid", &accountinfo)
-	db.RedisExec("SET", db.AccountTable, accountinfo.AccountID+1)
+//ProcessMessage 内部消息
+func (c *Client) ProcessMessage(msg commonstruct.ProcessMsg) {
+	log.Debugf("ProcessMessage : %v", msg)
 
-	log.Infof("initAutoID  table:[%v] autoid:[%v]", db.AccountTable, accountinfo.AccountID+1)
+	switch msg.MsgType {
+	case "TroopsMove":
+		troops := msg.Data.(commonstruct.TroopsStruct)
+		//部队移动信息
+		c.s2cMove(troops.TroopsID, troops.ArrivalTime)
+	case "OverMove":
+		troops := msg.Data.(commonstruct.TroopsStruct)
+		//移动结束后更新信息
+		c.s2cUpdateTroopsInfo(&troops)
+	case "OnFitht":
+		//触发战斗
+	}
 
-	//用户表
-	var userinfo account.P_RoleInfo
-	db.FindFieldMax(db.UserTable, "roleid", &userinfo)
-	db.RedisExec("SET", db.UserTable, userinfo.RoleID+1)
+}
 
-	log.Infof("initAutoID  table:[%v] autoid:[%v]", db.UserTable, userinfo.RoleID+1)
+//SendMsg 内部消息发送
+func (c *Client) SendMsg(msg commonstruct.ProcessMsg) {
+	go func() {
+		c.msgChan <- msg
+	}()
 }

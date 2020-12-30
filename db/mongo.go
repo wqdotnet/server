@@ -6,6 +6,7 @@ import (
 	pool "github.com/jolestar/go-commons-pool/v2"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -81,14 +82,8 @@ func InsertOne(tbname string, document interface{}) {
 
 //FindOneBson 查询数据
 //filter := bson.D{{field, value}}
+//filter := bson.D{primitive.E{Key:field, value}}
 func FindOneBson(tbname string, document interface{}, filter interface{}) error {
-	client, collection := getCollection(tbname)
-	defer clientPool.ReturnObject(context.Background(), client)
-	return collection.FindOne(context.TODO(), filter).Decode(document)
-}
-
-//FindOneObject select object
-func FindOneObject(tbname string, document interface{}, filter map[string]interface{}) error {
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)
 	return collection.FindOne(context.TODO(), filter).Decode(document)
@@ -150,7 +145,7 @@ func Update(tbname string, Findfield interface{}, Upfield interface{}) (int64, e
 func Delete(tbname string, field string, value interface{}) int64 {
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)
-	filter := bson.D{{field, value}}
+	filter := bson.D{primitive.E{Key: field, Value: value}}
 	//删除所有
 	deleteResult, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
@@ -161,11 +156,12 @@ func Delete(tbname string, field string, value interface{}) int64 {
 	return deleteResult.DeletedCount
 }
 
+//FindFieldMax 查询最大值
 func FindFieldMax(tbname string, fieldkey string, document interface{}) error {
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)
 
 	filter := bson.D{{}}
-	findOptions := options.FindOne().SetSort(bson.D{{fieldkey, -1}}).SetSkip(0)
+	findOptions := options.FindOne().SetSort(bson.D{primitive.E{Key: fieldkey, Value: -1}}).SetSkip(0)
 	return collection.FindOne(context.TODO(), filter, findOptions).Decode(document)
 }

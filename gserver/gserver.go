@@ -1,14 +1,18 @@
 package gserver
 
 import (
+	"os"
+	"os/signal"
 	"server/db"
+	"server/gserver/bigmapmanage"
 	"server/gserver/cfg"
 	"server/gserver/clienconnect"
-	"server/gserver/cservice"
+	"server/gserver/timedtasks"
 	"server/logger"
 	"server/network"
 	"server/web"
 	"sync"
+	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	//msg "server/proto"
@@ -79,7 +83,7 @@ type gameServer struct {
 var GameServerInfo = gameServer{
 	nw: network.NewNetWorkX(&sync.Pool{
 		New: func() interface{} {
-			return new(clienconnect.Client)
+			return clienconnect.NewClient() //new(clienconnect.Client)
 		},
 	},
 		ServerCfg.Port,
@@ -88,25 +92,32 @@ var GameServerInfo = gameServer{
 	command: make(chan string),
 }
 
-func (s *gameServer) GetSPType() cservice.CSType {
-	return cservice.GameServer
-}
-
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
+	log.Info("start game server")
 	if level, err := log.ParseLevel(ServerCfg.Loglevel); err == nil {
 		logger.Init(level, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
 	} else {
 		logger.Init(log.InfoLevel, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
 	}
 
-	log.Info("start game server ")
-
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
 	db.StartMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
 	db.StartRedis(ServerCfg.RedisConnStr)
 	clienconnect.InitAutoID()
+
+	//ctx, cancelFunc := context.WithCancel(context.Background())
+	bigmapmanage.StartBigmapGoroutine()
+	defer bigmapmanage.CloneBigmap()
+
+	//启动定时器
+	timedtasks.StartCronTasks()
+	//大地图loop
+	timedtasks.AddTasks("bigmaploop", "* * * * * ?", func() {
+		bigmapmanage.SendMsgBigMap("BigMapLoop_OneSecond")
+	})
+	defer timedtasks.RemoveTasks("bigmaploop")
 
 	if ServerCfg.OpenHTTP {
 		go web.Start(ServerCfg.HTTPPort)
@@ -115,8 +126,10 @@ func StartGServer() {
 	//启动网络
 	GameServerInfo.nw.Start()
 
-	//登陆成功后注册进程
-	cservice.Register("server", &GameServerInfo)
+	var exitChan = make(chan os.Signal)
+	//signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
+	signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1,
+		syscall.SIGUSR2, syscall.SIGTSTP)
 
 	for {
 		select {
@@ -127,7 +140,15 @@ func StartGServer() {
 			default:
 				log.Warn("command:", command)
 			}
+		case s := <-exitChan:
+			log.Info("收到退出信号", s)
+			return
+			//os.Exit(1) //如果ctrl+c 关不掉程序，使用os.Exit强行关掉
 		}
 	}
+}
 
+//SendGameServerMsg game system msg
+func SendGameServerMsg(msg string) {
+	GameServerInfo.command <- msg
 }

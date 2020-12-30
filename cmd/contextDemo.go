@@ -59,7 +59,7 @@ func speakMemo(ctx context.Context, cancelFunc context.CancelFunc) {
 			fmt.Println("exec default func")
 			err := doSome(3)
 			if err != nil {
-				fmt.Printf("cancelFunc()")
+				fmt.Println("cancelFunc()")
 				cancelFunc()
 			}
 		}
@@ -70,5 +70,15 @@ func demo() {
 	rootContext := context.Background()
 	ctx, cancelFunc := context.WithCancel(rootContext)
 	go speakMemo(ctx, cancelFunc)
+
+	go func(ctx context.Context) {
+		select {
+		case <-ctx.Done():
+			fmt.Printf("2222222222")
+		}
+		return
+
+	}(ctx)
+
 	time.Sleep(time.Second * 5)
 }

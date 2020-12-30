@@ -2,12 +2,9 @@ package web
 
 import (
 	"fmt"
-	"server/gserver/cservice"
-	"server/tool"
 
 	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // Start gin web interface
@@ -41,10 +38,10 @@ func Start(Port int32) {
 
 	router.GET("/map", func(c *gin.Context) {
 
-		tool.HandleImage(c.Writer, c.Request)
-		// c.JSON(200, gin.H{
-		// 	"message": "pong",
-		// })
+		//tool.HandleImage(c.Writer, c.Request)
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
 	})
 	//http.ResponseWriter, reqA *http.Request
 
@@ -62,13 +59,6 @@ func Start(Port int32) {
 
 //刷新配置
 func refreshCfg(c *gin.Context) {
-	//ok := gserver.InitConfig()
-	cservice.Range(func(key string, value cservice.CSInterface) bool {
-		if value.GetSPType() == cservice.GameServer {
-			log.Info("http refreshCfg")
-		}
-		return true
-	})
 
 	c.JSON(200, gin.H{
 		"message": "ok",
