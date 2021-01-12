@@ -1,13 +1,25 @@
-name: server
-
+ServerName: "server"
+ServerID:   1
+  
 ##web htpp port
 OpenHTTP: false
 HTTPPort: 8080
+
+#web StartStatsView
+StatsView: true
+StatsViewPort: 8081
 
 #NetType : tcp/kcp
 NetType: tcp
 Port: 3344
 Packet : 2
+Readtimeout: 1
+
+# ClientInterface 接口 commonstruct.ProcessMsg{MsgType: "TimeInterval", Data: msgNum} 消息包
+# MsgTime 多少秒后  
+# MsgNum 多少条消息后
+MsgTime: 300
+MsgNum : 500
 
 #protobuf path
 ProtoPath: "./proto"
@@ -19,6 +31,7 @@ Mongodb: "slggame"
 
 #redis
 RedisConnStr: "127.0.0.1:6379"
+RedisDB: 0
 
 
 #game confg
@@ -27,6 +40,6 @@ CfgType: "json"
 
 #log
 LogWrite: false
-Loglevel: "debug"  
+Loglevel: "debug"   #panic  fatal  error  warn  info  debug  trace
 LogPath:  "./log"
 LogName: "log"

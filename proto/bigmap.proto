@@ -1,7 +1,7 @@
 syntax = "proto3"; 
 package bigmap;
 import "common.proto";
-option go_package = "server/msgproto/bigmap";
+option go_package = "slgserver/msgproto/bigmap";
 
 
 
@@ -16,6 +16,7 @@ enum MSG_BIGMAP {
     
     //区域信息
     S2C_AreasInfo = 2010;//
+    
 
     //部队信息
     S2C_AreasTroops = 2020;//
@@ -27,8 +28,16 @@ enum MSG_BIGMAP {
     S2C_Move    = 2031;
     //暂停移动
     C2S_StopMoving= 2032;
-    S2C_StopMoving= 2033;
+    //S2C_StopMoving= 2033;
     
+    //触发战斗通知
+    S2C_Fight  =2041;
+    S2C_OverFight  =2042;
+
+    //订阅战斗区域
+    //取消订阅
+    
+
 }
 
 
@@ -63,10 +72,13 @@ message P_AreasInfo {
 }
 
 
-//区域占领信息 
+//区域信息 
 message s2c_AreasInfo {
     repeated P_AreasInfo AreasInfoList =1 ;      
 }
+
+
+
 
 //区域部队信息
 message c2s_GetAreasTroops {
@@ -94,6 +106,7 @@ message s2c_Move {
     int32 TroopsID = 1;     //部队ID
     int32 AreasIndex = 2;   //当前行进区域ID
     int64 ArrivalTime =3;   //预计到达时间时间戳
+    int32 State =4; //部队状态 0启动移动  
 }
 
 
@@ -103,9 +116,18 @@ message c2s_StopMoving {
     int32 TroopsID = 1;     //部队ID 
 }
 
-message s2c_StopMoving {
-    int32 TroopsID = 1;     //部队ID
-    int32 StopAreasIndex = 2;   //暂停点移动
-}
+//message s2c_StopMoving {
+    //int32 TroopsID = 1;     //部队ID
+    //int32 StopAreasIndex = 2;   //暂停点移动
+//}
 
   
+//部队进入战斗
+message s2c_Fight {
+    int32 TroopsID = 1;     //部队ID
+}
+
+message s2c_OverFight {
+    int32 TroopsID = 1;     //部队ID
+    bool  Victory = 2;//是否胜利
+}

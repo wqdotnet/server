@@ -2,7 +2,10 @@ package clienconnect
 
 import (
 	"server/gserver/bigmapmanage"
+	"server/gserver/cfg"
+	"server/gserver/commonstruct"
 	"server/msgproto/bigmap"
+	"server/msgproto/common"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -15,21 +18,7 @@ import (
 // }
 
 func (c *Client) bigmapModule(method int32, buf []byte) {
-	switch bigmap.MSG_BIGMAP_Module_BIGMAP {
-	// case bigmap.MSG_BIGMAP_C2S_GetAreasInfo:
-	// 	getareas := &bigmap.C2S_GetAreasInfo{}
-	// 	if e := proto.Unmarshal(buf, getareas); e != nil {
-	// 		log.Error(e)
-	// 		return
-	// 	}
-	// 	c.getAreasInfo(getareas)
-	// case bigmap.MSG_BIGMAP_C2S_GetAreasTroops:
-	// 	gettroops := &bigmap.C2S_GetAreasTroops{}
-	// 	if e := proto.Unmarshal(buf, gettroops); e != nil {
-	// 		log.Error(e)
-	// 		return
-	// 	}
-	// 	c.getAreasTroops(gettroops)
+	switch bigmap.MSG_BIGMAP(method) {
 	case bigmap.MSG_BIGMAP_C2S_Move:
 		move := &bigmap.C2S_Move{}
 		if e := proto.Unmarshal(buf, move); e != nil {
@@ -45,7 +34,7 @@ func (c *Client) bigmapModule(method int32, buf []byte) {
 		}
 		c.stopMoving(stopmove)
 	default:
-		log.Info("loginModule null methodID:", method)
+		log.Info("bigmap null methodID:", method)
 	}
 }
 
@@ -64,49 +53,62 @@ func (c *Client) sendAllArease() {
 		return true
 	})
 
-	log.Debug(areaslist)
 	c.Send(int32(bigmap.MSG_BIGMAP_Module_BIGMAP), int32(bigmap.MSG_BIGMAP_S2C_AreasInfo), areaslist)
 }
 
 //移动
 func (c *Client) move(move *bigmap.C2S_Move) {
+	//1. 数据从 c.troopslist 中读取
+	//2. 判断部队状态 0 3 则为出发和 大地图驻扎出发,其它状态不可移动
+	//3. 数据定时保存DB 统一处理
+	if move.AreasList == nil || len(move.AreasList) == 0 {
+		log.Warn("部队移动路径不能为空")
+		return
+	}
+	var info *commonstruct.TroopsStruct
 
-	info, err := getTroopsinfo(c.roleid, move.TroopsID)
-	if err != nil {
-		log.Error(err)
+	info = c.troopslist[move.TroopsID]
+	if info == nil {
+		//无此部队
+		log.Warnf("[%v] [%v] 无此部队  部队id:[%v]", c.account, c.rolename, move.TroopsID)
+		return
 	}
 
-	//1. 数据验证->当前部队是否已经在大地图移动
-	//next ....
+	//此支部队已在大地图 则从大地图中得到全新数据
+	if bmtroops, ok := bigmapmanage.GetBigMapTroopsInfo(move.TroopsID); ok {
+		info = &bmtroops
+		//info.State == common.TroopsState_Move
+		if info.State == common.TroopsState_fight {
+			// 战斗中的无法接受命令
+			log.Warn("大地图 移动 战斗中的无法接受命令 TroopsID:", move.TroopsID)
+		}
+	} else {
+		//大地图中未找到该部队，部队位置启始为主城
+		info.State = common.TroopsState_StandBy
+		info.AreasIndex = cfg.GetCountryAreasIndex(info.Country)
+	}
 
 	info.AreasList = move.AreasList
-	info.State = 1
+	info.MoveNum = 0
 	info.ArrivalTime = int64(len(move.AreasList)*3) + time.Now().Unix()
 
-	// var areasindex int32 = 0
-	// for _, arecfg := range cfg.GlobalCfg.MapInfo.Areas {
-	// 	if arecfg.Type == int(info.Country) {
-	// 		areasindex = int32(arecfg.Setindex)
-	// 	}
-	// }
-
-	//2. 路径验证 -> 判断是否合法
-	//next ....
-
 	//发送给客户端 启动坐标 状态更新 预计到达时间
-	c.s2cMove(move.TroopsID, info.ArrivalTime)
-	//队伍移动发送大地图处理
-	bigmapmanage.SendTroopsMove(*info)
+	c.s2cMove(move.TroopsID, info.AreasIndex, int32(info.State), info.ArrivalTime)
 
-	updateTroopsInfo(info)
+	//队伍移动发送大地图处理
+	info.State = common.TroopsState_Move
+	bigmapmanage.SendTroopsMove(*info)
+	//角色部队数据更新
+	//updateTroopsInfo(info)
 }
 
 //发送部队移动信息至客户端
-func (c *Client) s2cMove(troopsid int32, arrivaltime int64) {
+func (c *Client) s2cMove(troopsid, areasindex, state int32, arrivaltime int64) {
 	s2c := &bigmap.S2C_Move{}
 	s2c.TroopsID = troopsid
 	s2c.ArrivalTime = arrivaltime
-
+	s2c.AreasIndex = areasindex
+	s2c.State = state
 	c.Send(int32(bigmap.MSG_BIGMAP_Module_BIGMAP), int32(bigmap.MSG_BIGMAP_S2C_Move), s2c)
 }
 

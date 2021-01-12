@@ -39,6 +39,7 @@ type TroopsStruct struct {
 	AreasIndex int32   //当前区域ID
 
 	MoveStamp int64 //上次移动时间戳
+	MoveNum   int32 //上次移动路径列表(AreasList)位置索引
 
 	State common.TroopsState //状态 0:未出动    1:移动  2:驻扎(暂停)  3:战斗
 	//兵种组成

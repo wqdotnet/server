@@ -13,6 +13,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+//获取部队信息
+//后期整理 所有数据库相关操作移至db 模块
+// func getTroopsinfo(roleid, troopsid int32) (*commonstruct.TroopsStruct, error) {
+// 	filter := bson.D{primitive.E{Key: "roleid", Value: roleid}, primitive.E{Key: "troopsid", Value: troopsid}}
+// 	troops := &commonstruct.TroopsStruct{}
+// 	if err := db.FindOneBson(db.TroopsTable, &troops, filter); err != nil {
+// 		return nil, err
+// 	}
+// 	return troops, nil
+// }
+
 func getRoleAlltroops(roleid int32) []*commonstruct.TroopsStruct {
 	filter := bson.D{primitive.E{Key: "roleid", Value: roleid}}
 	var results []*commonstruct.TroopsStruct
@@ -42,27 +53,19 @@ func (c *Client) sendTroopsList() {
 
 	var list []*bigmap.P_Troops
 	for _, value := range getRoleAlltroops(c.roleid) {
-		if v, ok := bigmapmanage.GetTroopsInfo(value.TroopsID); ok {
-			list = append(list, convertTroopsProto(v))
+		if v, ok := bigmapmanage.GetBigMapTroopsInfo(value.TroopsID); ok {
+			//log.Debug("大地图中的部队:", v)
+			c.troopslist[v.TroopsID] = &v
+			list = append(list, convertTroopsProto(&v))
 		} else {
+			//log.Debug("角色未出征部队:", value)
+			c.troopslist[value.TroopsID] = value
 			list = append(list, convertTroopsProto(value))
 		}
 	}
 
 	s2cmsg := &bigmap.S2C_TroopsList{TroopsList: list}
-	log.Debug(s2cmsg)
 	c.Send(int32(bigmap.MSG_BIGMAP_Module_BIGMAP), int32(bigmap.MSG_BIGMAP_S2C_AreasTroops), s2cmsg)
-}
-
-//获取部队信息
-//后期整理 所有数据库相关操作移至db 模块
-func getTroopsinfo(roleid, troopsid int32) (*commonstruct.TroopsStruct, error) {
-	filter := bson.D{primitive.E{Key: "roleid", Value: roleid}, primitive.E{Key: "troopsid", Value: troopsid}}
-	troops := &commonstruct.TroopsStruct{}
-	if err := db.FindOneBson(db.TroopsTable, &troops, filter); err != nil {
-		return nil, err
-	}
-	return troops, nil
 }
 
 //更新部队数据
@@ -86,9 +89,11 @@ func updateTroopsInfo(troops *commonstruct.TroopsStruct) {
 }
 
 func (c *Client) s2cUpdateTroopsInfo(troops *commonstruct.TroopsStruct) {
-	s2c := &bigmap.S2C_UpdateTroopsInfo{}
-	s2c.TroopsInfo = convertTroopsProto(troops)
-	c.Send(int32(bigmap.MSG_BIGMAP_Module_BIGMAP), int32(bigmap.MSG_BIGMAP_S2C_UpdateTroopsInfo), nil)
+	c.Send(
+		int32(bigmap.MSG_BIGMAP_Module_BIGMAP),
+		int32(bigmap.MSG_BIGMAP_S2C_UpdateTroopsInfo),
+		&bigmap.S2C_UpdateTroopsInfo{TroopsInfo: convertTroopsProto(troops)},
+	)
 }
 
 func convertTroopsProto(troops *commonstruct.TroopsStruct) *bigmap.P_Troops {

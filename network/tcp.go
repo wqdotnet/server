@@ -26,13 +26,6 @@ type TCPNetwork struct {
 // 	return
 // }
 
-// func bytesToInt(bys []byte) int {
-// 	bytebuff := bytes.NewBuffer(bys)
-// 	var data int64
-// 	binary.Read(bytebuff, binary.LittleEndian, &data)
-// 	return int(data)
-// }
-
 //Start start
 func (c *TCPNetwork) Start(nw *NetWorkx) {
 	log.Info(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
@@ -40,6 +33,9 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", nw.Port))
 	defer listener.Close()
 	checkError(err)
+	if nw.StartHook != nil {
+		nw.StartHook()
+	}
 	//go func() {
 	for {
 		conn, err := listener.Accept()

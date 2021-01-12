@@ -1,28 +1,29 @@
 package cfg
 
 type mapinfo struct {
-	Mapsize struct {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	} `json:"mapsize"`
+	IndexCfg []int `json:"indexCfg"`
 	Tilesize struct {
-		Width  int     `json:"width"`
-		Height float64 `json:"height"`
+		Width  float64 `json:"width"`
+		Height int     `json:"height"`
 	} `json:"tilesize"`
 	Movespeed int `json:"movespeed"`
 	Metatype  int `json:"metatype"`
 	Areas     []struct {
-		Setindex   int    `json:"setindex"`
-		Type       int    `json:"type"`
 		SegInfo    []int  `json:"segInfo"`
+		Setindex   int    `json:"setindex"`
 		AreasIndex []int  `json:"areasIndex"`
-		Beside     []int  `json:"beside"`
+		SetList    []int  `json:"setList"`
 		Name       string `json:"name"`
+		Beside     []int  `json:"beside"`
+		Type       int    `json:"type"`
 	} `json:"areas"`
-	PointsAry [][]float64 `json:"pointsAry"`
-	ArrowAry1 [][]int     `json:"arrowAry1"`
-	ArrowAry2 [][]int     `json:"arrowAry2"`
-	MaxX      int         `json:"maxX"`
-	MaxY      int         `json:"maxY"`
-	IndexCfg  []int       `json:"indexCfg"`
+	PointsAry [][]int `json:"pointsAry"`
+	ArrowAry1 [][]int `json:"arrowAry1"`
+	ArrowAry2 [][]int `json:"arrowAry2"`
+	MaxX      int     `json:"maxX"`
+	MaxY      int     `json:"maxY"`
+	Mapsize   struct {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	} `json:"mapsize"`
 }

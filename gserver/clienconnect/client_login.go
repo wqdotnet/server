@@ -1,6 +1,7 @@
 package clienconnect
 
 import (
+	"math/rand"
 	"server/db"
 	"server/gserver/cfg"
 	"server/gserver/commonstruct"
@@ -61,27 +62,36 @@ func (c *Client) userLogin(userlogin *account.C2S_Login) {
 		primitive.E{Key: "password", Value: userlogin.Password},
 	}
 
-	if userlogin.GetAccount() == "" || userlogin.Password == "" {
+	if userlogin.GetAccount() == "" || userlogin.GetPassword() == "" {
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login),
 			&account.S2C_Login{Success: false, Msg: cfg.ERROR_PARAMETER_EMPTY})
 	}
 
 	log.Debugf("login %v %v", userlogin.Account, userlogin.Password)
-	var accountinfo commonstruct.AccountInfoStruct
-	if err := db.FindOneBson(db.AccountTable, &accountinfo, filter); err != nil {
+	accountinfo := &commonstruct.AccountInfoStruct{}
+	if err := db.FindOneBson(db.AccountTable, accountinfo, filter); err != nil {
 		accountid := db.GetAutoID(db.AccountTable)
+		roleid := db.GetAutoID(db.UserTable)
 		c.account = userlogin.Account
 		c.accountid = accountid
+		c.roleid = roleid
+
 		//创建账号
-		db.InsertOne(db.AccountTable, &commonstruct.AccountInfoStruct{
-			AccountID:        accountid,
-			Account:          userlogin.Account,
-			Password:         userlogin.Password,
-			RegistrationTime: time.Now(),
-		})
+		accountinfo.AccountID = accountid
+		accountinfo.Account = userlogin.Account
+		accountinfo.Password = userlogin.Password
+		accountinfo.RoleID = roleid
+		accountinfo.RegistrationTime = time.Now()
+		db.InsertOne(db.AccountTable, accountinfo)
+
+		//创建角色
+		country := int32(rand.Intn(3) + 1)
+		createRoleInfo(userlogin.Account, country, roleid)
+
 	} else {
 		c.accountid = accountinfo.AccountID
 		c.account = accountinfo.Account
+		c.roleid = accountinfo.RoleID
 	}
 	//设置连接状态为已登陆
 	c.setLoginStatus()
@@ -93,14 +103,37 @@ func (c *Client) userLogin(userlogin *account.C2S_Login) {
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login), &account.S2C_Login{Success: true})
 		return
 	}
+
 	//登陆成功
-	c.hookLogin(userinfo.RoleName, userinfo.RoleID)
 	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login), &account.S2C_Login{Success: true, RoleInfo: &userinfo})
+	c.hookLogin(userinfo.RoleName, userinfo.Country)
+}
+
+//创建账号  及  角色信息
+func createRoleInfo(rolename string, country, roleid int32) {
+	//角色游戏信息
+	db.InsertOne(db.UserTable, &account.P_RoleInfo{
+		RoleID:        roleid,
+		RoleName:      rolename,
+		Country:       country,
+		Level:         0,
+		TesourcesList: map[int32]int32{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
+	})
+
+	//创建部队信息
+	for i := 0; i < 5; i++ {
+		db.InsertOne(db.TroopsTable, commonstruct.TroopsStruct{
+			TroopsID:   db.GetAutoID(db.TroopsTable),
+			Country:    country,
+			AreasIndex: cfg.GetCountryAreasIndex(country),
+			Type:       1,
+			Number:     100,
+			Roleid:     roleid})
+	}
 }
 
 func (c *Client) createRole(userlogin *account.C2S_CreateRole) {
 	returnmsg := &account.S2C_CreateRole{Success: false}
-	log.Debug(userlogin)
 	if userlogin.GetRoleName() == "" || userlogin.GetCountry() == 0 || userlogin.GetCountry() > 3 {
 		returnmsg.Msg = cfg.ERROR_PARAMETER_EMPTY
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
@@ -112,57 +145,60 @@ func (c *Client) createRole(userlogin *account.C2S_CreateRole) {
 		roleinfo.GetRoleName() == userlogin.GetRoleName() {
 		returnmsg.Msg = cfg.ERROR_RoleNameExists
 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
+		return
 	}
 
-	roleid := db.GetAutoID(db.UserTable)
-
-	//角色游戏信息
-	db.InsertOne(db.UserTable, &account.P_RoleInfo{
-		RoleID:        roleid,
-		RoleName:      userlogin.GetRoleName(),
-		Country:       userlogin.GetCountry(),
-		Level:         0,
-		TesourcesList: map[int32]int32{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
-	})
-
-	//查找国家起启坐标
-	var areasindex int32 = 0
-	for _, arecfg := range cfg.GlobalCfg.MapInfo.Areas {
-		if arecfg.Type == int(userlogin.GetCountry()) {
-			areasindex = int32(arecfg.Setindex)
-		}
-	}
-
-	//创建部队信息
-	for i := 0; i < 5; i++ {
-		db.InsertOne(db.TroopsTable, commonstruct.TroopsStruct{
-			TroopsID:   db.GetAutoID(db.TroopsTable),
-			Country:    userlogin.GetCountry(),
-			AreasIndex: areasindex,
-			Roleid:     roleid})
-	}
-
-	//更新账号信息里角色id
-	db.Update(db.AccountTable,
-		bson.D{primitive.E{Key: "accountid", Value: c.accountid}},
-		bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "roleid", Value: roleid}}}},
-	)
+	createRoleInfo(userlogin.GetRoleName(), userlogin.GetCountry(), c.roleid)
+	// //角色游戏信息
+	// db.InsertOne(db.UserTable, &account.P_RoleInfo{
+	// 	RoleID:        roleid,
+	// 	RoleName:      userlogin.GetRoleName(),
+	// 	Country:       userlogin.GetCountry(),
+	// 	Level:         0,
+	// 	TesourcesList: map[int32]int32{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
+	// })
+	// //创建部队信息
+	// for i := 0; i < 5; i++ {
+	// 	db.InsertOne(db.TroopsTable, commonstruct.TroopsStruct{
+	// 		TroopsID:   db.GetAutoID(db.TroopsTable),
+	// 		Country:    userlogin.GetCountry(),
+	// 		AreasIndex: cfg.GetCountryAreasIndex(userlogin.GetCountry()),
+	// 		Type:       1,
+	// 		Number:     100,
+	// 		Roleid:     roleid})
+	// }
+	// //更新账号信息里角色id
+	// db.Update(db.AccountTable,
+	// 	bson.D{primitive.E{Key: "accountid", Value: c.accountid}},
+	// 	bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "roleid", Value: roleid}}}},
+	// )
 
 	//登陆成功
-	c.hookLogin(userlogin.GetRoleName(), roleid)
+	c.hookLogin(userlogin.GetRoleName(), userlogin.GetCountry())
 
 	returnmsg.Success = true
-	returnmsg.Roleid = roleid
+	returnmsg.Roleid = c.roleid
 	c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_CreateRole), returnmsg)
 
 }
 
 //登陆成功后需要发给客户端的信息
-func (c *Client) hookLogin(rolename string, roleid int32) {
+func (c *Client) hookLogin(rolename string, country int32) {
 	//登陆成功后注册进程
-	process.Register(roleid, c.msgChan)
+	if process.IsRegister(c.roleid) {
+		roleLoginchan := make(chan string)
+		process.SendMsg(c.roleid, commonstruct.ProcessMsg{MsgType: "RoleLogin", Data: roleLoginchan})
+		process.UnRegister(c.roleid)
+
+		select {
+		case <-roleLoginchan:
+		case <-time.After(2 * time.Second):
+		}
+	}
+
+	process.Register(c.roleid, c.msgChan)
 	c.rolename = rolename
-	c.roleid = roleid
+	c.country = country
 
 	//地图区域信息
 	c.sendAllArease()

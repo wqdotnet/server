@@ -11,6 +11,7 @@ import (
 	"os"
 	"server/gserver/commonstruct"
 	"sync"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
@@ -18,12 +19,12 @@ import (
 
 //ClientInterface client hander
 type ClientInterface interface {
-	OnConnect(netconn net.Conn, packet int32, msgchan chan commonstruct.ProcessMsg)
+	OnConnect(netconn net.Conn, packet int32, msgchan chan commonstruct.ProcessMsg, cancelFunc context.CancelFunc)
 	OnClose()
 	OnMessage(module int32, method int32, buf []byte)
 	Send(module int32, method int32, pb proto.Message)
 	ProcessMessage(msg commonstruct.ProcessMsg)
-	SendMsg(msg commonstruct.ProcessMsg)
+	//SendMsg(msg commonstruct.ProcessMsg)
 }
 
 //NetInterface network
@@ -38,6 +39,12 @@ type NetWorkx struct {
 	//ClientHander ClientInterface
 	//包长度0 2 4
 	Packet int32
+	//读取超时时间
+	Readtimeout int32
+
+	MsgTime int32
+	MsgNum  int32
+
 	//tcp kcp
 	NetType string
 	//监听端口.
@@ -48,16 +55,22 @@ type NetWorkx struct {
 	UserPool *sync.Pool
 	//连接用户
 	userlist map[string]ClientInterface
+	//启动成功后回调
+	StartHook func()
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(pool *sync.Pool, port int32, packet int32, nettype string) *NetWorkx {
+func NewNetWorkX(pool *sync.Pool, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32, funcHook func()) *NetWorkx {
 	return &NetWorkx{
-		Packet:   packet,
-		NetType:  nettype,
-		Port:     port,
-		UserPool: pool,
-		userlist: make(map[string]ClientInterface),
+		Packet:      packet,
+		NetType:     nettype,
+		Port:        port,
+		UserPool:    pool,
+		userlist:    make(map[string]ClientInterface),
+		Readtimeout: readtimeout,
+		MsgTime:     msgtime,
+		MsgNum:      msgnum,
+		StartHook:   funcHook,
 	}
 }
 
@@ -65,13 +78,13 @@ func NewNetWorkX(pool *sync.Pool, port int32, packet int32, nettype string) *Net
 func (n *NetWorkx) Start() {
 	switch n.NetType {
 	case "kcp":
-		log.Info("start [kcp] port:", n.Port)
+		log.Info("NetWorkx [kcp] port:", n.Port)
 		n.src = &KCPNetwork{}
 	case "tcp":
-		log.Info("start [tcp] port:", n.Port)
+		log.Info("NetWorkx [tcp] port:", n.Port)
 		n.src = &TCPNetwork{}
 	default:
-		log.Info("start default [tcp] port:", n.Port)
+		log.Info("NetWorkx default [tcp] port:", n.Port)
 		n.src = new(TCPNetwork)
 	}
 
@@ -82,18 +95,15 @@ func (n *NetWorkx) Start() {
 
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
+	log.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
+
 	c := n.UserPool.Get().(ClientInterface)
 	n.onConnect()
 
-	defer c.OnClose()
-	defer conn.Close()
-	defer n.onClose()
 	defer n.UserPool.Put(c)
-
-	//超时
-	//conn.SetReadDeadline(time.Now().Add(2 * time.Minute)) // set 2 minutes timeout
-
-	log.Infof("sockert connect LocalAddr:[%v]", conn.RemoteAddr().String())
+	defer n.onClose()
+	defer conn.Close()
+	defer c.OnClose()
 
 	// sendc := make(chan []byte, 1)
 	//c.OnConnect(conn.RemoteAddr(), sendc)// go func(conn net.Conn) {
@@ -109,12 +119,12 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// 	}
 	// }(conn)
 
-	readc := make(chan []byte, 1)
-	gamechan := make(chan commonstruct.ProcessMsg)
-	c.OnConnect(conn, n.Packet, gamechan)
-
 	rootContext := context.Background()
 	ctx, cancelFunc := context.WithCancel(rootContext)
+
+	readc := make(chan []byte, 1)
+	gamechan := make(chan commonstruct.ProcessMsg)
+	c.OnConnect(conn, n.Packet, gamechan, cancelFunc)
 
 	// for {
 	// 	_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
@@ -142,18 +152,38 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// }
 
 	go func(conn net.Conn, cancelfunc context.CancelFunc) {
+		unix := time.Now().Unix()
+		msgNum := 0
 		for {
+			//超时
+			if n.Readtimeout != 0 {
+				readtimeout := time.Minute * time.Duration(n.Readtimeout)
+				conn.SetReadDeadline(time.Now().Add(readtimeout))
+			}
+
 			_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
 			if e != nil {
 				switch e {
 				case io.EOF:
 					cancelfunc()
 				default:
-					log.Error("socket error:", e.Error())
+					cancelfunc()
+					log.Warn("socket error:", e.Error())
 				}
 				return
 			}
 			readc <- buf
+
+			//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
+			now := time.Now().Unix()
+			msgNum++
+
+			if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
+				//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
+				gamechan <- commonstruct.ProcessMsg{MsgType: "TimeInterval", Data: msgNum}
+				unix = now
+				msgNum = 0
+			}
 		}
 	}(conn, cancelFunc)
 

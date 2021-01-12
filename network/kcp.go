@@ -20,6 +20,10 @@ func (c *KCPNetwork) Start(nw *NetWorkx) {
 
 	connstr := fmt.Sprintf("127.0.0.1:%v", nw.Port)
 	if listener, err := kcp.ListenWithOptions(connstr, block, 10, 3); err == nil {
+		if nw.StartHook != nil {
+			nw.StartHook()
+		}
+
 		for {
 			s, err := listener.AcceptKCP()
 			if err != nil {

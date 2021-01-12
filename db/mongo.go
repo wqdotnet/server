@@ -69,12 +69,11 @@ func getCollection(collectionname string) (*mongo.Client, *mongo.Collection) {
 func InsertOne(tbname string, document interface{}) {
 	client, collection := getCollection(tbname)
 
-	insertResult, err := collection.InsertOne(context.TODO(), document)
+	_, err := collection.InsertOne(context.TODO(), document)
 
 	if err != nil {
 		log.Error(err)
 	}
-	log.Info("Inserted a single document: ", insertResult)
 
 	clientPool.ReturnObject(context.Background(), client)
 
@@ -137,7 +136,7 @@ func Update(tbname string, Findfield interface{}, Upfield interface{}) (int64, e
 	if err != nil {
 		return 0, err
 	}
-	log.Infof("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+	//log.Debug("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 	return updateResult.ModifiedCount, nil
 }
 
@@ -151,7 +150,7 @@ func Delete(tbname string, field string, value interface{}) int64 {
 	if err != nil {
 		log.Error(err)
 	}
-	log.Debugf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
+	//log.Debugf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
 
 	return deleteResult.DeletedCount
 }

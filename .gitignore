@@ -6,6 +6,7 @@
 *.dylib
 *.test
 *.pb
+*.log
 main
 server
 server

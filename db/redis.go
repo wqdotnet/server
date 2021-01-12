@@ -18,7 +18,7 @@ var redis *Redis
 var auitid int32
 
 //StartRedis 初始化
-func StartRedis(address string) {
+func StartRedis(address string, selectdb int) {
 	log.Infof("StartRedis  create redis.pool:  [%v]", address)
 	redis = new(Redis)
 	redis.pool = &red.Pool{
@@ -32,7 +32,7 @@ func StartRedis(address string) {
 				red.DialReadTimeout(time.Duration(1000)*time.Millisecond),
 				red.DialWriteTimeout(time.Duration(1000)*time.Millisecond),
 				red.DialConnectTimeout(time.Duration(1000)*time.Millisecond),
-				red.DialDatabase(0),
+				red.DialDatabase(selectdb),
 				//red.DialPassword(""),
 			)
 		},
@@ -54,7 +54,6 @@ func RedisExec(cmd string, key interface{}, args ...interface{}) (interface{}, e
 			parmas = append(parmas, v)
 		}
 	}
-	con.Do("select", 0)
 	return con.Do(cmd, parmas...)
 }
 
@@ -70,7 +69,7 @@ func GetAutoID(tabname string) int32 {
 //SetStruct save struct
 func SetStruct(key string, v interface{}) (interface{}, error) {
 	conn := redis.pool.Get()
-	conn.Do("select", 1)
+
 	b, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
@@ -81,7 +80,6 @@ func SetStruct(key string, v interface{}) (interface{}, error) {
 //GetStruct get
 func GetStruct(key string, obj interface{}) error {
 	conn := redis.pool.Get()
-	conn.Do("select", 1)
 
 	objStr, err := red.String(conn.Do("GET", key))
 	if err != nil {
@@ -91,4 +89,48 @@ func GetStruct(key string, obj interface{}) error {
 
 	err = json.Unmarshal(b, obj)
 	return err
+}
+
+//HMSET HMSET redsi
+func HMSET(field string, args ...interface{}) {
+	RedisExec("HMSET", field, args...)
+}
+
+//HMGET HMGET redsi
+func HMGET(field string, keys ...interface{}) (map[interface{}]string, error) {
+	value, err := red.Values(RedisExec("HMGET", field, keys...))
+	if err != nil {
+		return nil, err
+	}
+
+	var returnmap = make(map[interface{}]string)
+	for k, v := range value {
+		if v == nil {
+			break
+		}
+		v := v.([]byte)
+		returnmap[keys[k]] = string(v)
+	}
+	return returnmap, err
+}
+
+//HVALS 获取所有值
+func HVALS(field string) (map[interface{}][]byte, error) {
+	value, err := red.Values(RedisExec("HVALS", field))
+	if err != nil {
+		return nil, err
+	}
+
+	var returnmap = make(map[interface{}][]byte)
+	for k, v := range value {
+
+		if v == nil {
+			break
+		}
+		v := v.([]byte)
+
+		returnmap[k] = v
+	}
+
+	return returnmap, err
 }

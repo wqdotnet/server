@@ -2,13 +2,27 @@ package web
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
+	"github.com/go-echarts/statsview"
+	"github.com/go-echarts/statsview/viewer"
+	log "github.com/sirupsen/logrus"
 )
+
+//StartStatsView 监控
+// localhost:18066/debug/statsview
+func StartStatsView(Port int32) {
+	httppath := fmt.Sprintf("localhost:%v", Port)
+	log.Infof("Start [StatsView] [%v/debug/statsview]", httppath)
+	viewer.SetConfiguration(viewer.WithTheme(viewer.ThemeMacarons), viewer.WithAddr(httppath))
+	mgr := statsview.New()
+	mgr.Start()
+}
 
 // Start gin web interface
 func Start(Port int32) {
+	log.Info("Start [Web Http]")
 	//禁用控制台颜色，在将日志写入文件时不需要控制台颜色
 	//gin.DisableConsoleColor()
 
@@ -26,7 +40,8 @@ func Start(Port int32) {
 	//如果需要同时将日志写入文件和控制台，请使用以下代码
 	//gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(logger(), gin.Recovery())
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -47,7 +62,7 @@ func Start(Port int32) {
 
 	// automatically add routers for net/http/pprof
 	// e.g. /debug/pprof, /debug/pprof/heap, etc.
-	ginpprof.Wrap(router)
+	//ginpprof.Wrap(router)
 
 	// ginpprof also plays well with *gin.RouterGroup
 	// group := router.Group("/debug/pprof")
@@ -55,6 +70,7 @@ func Start(Port int32) {
 	//http://localhost:8080/debug/pprof/
 
 	router.Run(fmt.Sprintf(":%v", Port))
+
 }
 
 //刷新配置
@@ -63,4 +79,19 @@ func refreshCfg(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "ok",
 	})
+}
+
+// 日志中间件
+func logger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		startTime := time.Now()
+		c.Next()
+		endTime := time.Now()
+		latencyTime := endTime.Sub(startTime)
+		reqMethod := c.Request.Method
+		reqURI := c.Request.RequestURI
+		statusCode := c.Writer.Status()
+		clientIP := c.Request.Host
+		log.Infof("| %3d | %13v | %15s | %s | %s |", statusCode, latencyTime, clientIP, reqMethod, reqURI)
+	}
 }

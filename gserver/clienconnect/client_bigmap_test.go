@@ -3,8 +3,10 @@ package clienconnect
 import (
 	"server/db"
 	"server/gserver/cfg"
+	"server/gserver/commonstruct"
 	"testing"
 
+	"github.com/go-playground/assert/v2"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,7 +28,13 @@ func TestMap(t *testing.T) {
 }
 
 func TestGetdata(t *testing.T) {
-	for k, v := range getRoleAlltroops(2) {
-		log.Info(k, ":", v)
+	var troopslist = make(map[int32]*commonstruct.TroopsStruct)
+	for _, v := range getRoleAlltroops(2) {
+		troopslist[v.TroopsID] = v
 	}
+
+	assert.Equal(t, troopslist[1], nil)
+	log.Info(troopslist[2])
+	log.Info(troopslist[3])
+
 }

@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"bytes"
-	"fmt"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -31,26 +29,4 @@ func fileHook(path string) *lfshook.LfsHook {
 			TimestampFormat: "2006-01-02 15:04:05",
 		},
 	)
-}
-
-// MyFormatter 自定义 formatter
-type MyFormatter struct {
-	Prefix string
-	Suffix string
-}
-
-// Format implement the Formatter interface
-func (mf *MyFormatter) Format(entry *log.Entry) ([]byte, error) {
-	var b *bytes.Buffer
-	if entry.Buffer != nil {
-		b = entry.Buffer
-	} else {
-		b = &bytes.Buffer{}
-	}
-	// entry.Message 就是需要打印的日志
-	b.WriteString(fmt.Sprintf("[%s] [%s]  %s\n",
-		entry.Level,
-		entry.Time.Format("2006-01-02 15:04:05"),
-		entry.Message))
-	return b.Bytes(), nil
 }

@@ -3,12 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"server/tool"
 
 	pool "github.com/jolestar/go-commons-pool/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,20 +24,15 @@ func init() {
 	rootCmd.AddCommand(testCmd)
 }
 
-func exectest(cmd *cobra.Command, args []string) {
+type teststr struct {
+	name string
+	id   int
+}
 
-	num := 1
-	log.Info(tool.GoID(), "-> :", num)
-	go func(n int) {
-		n++
-		log.Info(tool.GoID(), "-> :", n)
-	}(num)
+func exectest(cmd *cobra.Command, args []string) {
 
 	//mongodb()
 	//objectPool()
-
-	//time.Sleep(3000000000)
-	//log.Info(tool.GoID(), "-> :", num)
 
 }
 
