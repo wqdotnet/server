@@ -1,1 +1,1 @@
-# server
+# slgserver

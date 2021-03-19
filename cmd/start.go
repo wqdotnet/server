@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"server/gserver"
+	"slgserver/gserver"
 
 	"github.com/spf13/cobra"
-	//msg "server/proto"
+	//msg "slgserver/proto"
 )
 
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Short",
+	Short: "start game server",
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
 		gserver.StartGServer()

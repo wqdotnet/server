@@ -36,8 +36,8 @@ func StartMongodb(dbname string, url string) {
 	clientPool = pool.NewObjectPoolWithDefaultConfig(ctx, factory)
 }
 
-//getDatabase connectPool mongodb database
-func getDatabase() (*mongo.Client, *mongo.Database) {
+//GetDatabase connectPool mongodb database
+func GetDatabase() (*mongo.Client, *mongo.Database) {
 	ctx := context.Background()
 	obj, err := clientPool.BorrowObject(ctx)
 	if err != nil {
@@ -60,7 +60,7 @@ func getDatabase() (*mongo.Client, *mongo.Database) {
 
 //getCollection connectPool mongodb collection
 func getCollection(collectionname string) (*mongo.Client, *mongo.Collection) {
-	client, database := getDatabase()
+	client, database := GetDatabase()
 	collection := database.Collection(collectionname)
 	return client, collection
 }

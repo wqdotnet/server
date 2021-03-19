@@ -2,10 +2,12 @@ package bigmapmanage
 
 import (
 	"encoding/json"
-	"server/db"
-	"server/gserver/cfg"
-	"server/gserver/commonstruct"
-	"server/msgproto/common"
+	"slgserver/db"
+	"slgserver/gserver/cfg"
+	"slgserver/gserver/commonstruct"
+	"slgserver/gserver/process"
+	"slgserver/msgproto/common"
+	"slgserver/msgproto/fight"
 	"sync"
 	"time"
 
@@ -15,11 +17,19 @@ import (
 var (
 	areasSMap  sync.Map
 	troopsSMap sync.Map
+	//战斗设置
+	fightSetMap  = make(map[int32]commonstruct.FightSetting)
+	fightSetAuto = make(map[int32]bool)
 
-	//chan
-	bigmapmsgchan  = make(chan string)
-	troopsMoveChan = make(chan commonstruct.TroopsStruct)
-	stopMoveChan   = make(chan int32)
+	// ================== chan ============================
+	bigmapmsgchan        = make(chan string, 1)
+	troopsMoveChan       = make(chan commonstruct.TroopsStruct, 1)
+	stopMoveChan         = make(chan int32, 1)
+	msgSubscribeChan     = make(chan areasMsgChan, 1)                  //区域消息订阅/取消
+	fightSettingChan     = make(chan commonstruct.FightSetting, 1)     //战斗设置
+	troopsExitBigmapChan = make(chan commonstruct.TroopsExitBigmap, 1) //部队退出大地图
+
+	updateTroopsChan = make(chan commonstruct.TroopsStruct, 1) //更新部队单个数据（未完成）
 )
 
 //StartBigmapGoroutine init
@@ -27,7 +37,7 @@ func StartBigmapGoroutine() {
 	log.Info("start bigmap goroutine")
 	//加载地图配置 缓存
 	initBigmapAreasInfo()
-
+	fightSetAuto[0] = true
 	go func() {
 
 		// defer func() {
@@ -44,6 +54,14 @@ func StartBigmapGoroutine() {
 				handleTroopsEnterBigMap(troopsmove)
 			case troopsid := <-stopMoveChan:
 				handleTroopsStopMove(troopsid)
+			case msg := <-msgSubscribeChan:
+				areasMsgSubscribe(msg.subscribe, msg.areasIndex, msg.roleid)
+			case setting := <-fightSettingChan:
+				bigmapSetFightSet(&setting)
+			case troopsexit := <-troopsExitBigmapChan:
+				troopsExitBigmap(&troopsexit)
+			case troopsupdate := <-updateTroopsChan:
+				updateTroopsInfo(&troopsupdate)
 				// case <-ctx.Done():
 				// 	cloneBigmap()
 			}
@@ -52,15 +70,30 @@ func StartBigmapGoroutine() {
 	}()
 }
 
+func bigmapSetFightSet(fset *commonstruct.FightSetting) {
+	fightSetAuto[fset.RoleID] = fset.AutoSelect
+
+	if troops, ok := GetMapTroopsInfo(fset.TroopsID); ok {
+		troops.FightSet = fset
+		//推送给下轮战斗双方 技能施放选择情况
+		process.SendSocketMsg(fset.RoleID,
+			int32(fight.MSG_FIGHT_Module_FIGHT),
+			int32(fight.MSG_FIGHT_S2C_Select_Tactics), &fight.S2C_SelectTactics{SelectSkill: 2})
+	}
+	log.Info("战斗设置：", fightSetAuto[fset.RoleID])
+
+}
+
+//=================================================================================================
 //初始化大地图所有区域信息
 func initBigmapAreasInfo() {
 	//配置信息
-	for _, ares := range cfg.GlobalCfg.MapInfo.Areas {
+	for _, ares := range cfg.GameCfg.MapInfo.Areas {
 		index := int32(ares.Setindex)
 		if _, ok := areasSMap.Load(index); ok {
 			log.Warnf("Areasindex key:[%v] is existx", index)
 		} else {
-			areasSMap.Store(index, AreasInfo{AreasIndex: index, Type: int32(ares.Type), State: 0, Occupy: int32(ares.Type)})
+			areasSMap.Store(index, newAreasInfo(index, int32(ares.Type)))
 		}
 	}
 
@@ -77,71 +110,27 @@ func initBigmapAreasInfo() {
 	for _, v := range value {
 		troops := &commonstruct.TroopsStruct{}
 		json.Unmarshal(v, troops)
-		troopsSMap.Store(troops.TroopsID, *troops)
-	}
+		saveMapTroops(troops)
 
-	db.RedisExec("del", "areasSMap")
-	db.RedisExec("del", "troopsSMap")
-}
-
-//----------------------------------------发送至大地图接口------------------------------------------------------
-
-//SendMsgBigMap msg
-func SendMsgBigMap(msg string) {
-	bigmapmsgchan <- msg
-}
-
-//SendTroopsMove 部队进入大地图移动
-func SendTroopsMove(troops commonstruct.TroopsStruct) {
-	if troops.AreasList == nil || len(troops.AreasList) == 0 {
-		log.Warn("部队移动路径为空")
-		return
-	}
-	troopsMoveChan <- troops
-}
-
-//SendStopMove 部队停止移动
-func SendStopMove(troopsid int32) {
-	stopMoveChan <- troopsid
-}
-
-//------------------------------------------------------------------------------------------------
-
-func handleMapCommand(command string) {
-	//log.Infof("[%v] :[%v]", tool.GoID(), command)
-	switch command {
-	case "BigMapLoop_OneSecond":
-		loop(time.Now().Unix())
-	default:
-		log.Warnf("nil command: [%v]", command)
-	}
-}
-
-func loop(unix int64) {
-	//部队移动
-	troopsSMap.Range(func(key, value interface{}) bool {
-		troops := value.(commonstruct.TroopsStruct)
-
-		switch troops.State {
-		case common.TroopsState_Move: //移动状态
-			loopTroopsMove(key, troops, unix)
-		case common.TroopsState_Pause: //暂停命令
-			loopTroopsMove(key, troops, unix)
-		case common.TroopsState_Stationed: //原地驻扎
-		case common.TroopsState_fight: //战斗状态
-			//log.Debugf("[%v] [%v] [%v]", troops.MoveStamp, unix, troops.TroopsID)
-			//模拟停留十秒后 让其回城或者留在该区域
-			if unix > troops.MoveStamp+30 {
-
-				//战胜->1.更新部队状态为驻扎 2.改变区域状态
-				//战败->1.更新部队状态为0   2.部队从大地图移除 3.部队角色数据更新至role 用户不在线则保存到db
-				fightOver(key, troops, true)
-			}
+		//处理部队驻扎
+		if troops.State == common.TroopsState_Stationed || troops.State == common.TroopsState_fight {
+			log.Infof("驻扎部队区域信息：[%v - %v] [%v]", troops.Roleid, troops.TroopsID, *getAreasInfo(troops.AreasIndex))
+			// troops.AreasIndex
 		}
-		return true
-	})
+	}
 
 }
+
+// func getfightSetMap(roleid int32) *commonstruct.FightSetting {
+// 	fset := fightSetMap[roleid]
+// 	return &fset
+// }
+
+// func setfightSetMap(fset *commonstruct.FightSetting) {
+// 	fightSetMap[fset.RoleID] = *fset
+// }
+
+//===============================================外部接口==================================================
 
 //CloneBigmap 关闭大地图
 func CloneBigmap() {
@@ -177,5 +166,107 @@ func CloneBigmap() {
 		log.Trace("save troopsSMap:", troops)
 		return true
 	})
+}
 
+//----数据发送至大地图接口----
+
+//SendMsgBigMap msg
+func SendMsgBigMap(msg string) {
+	bigmapmsgchan <- msg
+}
+
+//SendTroopsMove 部队进入大地图移动
+func SendTroopsMove(troops *commonstruct.TroopsStruct) {
+	if troops.AreasList == nil || len(troops.AreasList) == 0 {
+		log.Warn("部队移动路径为空")
+		return
+	}
+	troops.Scene = commonstruct.SceneBigMap
+	troopsMoveChan <- *troops
+}
+
+//SendStopMove 部队停止移动
+func SendStopMove(troopsid int32) {
+	stopMoveChan <- troopsid
+}
+
+type areasMsgChan struct {
+	roleid     int32
+	areasIndex int32
+	subscribe  bool
+}
+
+//SendAreasSubscribe 消息订阅
+func SendAreasSubscribe(areas, roleid int32) {
+	msgSubscribeChan <- areasMsgChan{roleid: roleid, areasIndex: areas, subscribe: true}
+}
+
+//SendAreasCancelSubscribe 取消订阅
+func SendAreasCancelSubscribe(areas, roleid int32) {
+	msgSubscribeChan <- areasMsgChan{roleid: roleid, areasIndex: areas, subscribe: false}
+}
+
+//SendFightSetting 战斗设置
+//tacticsID 技能ID
+//autoSelect 自动选择
+func SendFightSetting(roleid, troopsid, skillid, tacticsID int32, autoSelect bool) {
+	fightSettingChan <- commonstruct.FightSetting{AutoSelect: autoSelect,
+		SkillID:    skillid,
+		TacticsID:  tacticsID,
+		RoleID:     roleid,
+		TroopsID:   troopsid,
+		SelectTime: time.Now().Unix(),
+	}
+}
+
+//SendUpdateTroopsInfo 更新大地图中部队数据
+func SendUpdateTroopsInfo(troops *commonstruct.TroopsStruct) {
+	updateTroopsChan <- *troops
+}
+
+//SendTroopsExitBigmap 部队退出大地图
+func SendTroopsExitBigmap(troopsexit *commonstruct.TroopsExitBigmap) {
+	troopsExitBigmapChan <- *troopsexit
+}
+
+//==================================================接收数据处理==================================================
+
+func handleMapCommand(command string) {
+	//log.Infof("[%v] :[%v]", tool.GoID(), command)
+	switch command {
+	case "BigMapLoop_OneSecond":
+		loop(time.Now().Unix())
+	default:
+		log.Warnf("nil command: [%v]", command)
+	}
+}
+
+func loop(unix int64) {
+	//部队移动
+	troopsSMap.Range(func(key, value interface{}) bool {
+		troops := value.(commonstruct.TroopsStruct)
+
+		switch troops.State {
+		case common.TroopsState_Move: //移动状态
+			loopTroopsMove(key, troops, unix)
+		case common.TroopsState_Pause: //暂停命令
+			loopTroopsMove(key, troops, unix)
+		case common.TroopsState_Stationed: //原地驻扎
+
+		}
+		return true
+	})
+
+	//区域战斗处理
+	AreasRange(func(areas AreasInfo) bool {
+		if areas.State == 0 {
+			return true
+		}
+
+		//战斗处理
+		areas.areasFighting(unix)
+		saveAreasInfo(areas)
+
+		return true
+	})
 }

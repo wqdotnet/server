@@ -66,10 +66,27 @@ func GetAutoID(tabname string) int32 {
 	return int32(autoid)
 }
 
+//INCRBY INCRBY num
+func INCRBY(tabname string, num int32) int32 {
+	autoid, err := red.Int(RedisExec("INCRBY", tabname, num))
+	if err != nil {
+		log.Error(err)
+	}
+	return int32(autoid)
+}
+
+//RedisGetInt get redis int
+func RedisGetInt(tabname string) int {
+	if data, err := red.Int(RedisExec("get", tabname)); err == nil {
+		return data
+	}
+	return 0
+}
+
 //SetStruct save struct
 func SetStruct(key string, v interface{}) (interface{}, error) {
 	conn := redis.pool.Get()
-
+	defer conn.Close()
 	b, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
@@ -80,7 +97,7 @@ func SetStruct(key string, v interface{}) (interface{}, error) {
 //GetStruct get
 func GetStruct(key string, obj interface{}) error {
 	conn := redis.pool.Get()
-
+	defer conn.Close()
 	objStr, err := red.String(conn.Do("GET", key))
 	if err != nil {
 		return err

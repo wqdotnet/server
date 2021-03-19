@@ -9,7 +9,7 @@
 *.log
 main
 server
-server
+slgserver
 # Test binary, built with `go test -c`
 *.test
 

@@ -1,7 +1,7 @@
 package process
 
 import (
-	"server/gserver/commonstruct"
+	"slgserver/gserver/commonstruct"
 	"testing"
 
 	log "github.com/sirupsen/logrus"

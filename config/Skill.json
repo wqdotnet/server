@@ -1,0 +1,900 @@
+{
+  "SkillList": [
+    {
+      "id": 101,
+      "troopsName": "骑兵",
+      "skillName": "铁骑无敌",
+      "skillIcon": "",
+      "skiilIntro": "对敌方前3排部队发起冲锋。",
+      "skilltype": 1,
+      "useTimeType": 1,
+      "useTime": 1,
+      "useEffects1": "",
+      "beforeEffects2": 100,
+      "ballisticEffects": "",
+      "struckEffect": 101,
+      "SceneEffects": "",
+      "effectType": 1,
+      "effectSubtypes1": 1,
+      "key1": 0.0,
+      "value1": 1.4,
+      "correctionConditions": 0.0,
+      "conditionsValue": [],
+      "correct": [],
+      "range": 3,
+      "addSkillsID": [],
+      "addbuffID": []
+    },
+    {
+      "id": 102,
+      "troopsName": "火枪兵",
+      "skillName": "枪林弹雨",
+      "skillIcon": "",
+      "skiilIntro": "对敌方2排部队发动猛烈攻击。",
+      "skilltype": 1,
+      "useTimeType": 1,
+      "useTime": 1,
+      "useEffects1": "",
+      "beforeEffects2": 100,
+      "ballisticEffects": "",
+      "struckEffect": 102,
+      "SceneEffects": "",
+      "effectType": 1,
+      "effectSubtypes1": 1,
+      "key1": 0.0,
+      "value1": 1.6,
+      "correctionConditions": 0.0,
+      "conditionsValue": [],
+      "correct": [],
+      "range": 2,
+      "addSkillsID": [],
+      "addbuffID": []
+    },
+    {
+      "id": 103,
+      "troopsName": "长枪兵",
+      "skillName": "奋力一击",
+      "skillIcon": "",
+      "skiilIntro": "攻击对方4排部队，敌方部队越多，威力越大。",
+      "skilltype": 1,
+      "useTimeType": 1,
+      "useTime": 1,
+      "useEffects1": "",
+      "beforeEffects2": 100,
+      "ballisticEffects": "",
+      "struckEffect": 103,
+      "SceneEffects": "",
+      "effectType": 1,
+      "effectSubtypes1": 1,
+      "key1": 0.0,
+      "value1": 1.2,
+      "correctionConditions": 1,
+      "conditionsValue": [
+        1,
+        0.5
+      ],
+      "correct": [
+        0.2,
+        0.1,
+        0
+      ],
+      "range": 4,
+      "addSkillsID": [],
+      "addbuffID": []
+    },
+    {
+      "id": 104,
+      "troopsName": "战车兵",
+      "skillName": "战车突击",
+      "skillIcon": "",
+      "skiilIntro": "提升己方战法防御力，对敌方前3排部队发动战车突击。",
+      "skilltype": 1,
+      "useTimeType": 1,
+      "useTime": 1,
+      "useEffects1": "",
+      "beforeEffects2": 100,
+      "ballisticEffects": "",
+      "struckEffect": 104,
+      "SceneEffects": "",
+      "effectType": 1,
+      "effectSubtypes1": 1,
+      "key1": 0.0,
+      "value1": 1.4,
+      "correctionConditions": 0.0,
+      "conditionsValue": "",
+      "correct": "",
+      "range": 3,
+      "addSkillsID": "",
+      "addbuffID": [
+        201
+      ]
+    },
+    {
+      "id": 105,
+      "troopsName": "坦克",
+      "skillName": "震天咆哮",
+      "skillIcon": "",
+      "skiilIntro": "使用坦克对敌方前3排部队进行密集轰炸，并有一定几率吓退敌方后50个部队。",
+      "skilltype": 1,
+      "useTimeType": 1,
+      "useTime": 1,
+      "useEffects1": "",
+      "beforeEffects2": 100,
+      "ballisticEffects": "",
+      "struckEffect": 105,
+      "SceneEffects": "",
+      "effectType": 1,
+      "effectSubtypes1": 1,
+      "key1": 0.0,
+      "value1": 1.2,
+      "correctionConditions": 2,
+      "conditionsValue": [
+        0.5,
+        0.25
+      ],
+      "correct": [
+        0,
+        0.1,
+        0.4
+      ],
+      "range": 3,
+      "addSkillsID": [
+        202
+      ],
+      "addbuffID": []
+    },
+    {
+      "id": 202,
+      "troopsName": "张飞特效",
+      "skillName": "",
+      "skillIcon": "",
+      "skiilIntro": "50%几率吓退敌方后50个部队",
+      "skilltype": 0.0,
+      "useTimeType": 0.0,
+      "useTime": 0.0,
+      "useEffects1": "",
+      "beforeEffects2": 100,
+      "ballisticEffects": "",
+      "struckEffect": 105,
+      "SceneEffects": "",
+      "effectType": 1,
+      "effectSubtypes1": 4,
+      "key1": 0.5,
+      "value1": 50,
+      "correctionConditions": 0.0,
+      "conditionsValue": [],
+      "correct": [],
+      "range": 0.0,
+      "addSkillsID": [],
+      "addbuffID": []
+    }
+  ],
+  "SkillLandform": [
+    {
+      "id": 11000,
+      "name": "奇袭",
+      "type": 1,
+      "lv": 0,
+      "icon": "",
+      "intro": "克制坚守，被强攻克制。",
+      "baseDamage": 0
+    },
+    {
+      "id": 11001,
+      "name": "山地奇袭Lv1",
+      "type": 1,
+      "lv": 1,
+      "icon": "",
+      "intro": "奇袭山地加强版，山地可用，克制坚守，被强攻克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 11002,
+      "name": "山地奇袭Lv2",
+      "type": 1,
+      "lv": 2,
+      "icon": "",
+      "intro": "奇袭山地加强版，山地可用，克制坚守，被强攻克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 11003,
+      "name": "山地奇袭Lv3",
+      "type": 1,
+      "lv": 3,
+      "icon": "",
+      "intro": "奇袭山地加强版，山地可用，克制坚守，被强攻克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 11004,
+      "name": "山地奇袭Lv4",
+      "type": 1,
+      "lv": 4,
+      "icon": "",
+      "intro": "奇袭山地加强版，山地可用，克制坚守，被强攻克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 11005,
+      "name": "山地奇袭Lv5",
+      "type": 1,
+      "lv": 5,
+      "icon": "",
+      "intro": "奇袭山地加强版，山地可用，克制坚守，被强攻克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 12001,
+      "name": "平原奇袭Lv1",
+      "type": 1,
+      "lv": 1,
+      "icon": "",
+      "intro": "奇袭平原加强版，平原可用，克制坚守，被强攻克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 12002,
+      "name": "平原奇袭Lv2",
+      "type": 1,
+      "lv": 2,
+      "icon": "",
+      "intro": "奇袭平原加强版，平原可用，克制坚守，被强攻克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 12003,
+      "name": "平原奇袭Lv3",
+      "type": 1,
+      "lv": 3,
+      "icon": "",
+      "intro": "奇袭平原加强版，平原可用，克制坚守，被强攻克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 12004,
+      "name": "平原奇袭Lv4",
+      "type": 1,
+      "lv": 4,
+      "icon": "",
+      "intro": "奇袭平原加强版，平原可用，克制坚守，被强攻克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 12005,
+      "name": "平原奇袭Lv5",
+      "type": 1,
+      "lv": 5,
+      "icon": "",
+      "intro": "奇袭平原加强版，平原可用，克制坚守，被强攻克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 13001,
+      "name": "丛林奇袭Lv1",
+      "type": 1,
+      "lv": 1,
+      "icon": "",
+      "intro": "奇袭丛林加强版，丛林可用，克制坚守，被强攻克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 13002,
+      "name": "丛林奇袭Lv2",
+      "type": 1,
+      "lv": 2,
+      "icon": "",
+      "intro": "奇袭丛林加强版，丛林可用，克制坚守，被强攻克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 13003,
+      "name": "丛林奇袭Lv3",
+      "type": 1,
+      "lv": 3,
+      "icon": "",
+      "intro": "奇袭丛林加强版，丛林可用，克制坚守，被强攻克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 13004,
+      "name": "丛林奇袭Lv4",
+      "type": 1,
+      "lv": 4,
+      "icon": "",
+      "intro": "奇袭丛林加强版，丛林可用，克制坚守，被强攻克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 13005,
+      "name": "丛林奇袭Lv5",
+      "type": 1,
+      "lv": 5,
+      "icon": "",
+      "intro": "奇袭丛林加强版，丛林可用，克制坚守，被强攻克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 14001,
+      "name": "沙漠奇袭Lv1",
+      "type": 1,
+      "lv": 1,
+      "icon": "",
+      "intro": "奇袭沙漠加强版，沙漠可用，克制坚守，被强攻克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 14002,
+      "name": "沙漠奇袭Lv2",
+      "type": 1,
+      "lv": 2,
+      "icon": "",
+      "intro": "奇袭沙漠加强版，沙漠可用，克制坚守，被强攻克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 14003,
+      "name": "沙漠奇袭Lv3",
+      "type": 1,
+      "lv": 3,
+      "icon": "",
+      "intro": "奇袭沙漠加强版，沙漠可用，克制坚守，被强攻克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 14004,
+      "name": "沙漠奇袭Lv4",
+      "type": 1,
+      "lv": 4,
+      "icon": "",
+      "intro": "奇袭沙漠加强版，沙漠可用，克制坚守，被强攻克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 14005,
+      "name": "沙漠奇袭Lv5",
+      "type": 1,
+      "lv": 5,
+      "icon": "",
+      "intro": "奇袭沙漠加强版，沙漠可用，克制坚守，被强攻克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 15001,
+      "name": "雪地奇袭Lv1",
+      "type": 1,
+      "lv": 1,
+      "icon": "",
+      "intro": "奇袭雪地加强版，雪地可用，克制坚守，被强攻克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 15002,
+      "name": "雪地奇袭Lv2",
+      "type": 1,
+      "lv": 2,
+      "icon": "",
+      "intro": "奇袭雪地加强版，雪地可用，克制坚守，被强攻克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 15003,
+      "name": "雪地奇袭Lv3",
+      "type": 1,
+      "lv": 3,
+      "icon": "",
+      "intro": "奇袭雪地加强版，雪地可用，克制坚守，被强攻克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 15004,
+      "name": "雪地奇袭Lv4",
+      "type": 1,
+      "lv": 4,
+      "icon": "",
+      "intro": "奇袭雪地加强版，雪地可用，克制坚守，被强攻克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 15005,
+      "name": "雪地奇袭Lv5",
+      "type": 1,
+      "lv": 5,
+      "icon": "",
+      "intro": "奇袭雪地加强版，雪地可用，克制坚守，被强攻克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 21000,
+      "name": "强攻",
+      "type": 2,
+      "lv": 0,
+      "icon": "",
+      "intro": "克制奇袭，被坚守克制。",
+      "baseDamage": 0
+    },
+    {
+      "id": 21001,
+      "name": "山地强攻Lv1",
+      "type": 2,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 21002,
+      "name": "山地强攻Lv2",
+      "type": 2,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 21003,
+      "name": "山地强攻Lv3",
+      "type": 2,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 21004,
+      "name": "山地强攻Lv4",
+      "type": 2,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 21005,
+      "name": "山地强攻Lv5",
+      "type": 2,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 22001,
+      "name": "平原强攻Lv1",
+      "type": 2,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制奇袭，被坚守克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 22002,
+      "name": "平原强攻Lv2",
+      "type": 2,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制奇袭，被坚守克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 22003,
+      "name": "平原强攻Lv3",
+      "type": 2,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制奇袭，被坚守克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 22004,
+      "name": "平原强攻Lv4",
+      "type": 2,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制奇袭，被坚守克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 22005,
+      "name": "平原强攻Lv5",
+      "type": 2,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制奇袭，被坚守克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 23001,
+      "name": "丛林强攻Lv1",
+      "type": 2,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制奇袭，被坚守克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 23002,
+      "name": "丛林强攻Lv2",
+      "type": 2,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制奇袭，被坚守克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 23003,
+      "name": "丛林强攻Lv3",
+      "type": 2,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制奇袭，被坚守克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 23004,
+      "name": "丛林强攻Lv4",
+      "type": 2,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制奇袭，被坚守克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 23005,
+      "name": "丛林强攻Lv5",
+      "type": 2,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制奇袭，被坚守克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 24001,
+      "name": "沙漠强攻Lv1",
+      "type": 2,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制奇袭，被坚守克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 24002,
+      "name": "沙漠强攻Lv2",
+      "type": 2,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制奇袭，被坚守克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 24003,
+      "name": "沙漠强攻Lv3",
+      "type": 2,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制奇袭，被坚守克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 24004,
+      "name": "沙漠强攻Lv4",
+      "type": 2,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制奇袭，被坚守克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 24005,
+      "name": "沙漠强攻Lv5",
+      "type": 2,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制奇袭，被坚守克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 25001,
+      "name": "雪地强攻Lv1",
+      "type": 2,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 25002,
+      "name": "雪地强攻Lv2",
+      "type": 2,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 25003,
+      "name": "雪地强攻Lv3",
+      "type": 2,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 25004,
+      "name": "雪地强攻Lv4",
+      "type": 2,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 25005,
+      "name": "雪地强攻Lv5",
+      "type": 2,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制奇袭，被坚守克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 31000,
+      "name": "坚守",
+      "type": 3,
+      "lv": 0,
+      "icon": "",
+      "intro": "克制强攻，被奇袭克制。",
+      "baseDamage": 0
+    },
+    {
+      "id": 31001,
+      "name": "山地坚守Lv1",
+      "type": 3,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 31002,
+      "name": "山地坚守Lv2",
+      "type": 3,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 31003,
+      "name": "山地坚守Lv3",
+      "type": 3,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 31004,
+      "name": "山地坚守Lv4",
+      "type": 3,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 31005,
+      "name": "山地坚守Lv5",
+      "type": 3,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻山地加强版，山地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 32001,
+      "name": "平原坚守Lv1",
+      "type": 3,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制强攻，被奇袭克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 32002,
+      "name": "平原坚守Lv2",
+      "type": 3,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制强攻，被奇袭克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 32003,
+      "name": "平原坚守Lv3",
+      "type": 3,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制强攻，被奇袭克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 32004,
+      "name": "平原坚守Lv4",
+      "type": 3,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制强攻，被奇袭克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 32005,
+      "name": "平原坚守Lv5",
+      "type": 3,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻平原加强版，平原可用，克制强攻，被奇袭克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 33001,
+      "name": "丛林坚守Lv1",
+      "type": 3,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制强攻，被奇袭克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 33002,
+      "name": "丛林坚守Lv2",
+      "type": 3,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制强攻，被奇袭克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 33003,
+      "name": "丛林坚守Lv3",
+      "type": 3,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制强攻，被奇袭克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 33004,
+      "name": "丛林坚守Lv4",
+      "type": 3,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制强攻，被奇袭克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 33005,
+      "name": "丛林坚守Lv5",
+      "type": 3,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻丛林加强版，丛林可用，克制强攻，被奇袭克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 34001,
+      "name": "沙漠坚守Lv1",
+      "type": 3,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制强攻，被奇袭克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 34002,
+      "name": "沙漠坚守Lv2",
+      "type": 3,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制强攻，被奇袭克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 34003,
+      "name": "沙漠坚守Lv3",
+      "type": 3,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制强攻，被奇袭克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 34004,
+      "name": "沙漠坚守Lv4",
+      "type": 3,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制强攻，被奇袭克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 34005,
+      "name": "沙漠坚守Lv5",
+      "type": 3,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻沙漠加强版，沙漠可用，克制强攻，被奇袭克制。",
+      "baseDamage": 800
+    },
+    {
+      "id": 35001,
+      "name": "雪地坚守Lv1",
+      "type": 3,
+      "lv": 1,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 100
+    },
+    {
+      "id": 35002,
+      "name": "雪地坚守Lv2",
+      "type": 3,
+      "lv": 2,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 200
+    },
+    {
+      "id": 35003,
+      "name": "雪地坚守Lv3",
+      "type": 3,
+      "lv": 3,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 300
+    },
+    {
+      "id": 35004,
+      "name": "雪地坚守Lv4",
+      "type": 3,
+      "lv": 4,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 400
+    },
+    {
+      "id": 35005,
+      "name": "雪地坚守Lv5",
+      "type": 3,
+      "lv": 5,
+      "icon": "",
+      "intro": "强攻雪地加强版，雪地可用，克制强攻，被奇袭克制。",
+      "baseDamage": 800
+    }
+  ],
+  "BuffList": [
+    {
+      "id": 201,
+      "troopsName": "关羽buff",
+      "BuffName": "关羽buff",
+      "skillIcon": "",
+      "skiilIntro": "增加己方4排部队战法防御力",
+      "bufftype": "",
+      "bufflv": "",
+      "roundNumber": "",
+      "RoleEffects": "",
+      "SceneEffects": "",
+      "effectType": 1,
+      "effectSubtypes1": 1,
+      "key1": 5,
+      "value1": 0.5,
+      "correctionConditions": "",
+      "conditionsValue": "",
+      "correct": "",
+      "range": 4,
+      "removeRoundNum": 0,
+      "addbuffid": ""
+    }
+  ]
+}

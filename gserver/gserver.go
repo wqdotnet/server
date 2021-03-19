@@ -4,25 +4,28 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"server/db"
-	"server/gserver/bigmapmanage"
-	"server/gserver/cfg"
-	"server/gserver/clienconnect"
-	"server/gserver/timedtasks"
-	"server/logger"
-	"server/network"
-	"server/web"
+	"slgserver/db"
+	"slgserver/gserver/bigmapmanage"
+	"slgserver/gserver/cfg"
+	"slgserver/gserver/clienconnect"
+	"slgserver/gserver/timedtasks"
+	"slgserver/logger"
+	"slgserver/network"
+	"slgserver/web"
 	"sync"
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
-	//msg "server/proto"
+	//msg "slgserver/proto"
 )
 
 // ServerConfig  server cfg
 type ServerConfig struct {
 	ServerName string
 	ServerID   int32
+
+	Daemon     bool
+	RestartNum int
 
 	OpenHTTP bool
 	HTTPPort int32
@@ -60,6 +63,9 @@ type ServerConfig struct {
 var ServerCfg = ServerConfig{
 	ServerName: "server",
 	ServerID:   1,
+
+	Daemon:     false,
+	RestartNum: 2,
 
 	// http
 	OpenHTTP: true,
@@ -113,6 +119,19 @@ func StartGServer() {
 	} else {
 		logger.Init(log.InfoLevel, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
 	}
+
+	// if ServerCfg.Daemon {
+	// 	log.Info("daemon start")
+	// 	//"github.com/zh-five/xdaemon"
+	// 	//创建一个Daemon对象
+	// 	logFile := fmt.Sprintf("daemon_%v.log", ServerCfg.ServerID)
+	// 	d := xdaemon.NewDaemon(logFile)
+	// 	//调整一些运行参数(可选)
+	// 	d.MaxCount = ServerCfg.RestartNum //最大重启次数
+	// 	//执行守护进程模式
+	// 	d.Run()
+	// }
+
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
 	//检查大地图临近区域配置数据是否有遗漏
 	if !cfg.CheckBigMapConfig() {
@@ -155,11 +174,15 @@ func StartGServer() {
 			ServerCfg.MsgTime,
 			ServerCfg.MsgNum,
 			func() { SendGameServerMsg("StartSuccess") },
+			func() { db.RedisExec("del", "ConnectNumber") },
+			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", 1)) },
+			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", -1)) },
 		),
 		command: make(chan string),
 	}
 	//启动网络
 	GameServerInfo.nw.Start()
+	defer GameServerInfo.nw.Close()
 
 	//退出消息监控
 	var exitChan = make(chan os.Signal)
@@ -181,11 +204,16 @@ func StartGServer() {
 				log.Warn("command:", command)
 			}
 		case s := <-exitChan:
-			log.Info("收到退出信号", s)
-			return
-			//os.Exit(1)
+			log.Info("收到信号: ", s)
+			if s.String() == "quit" || s.String() == "terminated" {
+				//os.Exit(1)
+				return
+			}
+			//case <-time.After(60 * time.Second):
+			//log.Infof("time: [%v]  online:[%v]", time.Now().Format(tool.DateTimeFormat), db.RedisGetInt("ConnectNumber"))
 		}
 	}
+
 }
 
 //SendGameServerMsg game system msg

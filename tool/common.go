@@ -3,9 +3,22 @@ package tool
 import (
 	"bytes"
 	"encoding/binary"
+	"math"
+	"math/rand"
 	"runtime"
 	"strconv"
+	"strings"
+	"time"
 	"unsafe"
+)
+
+const (
+	//DateTimeFormat 日期时间格式化
+	DateTimeFormat = "2006-01-02 15:04:05"
+	//DateFormat 日期式化
+	DateFormat = "2006-01-02"
+	//TimeFormat 时间格式化
+	TimeFormat = "15:04:05"
 )
 
 //IsLittleEndian 判断大小端
@@ -43,3 +56,35 @@ func BytesToInt(bys []byte) int {
 // string := strconv.Itoa(int)
 // int64转成string：
 // string := strconv.FormatInt(int64,10)
+
+//StringReplace 去除空格和换行
+func StringReplace(str string) string {
+	// 去除空格
+	str = strings.Replace(str, " ", "", -1)
+	// 去除换行符
+	str = strings.Replace(str, "\n", "", -1)
+	return str
+}
+
+//Round 四舍五入
+func Round(x float64) int {
+	return int(math.Floor(x + 0/5))
+}
+
+//DelList 删除
+func DelList(list []int32, key int32) []int32 {
+	for index, v := range list {
+		if v == key {
+			return append(list[:index], list[index+1:]...)
+		}
+	}
+	return list
+}
+
+//Random 100 随机
+func Random(randkey float64) bool {
+	rand.Seed(time.Now().Unix())
+	num := rand.Intn(100)
+	return num < int(randkey*100)
+
+}

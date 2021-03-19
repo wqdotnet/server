@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "server/cmd"
+import "slgserver/cmd"
 
 func main() {
 	cmd.Execute()

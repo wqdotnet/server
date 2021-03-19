@@ -15,7 +15,7 @@ enum MSG_BASE {
     C2SHeartBeat =101;     //心跳
     S2CHeartBeat =102;     
 
-
+    S2CErrorMsg = 103; //错误提示
 }
 
 //心跳  1
@@ -27,3 +27,7 @@ message s2c_HeartBeat {
     int64 servertime =1;
 }
  
+//错误提示消息
+message s2c_ErrorMsg {
+    string  MsgCode = 1;
+}

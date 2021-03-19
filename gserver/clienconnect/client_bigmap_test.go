@@ -1,9 +1,9 @@
 package clienconnect
 
 import (
-	"server/db"
-	"server/gserver/cfg"
-	"server/gserver/commonstruct"
+	"slgserver/db"
+	"slgserver/gserver/cfg"
+	"slgserver/gserver/commonstruct"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
@@ -18,7 +18,7 @@ func TestMap(t *testing.T) {
 	cfg.InitViperConfig("../../config", "json")
 
 	var areasindex int32 = 0
-	for _, arecfg := range cfg.GlobalCfg.MapInfo.Areas {
+	for _, arecfg := range cfg.GameCfg.MapInfo.Areas {
 		if arecfg.Type == 1 {
 			areasindex = int32(arecfg.Setindex)
 		}

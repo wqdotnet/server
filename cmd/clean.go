@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"server/db"
-	"server/gserver"
+	"context"
+	"slgserver/db"
+	"slgserver/gserver"
 
 	"github.com/spf13/cobra"
 )
@@ -32,10 +33,14 @@ func init() {
 }
 
 func clean() {
-	//db.StartMongodb(gserver.ServerCfg.Mongodb, gserver.ServerCfg.MongoConnStr)
-	//client, database := getDatabase()
+	db.StartMongodb(gserver.ServerCfg.Mongodb, gserver.ServerCfg.MongoConnStr)
+	_, database := db.GetDatabase()
+	database.Drop(context.Background())
 
 	db.StartRedis(gserver.ServerCfg.RedisConnStr, gserver.ServerCfg.RedisDB)
 	db.RedisExec("del", "areasSMap")
 	db.RedisExec("del", "troopsSMap")
+	db.RedisExec("del", "ConnectNumber")
+
+	//db.RedisExec("FLUSHDB", "")
 }

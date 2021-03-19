@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"server/gserver"
+	"slgserver/gserver"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

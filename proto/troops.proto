@@ -1,0 +1,133 @@
+syntax = "proto3"; 
+package troops;
+import "common.proto";
+option go_package = "slgserver/msgproto/troops";
+
+
+
+message P_RoleTroops {
+    int32 roleid =1;
+    repeated P_Troops TroopsList =2;
+}
+
+
+//部队信息
+message P_Troops {
+    int32 TroopsID  =1;       //部队名/id
+    string Name = 2; 
+    int32 country =3;       //国家归属
+    repeated int32 AreasList =4; //移动路径 区域id list
+    int32 AreasIndex =5;    //当前区域ID
+    common.TroopsState State =6;         //状态 0:未出动    1:移动  2:驻扎(暂停)  3:战斗
+    repeated int32 RowHP =7; //每排血量 
+
+    //兵种组成
+    int32 Type =8;//部队类型
+    int32 MaxNumber =9 ;//部队上限
+    int32 Number=10;//当前数量
+    int32 Level=11;//等级
+    int32 roleid =12;
+
+    int32 Attack =13;         // 攻击	att_A
+	int32 Defensive =14;      // 防御	def_A
+	int32 AttackSuper    =15; // 强攻	att_damage
+	int32 DefensiveSuper =17; // 强防	def_damage
+	int32 Strong         =18; // 强壮	att_B
+	int32 Control        =19; // 掌控	def_B
+
+	int32 Leader       =20; // 统帅	leader
+	int32 Strength     =21; // 勇气	strength
+	int32 politics     =22; //政治
+	int32 Intelligence =23; //智力
+
+	int32 SkillID    =24; //战法id
+	int32 TalentID   =25; //天赋id
+	int32 TacticsID =26; //战术id
+
+    int32 QueueNum =27;//队列编号(第几个进入队列的)
+    int32 FightType =28;//战斗状态  0:待战   1:上阵
+	int32 FightState =29;//战斗类型  0:国战   1:副本  2:剧本
+
+
+    int32 StageNumber = 30;//上阵编号
+
+    int32 SelectTactics =31;//已选择的战术(战斗中)
+    repeated int32 Bufflist =32;//buf 列表
+}
+ 
+ 
+
+//消息号
+enum MSG_TROOPS {
+    PLACEHOLDER_TROOPS =0;  //占位
+       //大地图模块
+    Module_TROOPS  = 3000;
+     
+    //部队信息
+    S2C_TroopsList = 3001;//
+    S2C_UpdateTroopsInfo =3002;//
+    //S2C_UpdateTroopsField =3003;//更新部队信息
+ 
+    C2S_Behavior = 3011;//部队行为
+    S2C_Behavior = 3012;   
+
+    S2C_TroopsAddExp =3020;
+}
+
+
+
+message s2c_TroopsAddExp {
+    int64 addExp =1;
+    int64 NewExp =2;
+    int64 NewLevel =3;
+}
+
+enum TroopsBehavior{
+    AddExp =0;
+    Recruit=1;
+    OnStage=2;
+    Exit=3;
+}
+
+
+//部队行为 
+//AddExp:加经验  parValue-> 加经验值
+//Recruit:招募  parValue-> 兵种类型
+//OnStage:上阵  parValue-> 上阵编号(1-5)
+//Exit:下阵 
+message c2s_Behavior {    
+    TroopsBehavior behaviorID =1;
+    int32 troopsID   =2;
+    repeated int64 parValue =3;
+}
+
+//部队行为
+//AddExp:加经验  item -> addExp
+//Recruit:招募  item -> TroopsID
+//OnStage:上阵  item -> StageNumber(上阵编号 1-5)
+//Exit:下阵  
+message s2c_Behavior {
+    int32 troopsID   =1;
+    TroopsBehavior behaviorID =2;
+    map<string, int64> item =3; 
+    string msg =4; //错误信息
+}
+
+
+
+//部队信息
+message s2c_TroopsList {
+    repeated P_Troops TroopsList =1;
+}
+
+//单个部队信息更新
+message s2c_UpdateTroopsInfo {
+    P_Troops TroopsInfo =1;
+}
+
+//部队字段更新
+//message  S2C_UpdateTroopsField {
+    //int32 TroopsID =1;
+    //map<string, object> item =3; 
+//}
+

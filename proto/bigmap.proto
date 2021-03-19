@@ -1,6 +1,7 @@
 syntax = "proto3"; 
 package bigmap;
 import "common.proto";
+import "troops.proto";
 option go_package = "slgserver/msgproto/bigmap";
 
 
@@ -13,16 +14,10 @@ enum MSG_BIGMAP {
     //大地图模块
     Module_BIGMAP  = 2000;
     
-    
     //区域信息
     S2C_AreasInfo = 2010;//
-    
 
-    //部队信息
-    S2C_AreasTroops = 2020;//
-    S2C_UpdateTroopsInfo =2021;//
-
-
+     
     //移动
     C2S_Move    = 2030;
     S2C_Move    = 2031;
@@ -34,34 +29,32 @@ enum MSG_BIGMAP {
     S2C_Fight  =2041;
     S2C_OverFight  =2042;
 
+    //获取区域简迅 区域战斗双方部队数据
+    C2S_AreasSimple  = 2051;
+    S2C_AreasSimple  = 2052;
+
     //订阅战斗区域
-    //取消订阅
+    C2S_FightSubscribe = 2053;
+    //取消订阅 
+    C2S_FightCancelSubscribe = 2054;
+    //订阅后 区域战斗队列推送 
+    S2C_FightSubscribe = 2055;
+    //部队详细信息 (上阵时推送)
+    S2C_QueueTroopsInfo = 2056;
+    //部队进入区域队列
+    S2C_EntryQueue  = 2057;
+    //部队离开区域队列
+    S2C_LeaveQueue = 2058;    
+   
+
+    //启动战斗测试用接口
+    //C2S_StartFight =2070;
     
-
+    //离开区域 (撤退 突进 单挑)
+    //C2S_TroopsLeaveAreas = 2057;
 }
 
 
-
-message P_RoleTroops {
-    int32 roleid =1;
-    repeated P_Troops TroopsList =2;
-}
-
-
-//部队信息
-message P_Troops {
-    int32 TroopsID  =1;       //部队名/id
-    int32 country =2;       //国家归属
-    repeated int32 AreasList =3; //移动路径 区域id list
-    int32 AreasIndex =4;    //当前区域ID
-    common.TroopsState State =5;         //状态 0:未出动    1:移动  2:驻扎(暂停)  3:战斗
-    //兵种组成
-    int32 Type =6;//部队类型
-    int32 Number=7;//数量
-    int32 Level=8;//等级
-    int32 roleid =9;
-}
- 
 
 //区域信息
 message P_AreasInfo {
@@ -77,24 +70,7 @@ message s2c_AreasInfo {
     repeated P_AreasInfo AreasInfoList =1 ;      
 }
 
-
-
-
-//区域部队信息
-message c2s_GetAreasTroops {
-    repeated int32 AreasIndex =1;// 区域id
-}
-
-//部队信息
-message s2c_TroopsList {
-    repeated P_Troops TroopsList =1;
-}
-
-//单个部队信息更新
-message s2c_UpdateTroopsInfo {
-    P_Troops TroopsInfo =1;
-}
-
+ 
 
 //移动
 message c2s_Move {
@@ -116,11 +92,6 @@ message c2s_StopMoving {
     int32 TroopsID = 1;     //部队ID 
 }
 
-//message s2c_StopMoving {
-    //int32 TroopsID = 1;     //部队ID
-    //int32 StopAreasIndex = 2;   //暂停点移动
-//}
-
   
 //部队进入战斗
 message s2c_Fight {
@@ -128,6 +99,69 @@ message s2c_Fight {
 }
 
 message s2c_OverFight {
-    int32 TroopsID = 1;     //部队ID
-    bool  Victory = 2;//是否胜利
+    int32 AreasIndex = 1;  //区域ID
+    int32 Victory = 2;  //胜方 1 守方 2攻方
 }
+
+
+
+//订阅战斗区域
+message c2s_FightSubscribe {
+    int32 AreasIndex =1; //区域index
+} 
+
+//区域战斗信息 (部队前两位详细信息,未上阵部队只有ID与部队名称)
+message s2c_FightSubscribe {
+    repeated troops.P_Troops  AttackTroopsList= 1;  //攻方上阵部队
+    repeated troops.P_Troops  DefenseTroopsList= 2;  //守方上阵部队
+    int64 fightStamp =3;//下轮战斗时间戳
+    string msg =4;
+}
+
+//部队详细信息
+message s2c_QueueTroopsInfo {
+    repeated troops.P_Troops  AttackTroopsList= 1;  //攻方上阵部队
+    repeated troops.P_Troops  DefenseTroopsList= 2;  //守方上阵部队
+}
+
+//部队进入区域战斗队列
+message s2c_EntryQueue {
+    int32 AreasIndex = 1;
+    troops.P_Troops Troops = 2; 
+    int32 Queue =3;//队列 0 守方  1 攻方    
+    int32 Type =4;//类型(预留)
+}
+
+//部队离开区域队列
+message s2c_LeaveQueue {
+    int32 AreasIndex = 1;
+    int32 TroopsID =2;
+}
+
+
+ 
+
+//离开区域 (撤退 突进)
+//message c2s_TroopsLeaveAreas {
+//    int32 TroopsID =1;
+//    int32 Type =2;//类型(预留)
+//}
+
+
+//查看区域 简讯
+message c2s_AreasSimple {
+    int32 AreasIndex =1; //区域index
+}
+message s2c_AreasSimple {
+    int32 AreasIndex    =1; //区域index
+    map<int32, int32>  TroopsNumList = 2;//部队数量列表,<国家，数量>
+}
+     
+ 
+
+
+//取消订阅
+message c2s_FightCancelSubscribe {
+    int32 AreasIndex =1; //区域index
+}
+

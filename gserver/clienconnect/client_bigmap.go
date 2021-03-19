@@ -1,15 +1,14 @@
 package clienconnect
 
 import (
-	"server/gserver/bigmapmanage"
-	"server/gserver/cfg"
-	"server/gserver/commonstruct"
-	"server/msgproto/bigmap"
-	"server/msgproto/common"
+	"slgserver/gserver/bigmapmanage"
+	"slgserver/gserver/cfg"
+	"slgserver/gserver/commonstruct"
+	"slgserver/msgproto/bigmap"
+	"slgserver/msgproto/common"
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 )
 
 // type rolemapinfo struct {
@@ -21,18 +20,31 @@ func (c *Client) bigmapModule(method int32, buf []byte) {
 	switch bigmap.MSG_BIGMAP(method) {
 	case bigmap.MSG_BIGMAP_C2S_Move:
 		move := &bigmap.C2S_Move{}
-		if e := proto.Unmarshal(buf, move); e != nil {
-			log.Error(e)
-			return
+		if decode(move, buf) {
+			c.move(move)
 		}
-		c.move(move)
 	case bigmap.MSG_BIGMAP_C2S_StopMoving:
 		stopmove := &bigmap.C2S_StopMoving{}
-		if e := proto.Unmarshal(buf, stopmove); e != nil {
-			log.Error(e)
-			return
+		if decode(stopmove, buf) {
+			c.stopMoving(stopmove)
 		}
-		c.stopMoving(stopmove)
+
+	//区域战斗订阅
+	case bigmap.MSG_BIGMAP_C2S_FightSubscribe:
+		data := &bigmap.C2S_FightSubscribe{}
+		if decode(data, buf) {
+			c.fightSubscribe(data)
+		}
+	case bigmap.MSG_BIGMAP_C2S_FightCancelSubscribe:
+		data := &bigmap.C2S_FightCancelSubscribe{}
+		if decode(data, buf) {
+			c.fightCancelSubscribe(data)
+		}
+	case bigmap.MSG_BIGMAP_C2S_AreasSimple:
+		data := &bigmap.C2S_AreasSimple{}
+		if decode(data, buf) {
+			c.getAreasSimple(data)
+		}
 	default:
 		log.Info("bigmap null methodID:", method)
 	}
@@ -74,19 +86,30 @@ func (c *Client) move(move *bigmap.C2S_Move) {
 		return
 	}
 
+	if info.StageNumber == 0 {
+		//TROOPS_NOT_ONSTAGE
+		log.Warn("部队未上阵")
+		return
+	}
+
 	//此支部队已在大地图 则从大地图中得到全新数据
-	if bmtroops, ok := bigmapmanage.GetBigMapTroopsInfo(move.TroopsID); ok {
+	if bmtroops, ok := bigmapmanage.GetMapTroopsInfo(move.TroopsID); ok {
 		info = &bmtroops
 		//info.State == common.TroopsState_Move
 		if info.State == common.TroopsState_fight {
 			// 战斗中的无法接受命令
-			log.Warn("大地图 移动 战斗中的无法接受命令 TroopsID:", move.TroopsID)
+			log.Warn("大地图 移动 战斗中的无法接受命令 : ", info.TroopsID, info.AreasIndex, info.FitghtState)
 		}
 	} else {
 		//大地图中未找到该部队，部队位置启始为主城
 		info.State = common.TroopsState_StandBy
 		info.AreasIndex = cfg.GetCountryAreasIndex(info.Country)
 	}
+
+	// if info.FitghtState > 0 {
+	// 	log.Warn("队伍战斗中 已上阵 无法移动")
+	// 	return
+	// }
 
 	info.AreasList = move.AreasList
 	info.MoveNum = 0
@@ -97,7 +120,7 @@ func (c *Client) move(move *bigmap.C2S_Move) {
 
 	//队伍移动发送大地图处理
 	info.State = common.TroopsState_Move
-	bigmapmanage.SendTroopsMove(*info)
+	bigmapmanage.SendTroopsMove(info)
 	//角色部队数据更新
 	//updateTroopsInfo(info)
 }
@@ -115,4 +138,23 @@ func (c *Client) s2cMove(troopsid, areasindex, state int32, arrivaltime int64) {
 //暂停移动
 func (c *Client) stopMoving(stop *bigmap.C2S_StopMoving) {
 	bigmapmanage.SendStopMove(stop.TroopsID)
+}
+
+//消息订阅
+func (c *Client) fightSubscribe(data *bigmap.C2S_FightSubscribe) {
+	c.areasindex = data.AreasIndex
+	bigmapmanage.SendAreasSubscribe(data.AreasIndex, c.roleid)
+}
+
+//取消消息订阅
+func (c *Client) fightCancelSubscribe(data *bigmap.C2S_FightCancelSubscribe) {
+	bigmapmanage.SendAreasCancelSubscribe(data.AreasIndex, c.roleid)
+}
+
+//获取区域部队数量 简讯
+func (c *Client) getAreasSimple(data *bigmap.C2S_AreasSimple) {
+	list := bigmapmanage.GetAreasSimple(data.AreasIndex)
+	c.Send(int32(bigmap.MSG_BIGMAP_Module_BIGMAP),
+		int32(bigmap.MSG_BIGMAP_S2C_AreasSimple),
+		&bigmap.S2C_AreasSimple{AreasIndex: data.AreasIndex, TroopsNumList: list})
 }

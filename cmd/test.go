@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -31,8 +32,32 @@ type teststr struct {
 
 func exectest(cmd *cobra.Command, args []string) {
 
-	//mongodb()
+	//slice()
+	//time.Sleep(time.Second * 10)
 	//objectPool()
+
+}
+
+func slice() {
+	var ss []string
+	fmt.Printf("[ local print ]\t:\t length:%v\taddr:%p\tisnil:%v\n", len(ss), ss, ss == nil)
+	fmt.Println("func print", ss)
+	//切片尾部追加元素append elemnt
+	for i := 0; i < 10; i++ {
+		ss = append(ss, fmt.Sprintf("s%d", i))
+	}
+	fmt.Printf("[ local print ]\t:\tlength:%v\taddr:%p\tisnil:%v\n", len(ss), ss, ss == nil)
+	fmt.Println("after append", ss)
+	//删除切片元素remove element at index
+	index := 5
+	ss = append(ss[:index], ss[index+1:]...)
+	fmt.Println("after delete", ss)
+	//在切片中间插入元素insert element at index;
+	//注意：保存后部剩余元素，必须新建一个临时切片
+	rear := append([]string{}, ss[index:]...)
+	ss = append(ss[0:index], "inserted")
+	ss = append(ss, rear...)
+	fmt.Println("after insert\n", ss)
 
 }
 
@@ -86,8 +111,8 @@ func mongodb() {
 	log.Info("Inserted multiple documents: ", insertManyResult.InsertedIDs)
 
 	// 更新
-	filter := bson.D{{"name", "Ash"}}
-	update := bson.D{{"$inc", bson.D{{"age", 1}}}}
+	filter := bson.D{primitive.E{Key: "name", Value: "Ash"}}
+	update := bson.D{primitive.E{Key: "$inc", Value: bson.D{primitive.E{Key: "age", Value: 1}}}}
 	updateResult, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		log.Fatal(err)
@@ -95,7 +120,7 @@ func mongodb() {
 	log.Infof("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 
 	//查找
-	filter2 := bson.D{{"name", "Ash"}}
+	filter2 := bson.D{primitive.E{Key: "name", Value: "Ash"}}
 	var result trainer
 	err = collection.FindOne(context.TODO(), filter2).Decode(&result)
 	if err != nil {

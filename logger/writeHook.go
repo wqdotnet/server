@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"slgserver/tool"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -17,16 +18,20 @@ func fileHook(path string) *lfshook.LfsHook {
 		rotatelogs.WithRotationTime(time.Duration(60)*time.Minute),
 		rotatelogs.WithRotationSize(200*1024*1024),
 	)
-
+	//panic  fatal  error  warn  info  debug  trace
 	return lfshook.NewHook(
 		lfshook.WriterMap{
-			log.InfoLevel:  writer,
+			log.PanicLevel: writer,
+			log.FatalLevel: writer,
 			log.ErrorLevel: writer,
 			log.WarnLevel:  writer,
+			log.InfoLevel:  writer,
+			log.DebugLevel: writer,
+			log.TraceLevel: writer,
 		},
 		&log.TextFormatter{
 			ForceColors:     true,
-			TimestampFormat: "2006-01-02 15:04:05",
+			TimestampFormat: tool.DateTimeFormat,
 		},
 	)
 }

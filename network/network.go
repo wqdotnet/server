@@ -9,7 +9,7 @@ import (
 	"io"
 	"net"
 	"os"
-	"server/gserver/commonstruct"
+	"slgserver/gserver/commonstruct"
 	"sync"
 	"time"
 
@@ -19,17 +19,18 @@ import (
 
 //ClientInterface client hander
 type ClientInterface interface {
-	OnConnect(netconn net.Conn, packet int32, msgchan chan commonstruct.ProcessMsg, cancelFunc context.CancelFunc)
+	OnConnect(sendchan chan []byte, packet int32, msgchan chan commonstruct.ProcessMsg, addr net.Addr)
 	OnClose()
 	OnMessage(module int32, method int32, buf []byte)
 	Send(module int32, method int32, pb proto.Message)
-	ProcessMessage(msg commonstruct.ProcessMsg)
+	ProcessMessage(msg commonstruct.ProcessMsg) bool
 	//SendMsg(msg commonstruct.ProcessMsg)
 }
 
 //NetInterface network
 type NetInterface interface {
 	Start(n *NetWorkx)
+	Close()
 }
 
 //NetWorkx 网络管理
@@ -49,28 +50,37 @@ type NetWorkx struct {
 	NetType string
 	//监听端口.
 	Port int32
-	//当前连接用户数量
-	UserNumber int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
 	UserPool *sync.Pool
 	//连接用户
-	userlist map[string]ClientInterface
+	//userlist map[string]ClientInterface
 	//启动成功后回调
 	StartHook func()
+
+	//新连接回调
+	connectHook func()
+	//连接关闭回调
+	closedConnectHook func()
+	//socket 关闭回调
+	closeHook func()
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(pool *sync.Pool, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32, funcHook func()) *NetWorkx {
+func NewNetWorkX(pool *sync.Pool, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
+	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
 	return &NetWorkx{
-		Packet:      packet,
-		NetType:     nettype,
-		Port:        port,
-		UserPool:    pool,
-		userlist:    make(map[string]ClientInterface),
-		Readtimeout: readtimeout,
-		MsgTime:     msgtime,
-		MsgNum:      msgnum,
-		StartHook:   funcHook,
+		Packet:   packet,
+		NetType:  nettype,
+		Port:     port,
+		UserPool: pool,
+		//userlist:    make(map[string]ClientInterface),
+		Readtimeout:       readtimeout,
+		MsgTime:           msgtime,
+		MsgNum:            msgnum,
+		StartHook:         startHook,
+		closeHook:         closeHook,
+		connectHook:       connectHook,
+		closedConnectHook: closedConnectHook,
 	}
 }
 
@@ -95,18 +105,17 @@ func (n *NetWorkx) Start() {
 
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
-	log.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
-
 	c := n.UserPool.Get().(ClientInterface)
 	n.onConnect()
 
 	defer n.UserPool.Put(c)
-	defer n.onClose()
+	defer n.onClosedConnect()
 	defer conn.Close()
 	defer c.OnClose()
 
 	// sendc := make(chan []byte, 1)
-	//c.OnConnect(conn.RemoteAddr(), sendc)// go func(conn net.Conn) {
+	//c.OnConnect(conn.RemoteAddr(), sendc)
+	// go func(conn net.Conn) {
 	// 	for {
 	// 		select {
 	// 		case buf := <-sendc:
@@ -121,10 +130,12 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 	rootContext := context.Background()
 	ctx, cancelFunc := context.WithCancel(rootContext)
+	sendctx, sendcancelFunc := context.WithCancel(rootContext)
 
-	readc := make(chan []byte, 1)
+	readchan := make(chan []byte, 1)
+	sendchan := make(chan []byte, 1)
 	gamechan := make(chan commonstruct.ProcessMsg)
-	c.OnConnect(conn, n.Packet, gamechan, cancelFunc)
+	c.OnConnect(sendchan, n.Packet, gamechan, conn.RemoteAddr())
 
 	// for {
 	// 	_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
@@ -151,7 +162,20 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// 	}
 	// }
 
-	go func(conn net.Conn, cancelfunc context.CancelFunc) {
+	go func(conn net.Conn) {
+		for {
+			select {
+			case buf := <-sendchan:
+				le := IntToBytes(int32(len(buf)), n.Packet)
+				conn.Write(BytesCombine(le, buf))
+			case <-sendctx.Done():
+				//log.Debug("exit role sendGO")
+				return
+			}
+		}
+	}(conn)
+
+	go func(conn net.Conn, cancelfunc, sendcancelFunc context.CancelFunc) {
 		unix := time.Now().Unix()
 		msgNum := 0
 		for {
@@ -166,13 +190,15 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 				switch e {
 				case io.EOF:
 					cancelfunc()
+					sendcancelFunc()
 				default:
 					cancelfunc()
-					log.Warn("socket error:", e.Error())
+					sendcancelFunc()
+					log.Warn("socket closed:", e.Error())
 				}
 				return
 			}
-			readc <- buf
+			readchan <- buf
 
 			//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
 			now := time.Now().Unix()
@@ -180,35 +206,50 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 			if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
 				//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
-				gamechan <- commonstruct.ProcessMsg{MsgType: "TimeInterval", Data: msgNum}
+
+				gamechan <- commonstruct.ProcessMsg{MsgType: commonstruct.ProcessMsgTimeInterval, Data: msgNum}
 				unix = now
 				msgNum = 0
 			}
 		}
-	}(conn, cancelFunc)
+	}(conn, cancelFunc, sendcancelFunc)
 
 	for {
 		select {
-		case buf := <-readc:
+		case buf := <-readchan:
 			module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 			method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
 			c.OnMessage(module, method, buf[n.Packet+4:])
 		case msg := <-gamechan:
-			c.ProcessMessage(msg)
+			if !c.ProcessMessage(msg) {
+				return
+			}
 		case <-ctx.Done():
-			log.Debug("exit role goroutine")
+			//log.Debug("exit role goroutine")
 			return
 		}
 	}
+
 }
 
 func (n *NetWorkx) onConnect() {
-	n.UserNumber++
-	log.Debug("user number:", n.UserNumber)
+	if n.connectHook != nil {
+		n.connectHook()
+	}
 }
-func (n *NetWorkx) onClose() {
-	n.UserNumber--
-	log.Debug("user number:", n.UserNumber)
+
+func (n *NetWorkx) onClosedConnect() {
+	if n.closedConnectHook != nil {
+		n.closedConnectHook()
+	}
+}
+
+//Close 关闭
+func (n *NetWorkx) Close() {
+	if n.closeHook != nil {
+		n.closeHook()
+	}
+	n.src.Close()
 }
 
 func checkError(err error) {
@@ -219,7 +260,7 @@ func checkError(err error) {
 }
 
 //IntToBytes int 转换为[]byte
-func IntToBytes(i int, packet int32) []byte {
+func IntToBytes(i int32, packet int32) []byte {
 	var buf = make([]byte, 2)
 	if packet == 2 {
 		binary.BigEndian.PutUint16(buf, uint16(i))

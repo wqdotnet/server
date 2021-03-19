@@ -37,6 +37,11 @@ func (c *KCPNetwork) Start(nw *NetWorkx) {
 	}
 }
 
+//Close 关闭
+func (c *KCPNetwork) Close() {
+
+}
+
 //demo :
 // func startDemo() {
 // 	key := pbkdf2.Key([]byte("demo pass"), []byte("demo salt"), 1024, 32, sha1.New)

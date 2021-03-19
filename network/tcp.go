@@ -36,15 +36,19 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 	if nw.StartHook != nil {
 		nw.StartHook()
 	}
-	//go func() {
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Error(err.Error())
 			break
 		}
+		log.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
 		go nw.HandleClient(conn)
 	}
-	//}()
-	//select {}
+}
+
+//Close 关闭
+func (c *TCPNetwork) Close() {
+
 }

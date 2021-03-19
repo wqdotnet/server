@@ -1,9 +1,11 @@
 package clienconnect
 
 import (
-	"server/msgproto/account"
-	"server/msgproto/bigmap"
-	"server/msgproto/protocol_base"
+	"slgserver/msgproto/account"
+	"slgserver/msgproto/bigmap"
+	"slgserver/msgproto/fight"
+	"slgserver/msgproto/protocol_base"
+	"slgserver/msgproto/troops"
 
 	"time"
 
@@ -26,6 +28,10 @@ func (c *Client) rount(module int32, method int32, buf []byte) {
 		c.loginModule(method, buf)
 	case int32(bigmap.MSG_BIGMAP_Module_BIGMAP):
 		c.bigmapModule(method, buf)
+	case int32(troops.MSG_TROOPS_Module_TROOPS):
+		c.troopsModule(method, buf)
+	case int32(fight.MSG_FIGHT_Module_FIGHT):
+		c.fightModule(method, buf)
 	default:
 		c.EmptyMsg(module, method)
 	}

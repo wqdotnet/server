@@ -1,0 +1,1204 @@
+{
+  "ExpList": [
+    {
+      "Level": 1,
+      "RoleExp": 0,
+      "TroopsExp": 0,
+      "UnlockID": 1
+    },
+    {
+      "Level": 2,
+      "RoleExp": 10000,
+      "TroopsExp": 2000,
+      "UnlockID": 2
+    },
+    {
+      "Level": 3,
+      "RoleExp": 50982,
+      "TroopsExp": 10196,
+      "UnlockID": 3
+    },
+    {
+      "Level": 4,
+      "RoleExp": 132201,
+      "TroopsExp": 26440,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 5,
+      "RoleExp": 259920,
+      "TroopsExp": 51984,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 6,
+      "RoleExp": 439116,
+      "TroopsExp": 87823,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 7,
+      "RoleExp": 673993,
+      "TroopsExp": 134798,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 8,
+      "RoleExp": 968234,
+      "TroopsExp": 193646,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 9,
+      "RoleExp": 1325139,
+      "TroopsExp": 265027,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 10,
+      "RoleExp": 1747712,
+      "TroopsExp": 349542,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 11,
+      "RoleExp": 2238721,
+      "TroopsExp": 447744,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 12,
+      "RoleExp": 2800740,
+      "TroopsExp": 560148,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 13,
+      "RoleExp": 3436180,
+      "TroopsExp": 687236,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 14,
+      "RoleExp": 4147313,
+      "TroopsExp": 829462,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 15,
+      "RoleExp": 4936292,
+      "TroopsExp": 987258,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 16,
+      "RoleExp": 5805163,
+      "TroopsExp": 1161032,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 17,
+      "RoleExp": 6755880,
+      "TroopsExp": 1351176,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 18,
+      "RoleExp": 7790314,
+      "TroopsExp": 1558062,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 19,
+      "RoleExp": 8910260,
+      "TroopsExp": 1782052,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 20,
+      "RoleExp": 10117447,
+      "TroopsExp": 2023489,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 21,
+      "RoleExp": 11413543,
+      "TroopsExp": 2282708,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 22,
+      "RoleExp": 12800158,
+      "TroopsExp": 2560031,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 23,
+      "RoleExp": 14278852,
+      "TroopsExp": 2855770,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 24,
+      "RoleExp": 15851136,
+      "TroopsExp": 3170227,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 25,
+      "RoleExp": 17518479,
+      "TroopsExp": 3503695,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 26,
+      "RoleExp": 19282308,
+      "TroopsExp": 3856461,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 27,
+      "RoleExp": 21144010,
+      "TroopsExp": 4228802,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 28,
+      "RoleExp": 23104940,
+      "TroopsExp": 4620988,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 29,
+      "RoleExp": 25166416,
+      "TroopsExp": 5033283,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 30,
+      "RoleExp": 27329727,
+      "TroopsExp": 5465945,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 31,
+      "RoleExp": 29596131,
+      "TroopsExp": 5919226,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 32,
+      "RoleExp": 31966860,
+      "TroopsExp": 6393372,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 33,
+      "RoleExp": 34443117,
+      "TroopsExp": 6888623,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 34,
+      "RoleExp": 37026082,
+      "TroopsExp": 7405216,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 35,
+      "RoleExp": 39716910,
+      "TroopsExp": 7943382,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 36,
+      "RoleExp": 42516734,
+      "TroopsExp": 8503346,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 37,
+      "RoleExp": 45426667,
+      "TroopsExp": 9085333,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 38,
+      "RoleExp": 48447798,
+      "TroopsExp": 9689559,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 39,
+      "RoleExp": 51581201,
+      "TroopsExp": 10316240,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 40,
+      "RoleExp": 54827927,
+      "TroopsExp": 10965585,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 41,
+      "RoleExp": 58189011,
+      "TroopsExp": 11637802,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 42,
+      "RoleExp": 61665472,
+      "TroopsExp": 12333094,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 43,
+      "RoleExp": 65258311,
+      "TroopsExp": 13051662,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 44,
+      "RoleExp": 68968514,
+      "TroopsExp": 13793702,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 45,
+      "RoleExp": 72797051,
+      "TroopsExp": 14559410,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 46,
+      "RoleExp": 76744879,
+      "TroopsExp": 15348975,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 47,
+      "RoleExp": 80812939,
+      "TroopsExp": 16162587,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 48,
+      "RoleExp": 85002160,
+      "TroopsExp": 17000432,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 49,
+      "RoleExp": 89313458,
+      "TroopsExp": 17862691,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 50,
+      "RoleExp": 93747735,
+      "TroopsExp": 18749547,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 51,
+      "RoleExp": 98305883,
+      "TroopsExp": 19661176,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 52,
+      "RoleExp": 102988780,
+      "TroopsExp": 20597756,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 53,
+      "RoleExp": 107797293,
+      "TroopsExp": 21559458,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 54,
+      "RoleExp": 112732280,
+      "TroopsExp": 22546456,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 55,
+      "RoleExp": 117794587,
+      "TroopsExp": 23558917,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 56,
+      "RoleExp": 122985049,
+      "TroopsExp": 24597009,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 57,
+      "RoleExp": 128304492,
+      "TroopsExp": 25660898,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 58,
+      "RoleExp": 133753732,
+      "TroopsExp": 26750746,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 59,
+      "RoleExp": 139333576,
+      "TroopsExp": 27866715,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 60,
+      "RoleExp": 145044821,
+      "TroopsExp": 29008964,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 61,
+      "RoleExp": 150888255,
+      "TroopsExp": 30177651,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 62,
+      "RoleExp": 156864659,
+      "TroopsExp": 31372931,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 63,
+      "RoleExp": 162974805,
+      "TroopsExp": 32594961,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 64,
+      "RoleExp": 169219454,
+      "TroopsExp": 33843890,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 65,
+      "RoleExp": 175599364,
+      "TroopsExp": 35119872,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 66,
+      "RoleExp": 182115280,
+      "TroopsExp": 36423056,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 67,
+      "RoleExp": 188767945,
+      "TroopsExp": 37753589,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 68,
+      "RoleExp": 195558089,
+      "TroopsExp": 39111617,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 69,
+      "RoleExp": 202486439,
+      "TroopsExp": 40497287,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 70,
+      "RoleExp": 209553714,
+      "TroopsExp": 41910742,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 71,
+      "RoleExp": 216760624,
+      "TroopsExp": 43352124,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 72,
+      "RoleExp": 224107875,
+      "TroopsExp": 44821575,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 73,
+      "RoleExp": 231596166,
+      "TroopsExp": 46319233,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 74,
+      "RoleExp": 239226188,
+      "TroopsExp": 47845237,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 75,
+      "RoleExp": 246998628,
+      "TroopsExp": 49399725,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 76,
+      "RoleExp": 254914165,
+      "TroopsExp": 50982833,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 77,
+      "RoleExp": 262973472,
+      "TroopsExp": 52594694,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 78,
+      "RoleExp": 271177219,
+      "TroopsExp": 54235443,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 79,
+      "RoleExp": 279526068,
+      "TroopsExp": 55905213,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 80,
+      "RoleExp": 288020675,
+      "TroopsExp": 57604135,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 81,
+      "RoleExp": 296661692,
+      "TroopsExp": 59332338,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 82,
+      "RoleExp": 305449764,
+      "TroopsExp": 61089952,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 83,
+      "RoleExp": 314385533,
+      "TroopsExp": 62877106,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 84,
+      "RoleExp": 323469633,
+      "TroopsExp": 64693926,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 85,
+      "RoleExp": 332702697,
+      "TroopsExp": 66540539,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 86,
+      "RoleExp": 342085349,
+      "TroopsExp": 68417069,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 87,
+      "RoleExp": 351618211,
+      "TroopsExp": 70323642,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 88,
+      "RoleExp": 361301898,
+      "TroopsExp": 72260379,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 89,
+      "RoleExp": 371137022,
+      "TroopsExp": 74227404,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 90,
+      "RoleExp": 381124191,
+      "TroopsExp": 76224838,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 91,
+      "RoleExp": 391264005,
+      "TroopsExp": 78252801,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 92,
+      "RoleExp": 401557065,
+      "TroopsExp": 80311413,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 93,
+      "RoleExp": 412003963,
+      "TroopsExp": 82400792,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 94,
+      "RoleExp": 422605290,
+      "TroopsExp": 84521058,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 95,
+      "RoleExp": 433361629,
+      "TroopsExp": 86672325,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 96,
+      "RoleExp": 444273564,
+      "TroopsExp": 88854712,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 97,
+      "RoleExp": 455341671,
+      "TroopsExp": 91068334,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 98,
+      "RoleExp": 466566524,
+      "TroopsExp": 93313304,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 99,
+      "RoleExp": 477948692,
+      "TroopsExp": 95589738,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 100,
+      "RoleExp": 489488741,
+      "TroopsExp": 97897748,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 101,
+      "RoleExp": 501187233,
+      "TroopsExp": 100237446,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 102,
+      "RoleExp": 513044727,
+      "TroopsExp": 102608945,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 103,
+      "RoleExp": 525061776,
+      "TroopsExp": 105012355,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 104,
+      "RoleExp": 537238933,
+      "TroopsExp": 107447786,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 105,
+      "RoleExp": 549576744,
+      "TroopsExp": 109915348,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 106,
+      "RoleExp": 562075755,
+      "TroopsExp": 112415151,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 107,
+      "RoleExp": 574736505,
+      "TroopsExp": 114947301,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 108,
+      "RoleExp": 587559533,
+      "TroopsExp": 117511906,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 109,
+      "RoleExp": 600545373,
+      "TroopsExp": 120109074,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 110,
+      "RoleExp": 613694555,
+      "TroopsExp": 122738911,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 111,
+      "RoleExp": 627007607,
+      "TroopsExp": 125401521,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 112,
+      "RoleExp": 640485054,
+      "TroopsExp": 128097010,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 113,
+      "RoleExp": 654127418,
+      "TroopsExp": 130825483,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 114,
+      "RoleExp": 667935216,
+      "TroopsExp": 133587043,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 115,
+      "RoleExp": 681908965,
+      "TroopsExp": 136381793,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 116,
+      "RoleExp": 696049177,
+      "TroopsExp": 139209835,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 117,
+      "RoleExp": 710356362,
+      "TroopsExp": 142071272,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 118,
+      "RoleExp": 724831026,
+      "TroopsExp": 144966205,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 119,
+      "RoleExp": 739473673,
+      "TroopsExp": 147894734,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 120,
+      "RoleExp": 754284805,
+      "TroopsExp": 150856961,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 121,
+      "RoleExp": 769264920,
+      "TroopsExp": 153852984,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 122,
+      "RoleExp": 784414512,
+      "TroopsExp": 156882902,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 123,
+      "RoleExp": 799734077,
+      "TroopsExp": 159946815,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 124,
+      "RoleExp": 815224103,
+      "TroopsExp": 163044820,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 125,
+      "RoleExp": 830885079,
+      "TroopsExp": 166177015,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 126,
+      "RoleExp": 846717489,
+      "TroopsExp": 169343497,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 127,
+      "RoleExp": 862721817,
+      "TroopsExp": 172544363,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 128,
+      "RoleExp": 878898542,
+      "TroopsExp": 175779708,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 129,
+      "RoleExp": 895248142,
+      "TroopsExp": 179049628,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 130,
+      "RoleExp": 911771093,
+      "TroopsExp": 182354218,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 131,
+      "RoleExp": 928467866,
+      "TroopsExp": 185693573,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 132,
+      "RoleExp": 945338934,
+      "TroopsExp": 189067786,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 133,
+      "RoleExp": 962384762,
+      "TroopsExp": 192476952,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 134,
+      "RoleExp": 979605819,
+      "TroopsExp": 195921163,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 135,
+      "RoleExp": 997002566,
+      "TroopsExp": 199400513,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 136,
+      "RoleExp": 1014575465,
+      "TroopsExp": 202915093,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 137,
+      "RoleExp": 1032324975,
+      "TroopsExp": 206464995,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 138,
+      "RoleExp": 1050251554,
+      "TroopsExp": 210050310,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 139,
+      "RoleExp": 1068355654,
+      "TroopsExp": 213671130,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 140,
+      "RoleExp": 1086637730,
+      "TroopsExp": 217327546,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 141,
+      "RoleExp": 1105098231,
+      "TroopsExp": 221019646,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 142,
+      "RoleExp": 1123737605,
+      "TroopsExp": 224747521,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 143,
+      "RoleExp": 1142556299,
+      "TroopsExp": 228511259,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 144,
+      "RoleExp": 1161554757,
+      "TroopsExp": 232310951,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 145,
+      "RoleExp": 1180733421,
+      "TroopsExp": 236146684,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 146,
+      "RoleExp": 1200092731,
+      "TroopsExp": 240018546,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 147,
+      "RoleExp": 1219633124,
+      "TroopsExp": 243926624,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 148,
+      "RoleExp": 1239355038,
+      "TroopsExp": 247871007,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 149,
+      "RoleExp": 1259258906,
+      "TroopsExp": 251851781,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 150,
+      "RoleExp": 1279345160,
+      "TroopsExp": 255869032,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 151,
+      "RoleExp": 1299614232,
+      "TroopsExp": 259922846,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 152,
+      "RoleExp": 1320066549,
+      "TroopsExp": 264013309,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 153,
+      "RoleExp": 1340702538,
+      "TroopsExp": 268140507,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 154,
+      "RoleExp": 1361522624,
+      "TroopsExp": 272304524,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 155,
+      "RoleExp": 1382527230,
+      "TroopsExp": 276505446,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 156,
+      "RoleExp": 1403716777,
+      "TroopsExp": 280743355,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 157,
+      "RoleExp": 1425091685,
+      "TroopsExp": 285018337,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 158,
+      "RoleExp": 1446652371,
+      "TroopsExp": 289330474,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 159,
+      "RoleExp": 1468399251,
+      "TroopsExp": 293679850,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 160,
+      "RoleExp": 1490332739,
+      "TroopsExp": 298066547,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 161,
+      "RoleExp": 1512453249,
+      "TroopsExp": 302490649,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 162,
+      "RoleExp": 1534761190,
+      "TroopsExp": 306952238,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 163,
+      "RoleExp": 1557256972,
+      "TroopsExp": 311451394,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 164,
+      "RoleExp": 1579941003,
+      "TroopsExp": 315988200,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 165,
+      "RoleExp": 1602813688,
+      "TroopsExp": 320562737,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 166,
+      "RoleExp": 1625875432,
+      "TroopsExp": 325175086,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 167,
+      "RoleExp": 1649126638,
+      "TroopsExp": 329825327,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 168,
+      "RoleExp": 1672567706,
+      "TroopsExp": 334513541,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 169,
+      "RoleExp": 1696199036,
+      "TroopsExp": 339239807,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 170,
+      "RoleExp": 1720021025,
+      "TroopsExp": 344004205,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 171,
+      "RoleExp": 1744034072,
+      "TroopsExp": 348806814,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 172,
+      "RoleExp": 1768238569,
+      "TroopsExp": 353647713,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 173,
+      "RoleExp": 1792634912,
+      "TroopsExp": 358526982,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 174,
+      "RoleExp": 1817223491,
+      "TroopsExp": 363444698,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 175,
+      "RoleExp": 1842004697,
+      "TroopsExp": 368400939,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 176,
+      "RoleExp": 1866978920,
+      "TroopsExp": 373395784,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 177,
+      "RoleExp": 1892146546,
+      "TroopsExp": 378429309,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 178,
+      "RoleExp": 1917507962,
+      "TroopsExp": 383501592,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 179,
+      "RoleExp": 1943063552,
+      "TroopsExp": 388612710,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 180,
+      "RoleExp": 1968813700,
+      "TroopsExp": 393762740,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 181,
+      "RoleExp": 1994758787,
+      "TroopsExp": 398951757,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 182,
+      "RoleExp": 2020899195,
+      "TroopsExp": 404179839,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 183,
+      "RoleExp": 2047235301,
+      "TroopsExp": 409447060,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 184,
+      "RoleExp": 2073767485,
+      "TroopsExp": 414753497,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 185,
+      "RoleExp": 2100496122,
+      "TroopsExp": 420099224,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 186,
+      "RoleExp": 2127421587,
+      "TroopsExp": 425484317,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 187,
+      "RoleExp": 2154544254.0,
+      "TroopsExp": 430908850,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 188,
+      "RoleExp": 2181864495.0,
+      "TroopsExp": 436372899,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 189,
+      "RoleExp": 2209382683.0,
+      "TroopsExp": 441876536,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 190,
+      "RoleExp": 2237099186.0,
+      "TroopsExp": 447419837,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 191,
+      "RoleExp": 2265014372.0,
+      "TroopsExp": 453002874,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 192,
+      "RoleExp": 2293128611.0,
+      "TroopsExp": 458625722,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 193,
+      "RoleExp": 2321442266.0,
+      "TroopsExp": 464288453,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 194,
+      "RoleExp": 2349955704.0,
+      "TroopsExp": 469991140,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 195,
+      "RoleExp": 2378669288.0,
+      "TroopsExp": 475733857,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 196,
+      "RoleExp": 2407583380.0,
+      "TroopsExp": 481516676,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 197,
+      "RoleExp": 2436698341.0,
+      "TroopsExp": 487339668,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 198,
+      "RoleExp": 2466014531.0,
+      "TroopsExp": 493202906,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 199,
+      "RoleExp": 2495532310.0,
+      "TroopsExp": 499106462,
+      "UnlockID": 0.0
+    },
+    {
+      "Level": 200,
+      "RoleExp": 2525252033.0,
+      "TroopsExp": 505050406,
+      "UnlockID": 0.0
+    }
+  ]
+}

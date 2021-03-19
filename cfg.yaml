@@ -1,6 +1,11 @@
-ServerName: "server"
+ServerName: "SlgServer"
 ServerID:   1
   
+#守护进程  
+Daemon: false
+RestartNum: 2
+
+
 ##web htpp port
 OpenHTTP: false
 HTTPPort: 8080
@@ -30,7 +35,7 @@ MongoConnStr: "mongodb://localhost:27017"
 Mongodb: "slggame"
 
 #redis
-RedisConnStr: "127.0.0.1:6379"
+RedisConnStr: "localhost:6379"
 RedisDB: 0
 
 
@@ -39,7 +44,7 @@ CfgPath: "./config"
 CfgType: "json"
 
 #log
-LogWrite: false
+LogWrite: true
 Loglevel: "debug"   #panic  fatal  error  warn  info  debug  trace
 LogPath:  "./log"
 LogName: "log"

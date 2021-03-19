@@ -20,6 +20,7 @@ enum MSG_ACCOUNT {
     C2S_UpdateRoleName= 1005;//修改角色名
     S2C_UpdateRoleName= 1006;
 
+    S2C_RoleAddExp =1010; //角色获取经验
     //C2S_DeleteRole= 1007;//删除角色
     //S2C_DeleteRole= 1008;
 
@@ -48,9 +49,16 @@ enum MSG_ACCOUNT {
 message P_RoleInfo {
     int32 roleID = 1;
     string roleName =2;    
-    int32 level =3;
-    int32 country =4; //所属国家
-    map<int32, int32>  TesourcesList = 5;//玩家资源列表
+    int64 exp = 3;
+    int32 level =4;
+    int32 country =5; //所属国家
+    map<int32, int32>  TesourcesList = 6;//玩家资源列表
+    RoleSettings Settings =7;  //游戏内设置
+}
+
+//游戏设置
+message RoleSettings {
+    bool AutoSelectTactics = 1;//自动选择战术
 }
 
 
@@ -88,6 +96,13 @@ message c2s_UpdateRoleName {
 message s2c_UpdateRoleName {
     bool success =1;
     string msg = 2;
+}
+
+
+message s2c_RoleAddExp {
+    int64 addExp =1;
+    int64 NewExp =2;
+    int64 NewLevel =3;
 }
 
 // 删除角色

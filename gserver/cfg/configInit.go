@@ -18,7 +18,7 @@ func InitViperConfig(CfgPath string, CfgType string) {
 	v.AddConfigPath(CfgPath)
 	v.SetConfigType(CfgType)
 
-	reflectField(&GlobalCfg, v)
+	reflectField(&GameCfg, v)
 
 	// v.WatchConfig()
 	// v.OnConfigChange(fileChanged)
@@ -45,10 +45,13 @@ func reflectField(structName interface{}, v *viper.Viper) {
 		typename := t.Field(i).Type().Name()
 		field := t.Field(i).Interface()
 
-		v.SetConfigName(typename)
+		log.Info("init config :", fieldname)
+		v.SetConfigName(fieldname)
+
 		if err := v.ReadInConfig(); err != nil {
-			log.Fatalf("%v [%v][%v]", err, typename, fieldname)
+			log.Fatalf("read: %v [%v][%v]", err, typename, fieldname)
 		}
+
 		if err := v.UnmarshalExact(&field); err != nil {
 			log.Fatal("err:", err)
 		}
