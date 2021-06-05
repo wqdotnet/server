@@ -1,4 +1,4 @@
-module slgserver
+module server
 
 go 1.15
 

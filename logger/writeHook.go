@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"slgserver/tool"
+	"server/tool"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"

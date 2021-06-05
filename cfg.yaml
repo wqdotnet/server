@@ -1,4 +1,4 @@
-ServerName: "SlgServer"
+ServerName: "server"
 ServerID:   1
   
 #守护进程  

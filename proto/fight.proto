@@ -1,7 +1,7 @@
 syntax = "proto3"; 
 package fight;
 import "common.proto";
-option go_package = "slgserver/msgproto/fight";
+option go_package = "server/msgproto/fight";
 
 //消息号
 enum MSG_FIGHT {

@@ -5,12 +5,12 @@ FROM alpine:latest
 #ENV PATH /usr/local/nginx/sbin:$PATH
 
 #[WORKDIR 进入docker内文件夹] 相当于cd $GOPATH/..
-WORKDIR /home/slgserver
+WORKDIR /home/server
 
 #[ADD 本地文件 docker文件地址]   文件放在当前目录下，拷过去会自动解压
-ADD slgserver  /home/slgserver
-#ADD cfg.yaml  /home/slgserver/cfg.yaml
-#ADD config /home/slgserver/config
+ADD server  /home/server
+#ADD cfg.yaml  /home/server/cfg.yaml
+#ADD config /home/server/config
 
 #RUN 执行以下命令 
 #RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
@@ -23,14 +23,14 @@ EXPOSE 8080 8081 3344
 #CMD ["nginx"]
 
 #ENTRYPOINT ["command", "param1", "param2"]
-ENTRYPOINT ["./slgserver","start","--config=/home/slgserver/config/cfg.yaml"]
+ENTRYPOINT ["./server","start","--config=/home/server/config/cfg.yaml"]
 
 #=================================================================================================================================================
 #构建镜像 [ -t name:tag ]
 #sudo docker build -t slgdocker .
 
-#运行容器 -v[本地配置地址 :docker内读取配置固定地址"/home/slgserver/config"]
-#sudo docker run -t -i -d -v /mnt/e/dockerconfig:/home/slgserver/config -p 3344:3344 -p 8080:8080 -p 8081:8081 --name slggame  slgdocker:latest
+#运行容器 -v[本地配置地址 :docker内读取配置固定地址"/home/server/config"]
+#sudo docker run -t -i -d -v /mnt/e/dockerconfig:/home/server/config -p 3344:3344 -p 8080:8080 -p 8081:8081 --name slggame  slgdocker:latest
 
 #进入容器 
 #sudo docker exec -it slggame /bin/sh

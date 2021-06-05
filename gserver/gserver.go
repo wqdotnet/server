@@ -4,19 +4,17 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"slgserver/db"
-	"slgserver/gserver/bigmapmanage"
-	"slgserver/gserver/cfg"
-	"slgserver/gserver/clienconnect"
-	"slgserver/gserver/timedtasks"
-	"slgserver/logger"
-	"slgserver/network"
-	"slgserver/web"
+	"server/db"
+	"server/gserver/cfg"
+	"server/gserver/timedtasks"
+	"server/logger"
+	"server/network"
+	"server/web"
 	"sync"
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
-	//msg "slgserver/proto"
+	//msg "server/proto"
 )
 
 // ServerConfig  server cfg
@@ -133,26 +131,17 @@ func StartGServer() {
 	// }
 
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
-	//检查大地图临近区域配置数据是否有遗漏
-	if !cfg.CheckBigMapConfig() {
-		log.Fatal("地图配置数据有误")
-	}
 
 	db.StartMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
 	db.StartRedis(ServerCfg.RedisConnStr, ServerCfg.RedisDB)
-	clienconnect.InitAutoID()
-
-	//ctx, cancelFunc := context.WithCancel(context.Background())
-	bigmapmanage.StartBigmapGoroutine()
-	defer bigmapmanage.CloneBigmap()
 
 	//启动定时器
 	timedtasks.StartCronTasks()
-	//大地图loop
-	timedtasks.AddTasks("bigmaploop", "* * * * * ?", func() {
-		bigmapmanage.SendMsgBigMap("BigMapLoop_OneSecond")
-	})
-	defer timedtasks.RemoveTasks("bigmaploop")
+	// //大地图loop
+	// timedtasks.AddTasks("bigmaploop", "* * * * * ?", func() {
+	// 	bigmapmanage.SendMsgBigMap("BigMapLoop_OneSecond")
+	// })
+	//defer timedtasks.RemoveTasks("bigmaploop")
 
 	if ServerCfg.OpenHTTP {
 		go web.Start(ServerCfg.HTTPPort)
@@ -165,7 +154,7 @@ func StartGServer() {
 	GameServerInfo = gameServer{
 		nw: network.NewNetWorkX(&sync.Pool{
 			New: func() interface{} {
-				return clienconnect.NewClient() //new(clienconnect.Client)
+				return nil // clienconnect.NewClient() //new(clienconnect.Client)
 			}},
 			ServerCfg.Port,
 			ServerCfg.Packet,

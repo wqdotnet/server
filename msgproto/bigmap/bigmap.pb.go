@@ -11,8 +11,8 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
-	_ "slgserver/msgproto/common"
-	troops "slgserver/msgproto/troops"
+	_ "server/msgproto/common"
+	troops "server/msgproto/troops"
 	sync "sync"
 )
 

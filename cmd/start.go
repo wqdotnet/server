@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"slgserver/gserver"
+	"server/gserver"
 
 	"github.com/spf13/cobra"
-	//msg "slgserver/proto"
+	//msg "server/proto"
 )
 
 // startCmd represents the start command

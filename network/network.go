@@ -9,7 +9,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"slgserver/gserver/commonstruct"
 	"sync"
 	"time"
 
@@ -19,12 +18,12 @@ import (
 
 //ClientInterface client hander
 type ClientInterface interface {
-	OnConnect(sendchan chan []byte, packet int32, msgchan chan commonstruct.ProcessMsg, addr net.Addr)
+	//OnConnect(sendchan chan []byte, packet int32, msgchan chan commonstruct.ProcessMsg, addr net.Addr)
 	OnClose()
 	OnMessage(module int32, method int32, buf []byte)
 	Send(module int32, method int32, pb proto.Message)
-	ProcessMessage(msg commonstruct.ProcessMsg) bool
-	//SendMsg(msg commonstruct.ProcessMsg)
+	//ProcessMessage(msg commonstruct.ProcessMsg) bool
+
 }
 
 //NetInterface network
@@ -134,8 +133,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 	readchan := make(chan []byte, 1)
 	sendchan := make(chan []byte, 1)
-	gamechan := make(chan commonstruct.ProcessMsg)
-	c.OnConnect(sendchan, n.Packet, gamechan, conn.RemoteAddr())
+	// gamechan := make(chan commonstruct.ProcessMsg)
+	// c.OnConnect(sendchan, n.Packet, gamechan, conn.RemoteAddr())
 
 	// for {
 	// 	_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
@@ -207,7 +206,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 			if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
 				//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
 
-				gamechan <- commonstruct.ProcessMsg{MsgType: commonstruct.ProcessMsgTimeInterval, Data: msgNum}
+				//gamechan <- commonstruct.ProcessMsg{MsgType: commonstruct.ProcessMsgTimeInterval, Data: msgNum}
 				unix = now
 				msgNum = 0
 			}
@@ -220,10 +219,10 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 			module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 			method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
 			c.OnMessage(module, method, buf[n.Packet+4:])
-		case msg := <-gamechan:
-			if !c.ProcessMessage(msg) {
-				return
-			}
+		// case msg := <-gamechan:
+		// 	if !c.ProcessMessage(msg) {
+		// 		return
+		// 	}
 		case <-ctx.Done():
 			//log.Debug("exit role goroutine")
 			return

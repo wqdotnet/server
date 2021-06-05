@@ -1,7 +1,7 @@
 syntax = "proto3"; 
 package troops;
 import "common.proto";
-option go_package = "slgserver/msgproto/troops";
+option go_package = "server/msgproto/troops";
 
 
 

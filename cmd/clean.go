@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"context"
-	"slgserver/db"
-	"slgserver/gserver"
+	"server/db"
+	"server/gserver"
 
 	"github.com/spf13/cobra"
 )

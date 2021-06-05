@@ -1,6 +1,6 @@
 syntax = "proto3";
 package account;
-option go_package = "slgserver/msgproto/account";
+option go_package = "server/msgproto/account";
 
 
 

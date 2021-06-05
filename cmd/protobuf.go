@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"slgserver/gserver"
-	"slgserver/tool"
+	"server/gserver"
+	"server/tool"
 	"strconv"
 	"time"
 

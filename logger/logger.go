@@ -3,7 +3,7 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"slgserver/tool"
+	"server/tool"
 
 	log "github.com/sirupsen/logrus"
 )

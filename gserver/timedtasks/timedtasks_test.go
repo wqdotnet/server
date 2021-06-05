@@ -1,7 +1,7 @@
 package timedtasks
 
 import (
-	"slgserver/tool"
+	"server/tool"
 	"testing"
 	"time"
 

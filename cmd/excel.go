@@ -16,10 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"slgserver/gserver/cfg"
+	"server/gserver/cfg"
 
-	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -54,46 +52,46 @@ func init() {
 
 func excel() {
 	cfg.InitViperConfig("config", "json")
-	cfg.CheckBigMapConfig()
+	// cfg.CheckBigMapConfig()
 
-	f := excelize.NewFile()
-	// Create a new sheet.
-	index := f.NewSheet("AreasList")
+	// f := excelize.NewFile()
+	// // Create a new sheet.
+	// index := f.NewSheet("AreasList")
 
-	f.DeleteSheet("Sheet1")
+	// f.DeleteSheet("Sheet1")
 
-	// Set value of a cell.
-	//f.SetCellValue("AreasList", "B2", 100)
-	f.SetCellValue("AreasList", "A1", 100)
+	// // Set value of a cell.
+	// //f.SetCellValue("AreasList", "B2", 100)
+	// f.SetCellValue("AreasList", "A1", 100)
 
-	areaslist := cfg.GameCfg.MapInfo.Areas
+	// areaslist := cfg.GameCfg.MapInfo.Areas
 
-	f.SetCellValue("AreasList", "A1", "AreasIndex")
-	f.SetCellValue("AreasList", "A2", "int")
-	f.SetCellValue("AreasList", "A3", "区域城池索引")
-	f.SetCellValue("AreasList", "B1", "Beside")
-	f.SetCellValue("AreasList", "B2", "int")
-	f.SetCellValue("AreasList", "B3", "相邻城池")
+	// f.SetCellValue("AreasList", "A1", "AreasIndex")
+	// f.SetCellValue("AreasList", "A2", "int")
+	// f.SetCellValue("AreasList", "A3", "区域城池索引")
+	// f.SetCellValue("AreasList", "B1", "Beside")
+	// f.SetCellValue("AreasList", "B2", "int")
+	// f.SetCellValue("AreasList", "B3", "相邻城池")
 
-	for num, arecfg := range areaslist {
-		// index := cfg.GameCfg.MapInfo.IndexCfg[arecfg.Setindex-1]
-		// tmpareas := GameCfg.MapInfo.Areas[index-1]
-		f.SetCellValue("AreasList", fmt.Sprintf("A%v", num+4), arecfg.Setindex)
+	// for num, arecfg := range areaslist {
+	// 	// index := cfg.GameCfg.MapInfo.IndexCfg[arecfg.Setindex-1]
+	// 	// tmpareas := GameCfg.MapInfo.Areas[index-1]
+	// 	f.SetCellValue("AreasList", fmt.Sprintf("A%v", num+4), arecfg.Setindex)
 
-		beside := []int{}
-		for _, v := range arecfg.Beside {
-			tmpbaside := cfg.GameCfg.MapInfo.Areas[v-1]
-			beside = append(beside, tmpbaside.Setindex)
-		}
-		f.SetCellValue("AreasList", fmt.Sprintf("B%v", num+4), beside)
+	// 	beside := []int{}
+	// 	for _, v := range arecfg.Beside {
+	// 		tmpbaside := cfg.GameCfg.MapInfo.Areas[v-1]
+	// 		beside = append(beside, tmpbaside.Setindex)
+	// 	}
+	// 	f.SetCellValue("AreasList", fmt.Sprintf("B%v", num+4), beside)
 
-	}
+	// }
 
-	// Set active sheet of the workbook.
-	f.SetActiveSheet(index)
-	// Save spreadsheet by the given path.
-	if err := f.SaveAs("bigmap.xlsx"); err != nil {
-		fmt.Println(err)
-	}
+	// // Set active sheet of the workbook.
+	// f.SetActiveSheet(index)
+	// // Save spreadsheet by the given path.
+	// if err := f.SaveAs("bigmap.xlsx"); err != nil {
+	// 	fmt.Println(err)
+	// }
 
 }

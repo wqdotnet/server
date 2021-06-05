@@ -1,6 +1,6 @@
 syntax = "proto3";
 package common;
-option go_package = "slgserver/msgproto/common";
+option go_package = "server/msgproto/common";
 
  
 

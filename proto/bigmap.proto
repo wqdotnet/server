@@ -2,7 +2,7 @@ syntax = "proto3";
 package bigmap;
 import "common.proto";
 import "troops.proto";
-option go_package = "slgserver/msgproto/bigmap";
+option go_package = "server/msgproto/bigmap";
 
 
 
