@@ -1,3 +1,3 @@
 # server
 
-slg 项目原型
+game server

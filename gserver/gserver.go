@@ -15,98 +15,31 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	//msg "server/proto"
+
+	"github.com/halturin/ergo"
 )
-
-// ServerConfig  server cfg
-type ServerConfig struct {
-	ServerName string
-	ServerID   int32
-
-	Daemon     bool
-	RestartNum int
-
-	OpenHTTP bool
-	HTTPPort int32
-
-	StatsView     bool
-	StatsViewPort int32
-
-	NetType     string
-	Port        int32
-	Packet      int32
-	Readtimeout int32 //读超时时间
-
-	MsgTime int32
-	MsgNum  int32
-
-	ProtoPath string
-	GoOut     string
-
-	MongoConnStr string
-	Mongodb      string
-
-	RedisConnStr string
-	RedisDB      int
-
-	CfgPath string
-	CfgType string
-
-	LogWrite bool
-	Loglevel string
-	LogPath  string
-	LogName  string
-}
-
-// ServerCfg  Program overall configuration
-var ServerCfg = ServerConfig{
-	ServerName: "server",
-	ServerID:   1,
-
-	Daemon:     false,
-	RestartNum: 2,
-
-	// http
-	OpenHTTP: true,
-	HTTPPort: 8080,
-
-	StatsView:     true,
-	StatsViewPort: 8087,
-	// #network : tcp/udp
-	NetType:     "tcp",
-	Port:        3344,
-	Packet:      2,
-	Readtimeout: 0,
-
-	MsgTime: 300,
-	MsgNum:  500,
-
-	// #protobuf path
-	ProtoPath: "./proto",
-	GoOut:     "./proto",
-
-	MongoConnStr: "mongodb://localhost:27017",
-	Mongodb:      "mygame",
-
-	RedisConnStr: "127.0.0.1:6379",
-	RedisDB:      0,
-
-	CfgPath: "./config",
-	CfgType: "",
-
-	Loglevel: "info",
-	LogPath:  "./log",
-	LogName:  "log",
-	LogWrite: false,
-}
 
 type gameServer struct {
 	nw *network.NetWorkx
 	//game config
 	command chan string
+	node    *ergo.Node
 }
 
 //GameServerInfo game info
 var GameServerInfo gameServer
+
+func startOtp() {
+	opts := ergo.NodeOptions{
+		ListenRangeBegin: uint16(ServerCfg.ListenRangeBegin),
+		ListenRangeEnd:   uint16(ServerCfg.ListenRangeEnd),
+		EPMDPort:         uint16(ServerCfg.EPMDPort),
+	}
+
+	node := ergo.CreateNode(ServerCfg.NodeName, ServerCfg.Cookie, opts)
+	process, _ := node.Spawn("serverSup", ergo.ProcessOptions{}, &serverSup{})
+	process.Wait()
+}
 
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
@@ -137,11 +70,11 @@ func StartGServer() {
 
 	//启动定时器
 	timedtasks.StartCronTasks()
-	// //大地图loop
-	// timedtasks.AddTasks("bigmaploop", "* * * * * ?", func() {
-	// 	bigmapmanage.SendMsgBigMap("BigMapLoop_OneSecond")
+	// //定时器
+	// timedtasks.AddTasks("loop", "* * * * * ?", func() {
+	// 	log.Info("server time:", time.Now())
 	// })
-	//defer timedtasks.RemoveTasks("bigmaploop")
+	//defer timedtasks.RemoveTasks("loop")
 
 	if ServerCfg.OpenHTTP {
 		go web.Start(ServerCfg.HTTPPort)
@@ -202,7 +135,6 @@ func StartGServer() {
 			//log.Infof("time: [%v]  online:[%v]", time.Now().Format(tool.DateTimeFormat), db.RedisGetInt("ConnectNumber"))
 		}
 	}
-
 }
 
 //SendGameServerMsg game system msg

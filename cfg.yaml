@@ -20,6 +20,7 @@ Port: 3344
 Packet : 2
 Readtimeout: 1
 
+
 # ClientInterface 接口 commonstruct.ProcessMsg{MsgType: "TimeInterval", Data: msgNum} 消息包
 # MsgTime 多少秒后  
 # MsgNum 多少条消息后
@@ -48,3 +49,10 @@ LogWrite: true
 Loglevel: "debug"   #panic  fatal  error  warn  info  debug  trace
 LogPath:  "./log"
 LogName: "log"
+
+#OTP
+ListenRangeBegin: 15151
+ListenRangeEnd:   25151
+EPMDPort:         4369
+NodeName: "server001@127.0.0.1"
+Cookie: "123"
