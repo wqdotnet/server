@@ -29,15 +29,15 @@ type gameServer struct {
 //GameServerInfo game info
 var GameServerInfo gameServer
 
-func startOtp() {
+func (gs *gameServer) startOtp() {
 	opts := ergo.NodeOptions{
 		ListenRangeBegin: uint16(ServerCfg.ListenRangeBegin),
 		ListenRangeEnd:   uint16(ServerCfg.ListenRangeEnd),
 		EPMDPort:         uint16(ServerCfg.EPMDPort),
 	}
 
-	node := ergo.CreateNode(ServerCfg.NodeName, ServerCfg.Cookie, opts)
-	process, _ := node.Spawn("serverSup", ergo.ProcessOptions{}, &serverSup{})
+	gs.node = ergo.CreateNode(ServerCfg.NodeName, ServerCfg.Cookie, opts)
+	process, _ := gs.node.Spawn("serverSup", ergo.ProcessOptions{}, &serverSup{})
 	process.Wait()
 }
 
@@ -105,6 +105,7 @@ func StartGServer() {
 	//启动网络
 	GameServerInfo.nw.Start()
 	defer GameServerInfo.nw.Close()
+	GameServerInfo.startOtp()
 
 	//退出消息监控
 	var exitChan = make(chan os.Signal)
