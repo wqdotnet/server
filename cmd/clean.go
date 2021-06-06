@@ -38,8 +38,6 @@ func clean() {
 	database.Drop(context.Background())
 
 	db.StartRedis(gserver.ServerCfg.RedisConnStr, gserver.ServerCfg.RedisDB)
-	db.RedisExec("del", "areasSMap")
-	db.RedisExec("del", "troopsSMap")
 	db.RedisExec("del", "ConnectNumber")
 
 	//db.RedisExec("FLUSHDB", "")

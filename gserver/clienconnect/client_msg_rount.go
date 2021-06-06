@@ -1,4 +1,4 @@
-// package clienconnect
+package clienconnect
 
 // import (
 // 	"server/msgproto/account"

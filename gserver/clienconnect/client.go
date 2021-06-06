@@ -1,5 +1,7 @@
 package clienconnect
 
+import "fmt"
+
 // import (
 // 	"net"
 // 	"server/db"
@@ -10,6 +12,9 @@ package clienconnect
 // 	"server/msgproto/protocol_base"
 // 	"server/msgproto/troops"
 // 	"server/network"
+func init() {
+	fmt.Print("client init --------------------------------------")
+}
 
 // 	"github.com/golang/protobuf/proto"
 // 	log "github.com/sirupsen/logrus"

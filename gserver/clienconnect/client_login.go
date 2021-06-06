@@ -1,4 +1,6 @@
-// package clienconnect
+package clienconnect
+
+import "fmt"
 
 // import (
 // 	"math/rand"
@@ -8,6 +10,9 @@
 // 	"server/gserver/process"
 // 	"server/msgproto/account"
 // 	"time"
+func init() {
+	fmt.Print("client init2 -----------------------------------------")
+}
 
 // 	log "github.com/sirupsen/logrus"
 // 	"go.mongodb.org/mongo-driver/bson"
