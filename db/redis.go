@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	red "github.com/gomodule/redigo/redis"
@@ -151,3 +152,85 @@ func HVALS(field string) (map[interface{}][]byte, error) {
 
 	return returnmap, err
 }
+
+//==========================有序集合==================================================
+//保存数据  key   score:分值   member 数据
+func RedisZADD(key string, score int64, member interface{}) (reply interface{}, e error) {
+
+	switch member.(type) {
+	case string:
+		return RedisExec("ZADD", key, score, member)
+	default:
+		b, _ := json.Marshal(member)
+		return RedisExec("ZADD", key, score, string(b))
+	}
+
+}
+
+//返回有序集中成员的排名。其中有序集成员按分数值递减(从大到小)排序。
+func RedisZrevrank(key string, member interface{}) (int, error) {
+	switch member.(type) {
+	case string:
+		return red.Int(RedisExec("ZREVRANK", key, member))
+	default:
+		b, _ := json.Marshal(member)
+		fmt.Println("数据：", string(b))
+		return red.Int(RedisExec("ZREVRANK", key, string(b)))
+	}
+
+}
+
+//有序集合成员数
+func RedisZCARD(key string) (interface{}, error) {
+	return red.Int(RedisExec("ZCARD", key))
+}
+
+//返回有序集中，指定区间内的成员。 分数由低到高
+//key   strart 起始  stop 结束   withscores:是否附带分值
+func RedisZrange(key string, start, stop int32, withscores bool) ([]string, error) {
+	if withscores {
+		return red.Strings(RedisExec("ZRANGE", key, start, stop, "WITHSCORES"))
+	}
+	return red.Strings(RedisExec("ZRANGE", key, start, stop))
+}
+
+//返回有序集中，指定区间内的成员。 分数由高到低
+//key   strart 起始  stop 结束   withscores:是否附带分值
+func RedisZrevRange(key string, start, stop int32, withscores bool) ([]string, error) {
+	if withscores {
+		return red.Strings(RedisExec("zrevrange", key, start, stop, "WITHSCORES"))
+	}
+	return red.Strings(RedisExec("zrevrange", key, start, stop))
+}
+
+//按分值 返回有序集合中指定分数区间的成员列表。有序集成员按分数值递增(从小到大)次序排列。
+//  min < score <= max
+// withscores :是否附带分值
+func RedisZrangeByScore(key string, min, max int32, withscores bool) ([]string, error) {
+	if withscores {
+		return red.Strings(RedisExec("ZRANGEBYSCORE", key, fmt.Sprintf("(%v", min), max, "WITHSCORES"))
+	}
+	return red.Strings(RedisExec("ZRANGEBYSCORE", key, fmt.Sprintf("(%v", min), max))
+}
+
+//按分值 返回有序集合中指定分数区间的成员列表。有序集成员按分数值递增(从大到小)次序排列。
+//  min < score <= max
+// withscores :是否附带分值
+func RedisZrevrangebyscore(key string, max, min int32, withscores bool) ([]string, error) {
+	if withscores {
+		return red.Strings(RedisExec("Zrevrangebyscore", key, max, min, "WITHSCORES"))
+	}
+	return red.Strings(RedisExec("Zrevrangebyscore", key, max, min))
+}
+
+//用于移除有序集中，指定排名(rank)区间内的所有成员。 排名rank的分值 由低到高计算
+func RedisZremeangeByRank(key string, start, stop int32) (int, error) {
+	return red.Int(RedisExec("ZREMRANGEBYRANK", key, start, stop))
+}
+
+//移除有序集中，指定分数（score）区间内的所有成员。
+func RedisZremrangebyScore(key string, min, max int32) (int, error) {
+	return red.Int(RedisExec("ZREMRANGEBYSCORE", key, min, max))
+}
+
+//====================================================================================
