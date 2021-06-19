@@ -52,15 +52,7 @@ func StartGServer() {
 	}
 
 	// if ServerCfg.Daemon {
-	// 	log.Info("daemon start")
-	// 	//"github.com/zh-five/xdaemon"
-	// 	//创建一个Daemon对象
-	// 	logFile := fmt.Sprintf("daemon_%v.log", ServerCfg.ServerID)
-	// 	d := xdaemon.NewDaemon(logFile)
-	// 	//调整一些运行参数(可选)
-	// 	d.MaxCount = ServerCfg.RestartNum //最大重启次数
-	// 	//执行守护进程模式
-	// 	d.Run()
+	//https://github.com/takama/daemon
 	// }
 
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
@@ -103,16 +95,15 @@ func StartGServer() {
 		command: make(chan string),
 	}
 	//启动网络
-	GameServerInfo.nw.Start()
-	defer GameServerInfo.nw.Close()
-	GameServerInfo.startOtp()
+	//GameServerInfo.nw.Start()
+	//defer GameServerInfo.nw.Close()
+	//GameServerInfo.startOtp()
 
 	//退出消息监控
 	var exitChan = make(chan os.Signal)
 	if runtime.GOOS == "linux" {
 		//signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
-		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1,
-			syscall.SIGUSR2, syscall.SIGTSTP)
+		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
 	}
 
 	for {
