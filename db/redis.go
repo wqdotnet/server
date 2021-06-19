@@ -16,8 +16,6 @@ type Redis struct {
 
 var redis *Redis
 
-var auitid int32
-
 //StartRedis 初始化
 func StartRedis(address string, selectdb int) {
 	log.Infof("StartRedis  create redis.pool:  [%v]", address)
@@ -51,9 +49,7 @@ func RedisExec(cmd string, key interface{}, args ...interface{}) (interface{}, e
 	parmas = append(parmas, key)
 
 	if len(args) > 0 {
-		for _, v := range args {
-			parmas = append(parmas, v)
-		}
+		parmas = append(parmas, args...)
 	}
 	return con.Do(cmd, parmas...)
 }
