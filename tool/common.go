@@ -3,6 +3,7 @@ package tool
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"math"
 	"math/rand"
 	"runtime"
@@ -10,6 +11,8 @@ import (
 	"strings"
 	"time"
 	"unsafe"
+
+	"github.com/robfig/cron/v3"
 )
 
 const (
@@ -87,4 +90,22 @@ func Random(randkey float64) bool {
 	num := rand.Intn(100)
 	return num < int(randkey*100)
 
+}
+
+//对比时间范围 startStr<  difftime < endStr
+func DiffCronStrNowTime(difftime time.Time, startStr, endStr string) bool {
+	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+	startTime, serr := parser.Parse(startStr)
+	endTime, eerr := parser.Parse(endStr)
+	if serr != nil || eerr != nil {
+		fmt.Println("不合法的 cron 格式 ", startStr, endStr)
+		return false
+	}
+	//log.Debug("活动开放时间：", startTime.Next(time.Now()), endTime.Next(time.Now()))
+
+	fmt.Println(startTime.Next(difftime))
+	fmt.Println(difftime)
+	fmt.Println(endTime.Next(difftime))
+
+	return startTime.Next(difftime).Unix() > endTime.Next(difftime).Unix()
 }
