@@ -109,3 +109,10 @@ func DiffCronStrNowTime(difftime time.Time, startStr, endStr string) bool {
 
 	return startTime.Next(difftime).Unix() > endTime.Next(difftime).Unix()
 }
+
+//每日凌晨时间
+func GetToDayStartUnix() int64 {
+	timeStr := time.Now().Format("2006-01-02")
+	t2, _ := time.ParseInLocation("2006-01-02", timeStr, time.Local)
+	return t2.Unix()
+}
