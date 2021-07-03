@@ -4,6 +4,7 @@ package gserver
 type ServerConfig struct {
 	ServerName string
 	ServerID   int32
+	Version    string
 
 	Daemon     bool
 	RestartNum int
@@ -50,6 +51,7 @@ type ServerConfig struct {
 var ServerCfg = ServerConfig{
 	ServerName: "server",
 	ServerID:   1,
+	Version:    "0.0.1",
 
 	Daemon:     false,
 	RestartNum: 2,
