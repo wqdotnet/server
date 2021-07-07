@@ -2,10 +2,12 @@ package tool
 
 import (
 	"bytes"
+	crand "crypto/rand" //加密安全的随机库
 	"encoding/binary"
 	"fmt"
 	"math"
-	"math/rand"
+	"math/big"
+	"math/rand" //伪随机库
 	"runtime"
 	"strconv"
 	"strings"
@@ -89,7 +91,35 @@ func Random(randkey float64) bool {
 	rand.Seed(time.Now().Unix())
 	num := rand.Intn(100)
 	return num < int(randkey*100)
+}
 
+func RandInt64ForRange(min, max int64) int64 {
+	if min >= max {
+		return min
+	}
+	maxBigInt := big.NewInt(max + 1 - min)
+	i, err := crand.Int(crand.Reader, maxBigInt)
+	if err != nil {
+		return min
+	}
+	i64 := i.Int64()
+	return i64 + min
+}
+
+//权重随机
+func RandWeight(values []int64) int64 {
+	var total int64
+	for _, v := range values {
+		total += v
+	}
+	ranNum := RandInt64ForRange(0, total)
+	for i, v := range values {
+		ranNum -= v
+		if ranNum <= 0 {
+			return int64(i)
+		}
+	}
+	return 0
 }
 
 //对比时间范围 startStr<  difftime < endStr
