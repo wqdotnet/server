@@ -1,12 +1,12 @@
 package gserver
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"runtime"
 	"server/db"
 	"server/gserver/cfg"
-	"server/gserver/timedtasks"
 	"server/logger"
 	"server/network"
 	"server/web"
@@ -19,26 +19,33 @@ import (
 	"github.com/halturin/ergo"
 )
 
+//GameServerInfo game info
+var GameServerInfo *gameServer
+
 type gameServer struct {
-	nw *network.NetWorkx
-	//game config
-	command chan string
-	node    *ergo.Node
+	nw       *network.NetWorkx
+	serverid int32
+	command  chan string
+	node     map[string]*ergo.Node
 }
 
-//GameServerInfo game info
-var GameServerInfo gameServer
+func (g *gameServer) Start() {
+	//启动网络
+	g.nw.Start()
+	gateNodeName := fmt.Sprintf("gateNode_%v@127.0.0.1", g.serverid)
+	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", g.serverid)
+	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", g.serverid)
 
-func (gs *gameServer) startOtp() {
-	opts := ergo.NodeOptions{
-		ListenRangeBegin: uint16(ServerCfg.ListenRangeBegin),
-		ListenRangeEnd:   uint16(ServerCfg.ListenRangeEnd),
-		EPMDPort:         uint16(ServerCfg.EPMDPort),
-	}
+	gateNode, _ := StartGatewaySupSupNode(gateNodeName)
+	serverNode, _ := StartGameServerSupNode(serverNodeName)
+	dbNode, _ := StartDataBaseSupSupNode(dbNodeName)
+	g.node[gateNode.FullName] = gateNode
+	g.node[serverNode.FullName] = serverNode
+	g.node[dbNode.FullName] = dbNode
+}
 
-	gs.node = ergo.CreateNode(ServerCfg.NodeName, ServerCfg.Cookie, opts)
-	process, _ := gs.node.Spawn("serverSup", ergo.ProcessOptions{}, &serverSup{})
-	process.Wait()
+func (g *gameServer) Close() {
+	g.nw.Close()
 }
 
 //StartGServer 启动game server
@@ -61,7 +68,7 @@ func StartGServer() {
 	db.StartRedis(ServerCfg.RedisConnStr, ServerCfg.RedisDB)
 
 	//启动定时器
-	timedtasks.StartCronTasks()
+	//timedtasks.StartCronTasks()
 	// //定时器
 	// timedtasks.AddTasks("loop", "* * * * * ?", func() {
 	// 	log.Info("server time:", time.Now())
@@ -76,7 +83,7 @@ func StartGServer() {
 		go web.StartStatsView(ServerCfg.StatsViewPort)
 	}
 
-	GameServerInfo = gameServer{
+	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(&sync.Pool{
 			New: func() interface{} {
 				return nil // clienconnect.NewClient() //new(clienconnect.Client)
@@ -92,12 +99,12 @@ func StartGServer() {
 			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", 1)) },
 			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", -1)) },
 		),
-		command: make(chan string),
+		command:  make(chan string),
+		node:     make(map[string]*ergo.Node),
+		serverid: ServerCfg.ServerID,
 	}
-	//启动网络
-	//GameServerInfo.nw.Start()
-	//defer GameServerInfo.nw.Close()
-	//GameServerInfo.startOtp()
+	GameServerInfo.Start()
+	defer GameServerInfo.Close()
 
 	//退出消息监控
 	var exitChan = make(chan os.Signal)

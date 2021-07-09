@@ -16,7 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"reflect"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -37,7 +39,27 @@ func init() {
 	rootCmd.AddCommand(reflexCmd)
 }
 
+var execfuncname reflect.Value
+
+func sssssdc() {
+
+	execfuncname.Call(nil)
+}
+
+func testfun() {
+
+}
+
 func reflex() {
+	execfuncname = reflect.ValueOf(testfun)
+	t1 := time.Now()
+	for i := 0; i < 10000; i++ {
+		sssssdc()
+	}
+	elapsed := time.Since(t1)
+	fmt.Println("App elapsed: ", elapsed)
+
+	//funtype:= reflect.ValueOf(f).Type(),
 
 }
 

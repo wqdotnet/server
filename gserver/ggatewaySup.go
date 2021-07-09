@@ -1,39 +1,29 @@
 package gserver
 
 import (
+	genserver "server/gserver/genServer"
+
 	"github.com/halturin/ergo"
 )
 
-type serverSup struct {
+type GateWaySup struct {
 	ergo.Supervisor
 }
 
-func (ds *serverSup) Init(args ...interface{}) ergo.SupervisorSpec {
+func (ds *GateWaySup) Init(args ...interface{}) ergo.SupervisorSpec {
 	return ergo.SupervisorSpec{
-		Name: "demoSupervisorSup",
+		Name: "GateWaySup",
 		Children: []ergo.SupervisorChildSpec{
 			{
-				Name:    "demoServer01",
-				Child:   &demoGenServ{},
-				Restart: ergo.SupervisorChildRestartTemporary,
-				// Restart: ergo.SupervisorChildRestartTransient,
+				Name:  "gateServer",
+				Child: &genserver.GateWayGenServer{},
+				//Restart: ergo.SupervisorChildRestartTemporary,
+				Restart: ergo.SupervisorChildRestartTransient,
 				// Restart: ergo.SupervisorChildRestartPermanent,
 
 				// temporary:进程永远都不会被重启
 				// transient: 只有进程异常终止的时候会被重启
 				// permanent:遇到任何错误导致进程终止就会重启
-			},
-			{
-				Name:    "demoServer02",
-				Child:   &demoGenServ{},
-				Restart: ergo.SupervisorChildRestartPermanent,
-				Args:    []interface{}{12345},
-			},
-			{
-				Name:    "demoServer03",
-				Child:   &demoGenServ{},
-				Restart: ergo.SupervisorChildRestartPermanent,
-				Args:    []interface{}{"abc", 67890},
 			},
 		},
 		Strategy: ergo.SupervisorStrategy{
@@ -50,4 +40,17 @@ func (ds *serverSup) Init(args ...interface{}) ergo.SupervisorSpec {
 			Period:    5, //时间  1 -0 代表不重启
 		},
 	}
+}
+
+func StartGatewaySupSupNode(nodeName string) (*ergo.Node, *ergo.Process) {
+	opts := ergo.NodeOptions{
+		ListenRangeBegin: uint16(ServerCfg.ListenRangeBegin),
+		ListenRangeEnd:   uint16(ServerCfg.ListenRangeEnd),
+		EPMDPort:         uint16(ServerCfg.EPMDPort),
+	}
+
+	node := ergo.CreateNode(nodeName, ServerCfg.Cookie, opts)
+	// Spawn supervisor process
+	process, _ := node.Spawn("gateway_sup", ergo.ProcessOptions{}, &GateWaySup{})
+	return node, process
 }

@@ -3,8 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	pool "github.com/jolestar/go-commons-pool/v2"
+	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson"
@@ -32,9 +34,24 @@ type teststr struct {
 
 func exectest(cmd *cobra.Command, args []string) {
 
+	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+	startTime, _ := parser.Parse("0 0 0 8 6 ? ")
+	endTime, _ := parser.Parse("0 0 0 15 6 ? ")
+
+	fmt.Printf("%v   %v ", startTime.Next(time.Now()), endTime.Next(time.Now()))
+	fmt.Println()
+	stime := startTime.Next(time.Now())
+	etime := endTime.Next(time.Now())
+	fmt.Printf("%v   %v ", startTime.Next(time.Now()).Unix(), endTime.Next(time.Now()).Unix())
+	fmt.Println()
+	fmt.Println(stime.Unix() > etime.Unix())
+
 	//slice()
 	//time.Sleep(time.Second * 10)
 	//objectPool()
+
+	Record := make(map[uint32]uint32)
+	Record[2] = 34
 
 }
 

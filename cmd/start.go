@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"server/gserver"
-
 	"github.com/spf13/cobra"
 	//msg "server/proto"
 )
@@ -13,7 +11,7 @@ var startCmd = &cobra.Command{
 	Short: "start game server",
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
-		gserver.StartGServer()
+		//gserver.StartGServer()
 	},
 }
 

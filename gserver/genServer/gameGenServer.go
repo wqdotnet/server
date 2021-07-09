@@ -1,4 +1,4 @@
-package gserver
+package genserver
 
 import (
 	"fmt"
@@ -8,27 +8,26 @@ import (
 )
 
 // GenServer implementation structure
-type demoGenServ struct {
+type GameGenServer struct {
 	ergo.GenServer
 	process *ergo.Process
 }
 
-type state struct {
-	i int
+type gameGenState struct {
 }
 
 // Init initializes process state using arbitrary arguments
 // Init(...) -> state
-func (dgs *demoGenServ) Init(p *ergo.Process, args ...interface{}) interface{} {
+func (dgs *GameGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
 	fmt.Printf("Init (%s): args %v \n", p.Name(), args)
 	dgs.process = p
-	return state{i: 12345}
+	return gameGenState{}
 }
 
 // HandleCast serves incoming messages sending via gen_server:cast
 // HandleCast -> ("noreply", state) - noreply
 //		         ("stop", reason) - stop with reason
-func (dgs *demoGenServ) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *GameGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
 	fmt.Printf("HandleCast (%s): %#v\n", dgs.process.Name(), message)
 	switch message {
 	case etf.Atom("stop"):
@@ -41,7 +40,7 @@ func (dgs *demoGenServ) HandleCast(message etf.Term, state interface{}) (string,
 // HandleCall -> ("reply", message, state) - reply
 //				 ("noreply", _, state) - noreply
 //		         ("stop", reason, _) - normal stop
-func (dgs *demoGenServ) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
+func (dgs *GameGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
 	fmt.Printf("HandleCall (%s): %#v, From: %#v\n", dgs.process.Name(), message, from)
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
@@ -56,12 +55,12 @@ func (dgs *demoGenServ) HandleCall(from etf.Tuple, message etf.Term, state inter
 // HandleInfo serves all another incoming messages (Pid ! message)
 // HandleInfo -> ("noreply", state) - noreply
 //		         ("stop", reason) - normal stop
-func (dgs *demoGenServ) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *GameGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
 	fmt.Printf("HandleInfo (%s): %#v\n", dgs.process.Name(), message)
 	return "noreply", state
 }
 
 // Terminate called when process died
-func (dgs *demoGenServ) Terminate(reason string, state interface{}) {
+func (dgs *GameGenServer) Terminate(reason string, state interface{}) {
 	fmt.Printf("Terminate (%s): %#v\n", dgs.process.Name(), reason)
 }

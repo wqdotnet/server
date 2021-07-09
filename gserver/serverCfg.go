@@ -43,7 +43,6 @@ type ServerConfig struct {
 	ListenRangeBegin int
 	ListenRangeEnd   int
 	EPMDPort         int
-	NodeName         string
 	Cookie           string
 }
 
@@ -92,6 +91,5 @@ var ServerCfg = ServerConfig{
 	ListenRangeBegin: 15151,
 	ListenRangeEnd:   25151,
 	EPMDPort:         4369,
-	NodeName:         "server001@127.0.0.1",
 	Cookie:           "123",
 }
