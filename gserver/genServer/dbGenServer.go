@@ -1,7 +1,9 @@
 package genserver
 
 import (
-	"fmt"
+	"server/db"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/halturin/ergo"
 	"github.com/halturin/ergo/etf"
@@ -19,7 +21,11 @@ type dbState struct {
 // Init initializes process state using arbitrary arguments
 // Init(...) -> state
 func (dgs *DbGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
-	fmt.Printf("Init (%s): args %v \n", p.Name(), args)
+	log.Info("Init Gen_Server:(%s): args %v \n", p.Name(), args)
+
+	db.StartMongodb(args[0].(string), args[1].(string))
+	db.StartRedis(args[2].(string), args[3].(int))
+
 	dgs.process = p
 	return dbState{}
 }
@@ -28,7 +34,7 @@ func (dgs *DbGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
 // HandleCast -> ("noreply", state) - noreply
 //		         ("stop", reason) - stop with reason
 func (dgs *DbGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
-	fmt.Printf("HandleCast (%s): %#v\n", dgs.process.Name(), message)
+	log.Info("HandleCast (%s): %#v\n", dgs.process.Name(), message)
 	switch message {
 	case etf.Atom("stop"):
 		return "stop", "they said"
@@ -41,7 +47,7 @@ func (dgs *DbGenServer) HandleCast(message etf.Term, state interface{}) (string,
 //				 ("noreply", _, state) - noreply
 //		         ("stop", reason, _) - normal stop
 func (dgs *DbGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
-	fmt.Printf("HandleCall (%s): %#v, From: %#v\n", dgs.process.Name(), message, from)
+	log.Info("HandleCall (%s): %#v, From: %#v\n", dgs.process.Name(), message, from)
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
 
@@ -56,11 +62,11 @@ func (dgs *DbGenServer) HandleCall(from etf.Tuple, message etf.Term, state inter
 // HandleInfo -> ("noreply", state) - noreply
 //		         ("stop", reason) - normal stop
 func (dgs *DbGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
-	fmt.Printf("HandleInfo (%s): %#v\n", dgs.process.Name(), message)
+	log.Info("HandleInfo (%s): %#v\n", dgs.process.Name(), message)
 	return "noreply", state
 }
 
 // Terminate called when process died
 func (dgs *DbGenServer) Terminate(reason string, state interface{}) {
-	fmt.Printf("Terminate (%s): %#v\n", dgs.process.Name(), reason)
+	log.Info("Terminate (%s): %#v\n", dgs.process.Name(), reason)
 }

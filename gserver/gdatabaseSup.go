@@ -20,6 +20,7 @@ func (ds *DataBaseSup) Init(args ...interface{}) ergo.SupervisorSpec {
 				//Restart: ergo.SupervisorChildRestartTemporary,
 				Restart: ergo.SupervisorChildRestartTransient,
 				// Restart: ergo.SupervisorChildRestartPermanent,
+				Args: []interface{}{ServerCfg.Mongodb, ServerCfg.MongoConnStr, ServerCfg.RedisConnStr, ServerCfg.RedisDB},
 
 				// temporary:进程永远都不会被重启
 				// transient: 只有进程异常终止的时候会被重启

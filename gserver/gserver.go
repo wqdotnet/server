@@ -64,9 +64,6 @@ func StartGServer() {
 
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
 
-	db.StartMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
-	db.StartRedis(ServerCfg.RedisConnStr, ServerCfg.RedisDB)
-
 	//启动定时器
 	//timedtasks.StartCronTasks()
 	// //定时器
