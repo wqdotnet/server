@@ -20,7 +20,7 @@ type gateState struct {
 func (dgs *GateWayGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
 	log.Info("Init (%s): args %v \n", p.Name(), args)
 	dgs.process = p
-	return dbState{}
+	return gateState{}
 }
 
 // HandleCast serves incoming messages sending via gen_server:cast
