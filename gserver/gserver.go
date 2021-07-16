@@ -32,7 +32,7 @@ type gameServer struct {
 func (g *gameServer) Start() {
 	//启动网络
 	g.nw.Start()
-	gateNodeName := fmt.Sprintf("gateNode_%v@127.0.0.1", g.serverid)
+	gateNodeName := fmt.Sprintf("gatewayNode_%v@127.0.0.1", g.serverid)
 	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", g.serverid)
 	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", g.serverid)
 
