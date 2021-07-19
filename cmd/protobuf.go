@@ -17,8 +17,8 @@ import (
 // protobufCmd build protobuf
 var protobufCmd = &cobra.Command{
 	Use:   "protobuf",
-	Short: "protobuf 协议生成",
-	Long:  `long`,
+	Short: "protobuf [int] [obj] ",
+	Long:  `protobuf [只生成 int 分钟内修改文件] [生成客户端pb]`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var filetime int64 = 0
 
@@ -29,6 +29,8 @@ var protobufCmd = &cobra.Command{
 			}
 		}
 
+		isclientpb := len(args) == 2
+
 		pbpath := gserver.ServerCfg.ProtoPath
 		outpath := gserver.ServerCfg.GoOut
 		timeformat := tool.DateTimeFormat
@@ -37,8 +39,14 @@ var protobufCmd = &cobra.Command{
 			fmt.Println("文件夹不存在:", pbpath, outpath)
 			return
 		}
-		//execstr := "protoc  --proto_path=%s   --go_out=../ %s"
-		execstr := "protoc -o %s/%s.pb  --proto_path=%s   --go_out=../ %s"
+
+		//输出地址
+		execstr := ""
+		if isclientpb {
+			execstr = "protoc -o %s/%s.pb  --proto_path=%s   --go_out=../ %s"
+		} else {
+			execstr = "protoc  --proto_path=%s   --go_out=../ %s"
+		}
 
 		files, _ := ioutil.ReadDir(pbpath)
 		for _, onefile := range files {
@@ -49,8 +57,12 @@ var protobufCmd = &cobra.Command{
 				diff := getHourDiffer(onefile.ModTime().Format(timeformat), time.Now().Format(timeformat))
 				if filetime == 0 || diff < 60*filetime {
 
-					//execstrpro := fmt.Sprintf(execstr, pbpath, filename)
-					execstrpro := fmt.Sprintf(execstr, outpath, filebase, pbpath, filename)
+					execstrpro := ""
+					if isclientpb {
+						execstrpro = fmt.Sprintf(execstr, outpath, filebase, pbpath, filename)
+					} else {
+						execstrpro = fmt.Sprintf(execstr, pbpath, filename)
+					}
 
 					_, errout, err := Shellout(execstrpro)
 					if err != nil {
@@ -73,9 +85,7 @@ func init() {
 func PathExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
-	// 或者
 	//return err == nil || !os.IsNotExist(err)
-	// 或者
 	//return !os.IsNotExist(err)
 }
 
@@ -83,9 +93,9 @@ func PathExists(path string) bool {
 func getHourDiffer(startTime, endTime string) int64 {
 	var hour int64
 	t1, err := time.ParseInLocation(tool.DateTimeFormat, startTime, time.Local)
-	t2, err := time.ParseInLocation(tool.DateTimeFormat, endTime, time.Local)
+	t2, err2 := time.ParseInLocation(tool.DateTimeFormat, endTime, time.Local)
 
-	if err == nil && t1.Before(t2) {
+	if err == nil && err2 == nil && t1.Before(t2) {
 		diff := t2.Unix() - t1.Unix() //
 		hour = diff
 		return hour

@@ -10,7 +10,7 @@ import (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "start game server",
+	Short: "启动服务",
 	Long:  `long`,
 	Run: func(cmd *cobra.Command, args []string) {
 		gserver.StartGServer()
