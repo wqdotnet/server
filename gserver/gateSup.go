@@ -16,7 +16,7 @@ func (ds *GateWaySup) Init(args ...interface{}) ergo.SupervisorSpec {
 		Children: []ergo.SupervisorChildSpec{
 			{
 				Name:  "gateServer",
-				Child: &genserver.GateWayGenServer{},
+				Child: &genserver.GateGenServer{},
 				//Restart: ergo.SupervisorChildRestartTemporary,
 				Restart: ergo.SupervisorChildRestartTransient,
 				// Restart: ergo.SupervisorChildRestartPermanent,
@@ -42,7 +42,7 @@ func (ds *GateWaySup) Init(args ...interface{}) ergo.SupervisorSpec {
 	}
 }
 
-func StartGatewaySupSupNode(nodeName string) (*ergo.Node, *ergo.Process) {
+func StartGateSupNode(nodeName string) (*ergo.Node, *ergo.Process) {
 	opts := ergo.NodeOptions{
 		ListenRangeBegin: uint16(ServerCfg.ListenRangeBegin),
 		ListenRangeEnd:   uint16(ServerCfg.ListenRangeEnd),

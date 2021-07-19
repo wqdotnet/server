@@ -26,7 +26,11 @@ type gameServer struct {
 	nw       *network.NetWorkx
 	serverid int32
 	command  chan string
-	node     map[string]*ergo.Node
+
+	//由于没有 erlang:nodes()  手动维护所有节点信息
+	//三种节点类型 gate server db
+	//gate、db 集群可能会有多个
+	nodes map[string]*ergo.Node
 }
 
 func (g *gameServer) Start() {
@@ -36,12 +40,12 @@ func (g *gameServer) Start() {
 	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", g.serverid)
 	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", g.serverid)
 
-	gateNode, _ := StartGatewaySupSupNode(gateNodeName)
+	gateNode, _ := StartGateSupNode(gateNodeName)
 	serverNode, _ := StartGameServerSupNode(serverNodeName)
 	dbNode, _ := StartDataBaseSupSupNode(dbNodeName)
-	g.node[gateNode.FullName] = gateNode
-	g.node[serverNode.FullName] = serverNode
-	g.node[dbNode.FullName] = dbNode
+	g.nodes[gateNode.FullName] = gateNode
+	g.nodes[serverNode.FullName] = serverNode
+	g.nodes[dbNode.FullName] = dbNode
 }
 
 func (g *gameServer) Close() {
@@ -97,7 +101,7 @@ func StartGServer() {
 			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", -1)) },
 		),
 		command:  make(chan string),
-		node:     make(map[string]*ergo.Node),
+		nodes:    make(map[string]*ergo.Node),
 		serverid: ServerCfg.ServerID,
 	}
 	GameServerInfo.Start()

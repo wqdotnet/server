@@ -105,7 +105,7 @@ func mongodb() {
 	log.Info("Connected to MongoDB!")
 
 	// 2, 选择数据库my_db
-	database := client.Database("slggame")
+	database := client.Database("gamedemo")
 
 	// 3, 选择表my_collection
 	collection := database.Collection("cron_log")

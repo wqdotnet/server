@@ -11,7 +11,7 @@ import (
 )
 
 func TestConnectPool(t *testing.T) {
-	StartMongodb("slggame", "mongodb://localhost:27017")
+	StartMongodb("gamedemo", "mongodb://localhost:27017")
 }
 
 func TestInsertOne(t *testing.T) {

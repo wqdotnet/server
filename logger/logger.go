@@ -19,7 +19,7 @@ func Init(loglevel log.Level, writefile bool, LogName string, path string) {
 		//DisableTimestamp: false,
 		FullTimestamp: true,
 		// 定义时间戳格式
-		TimestampFormat: "15:04:05",
+		TimestampFormat: tool.TimeFormat,
 	})
 	log.AddHook(NewContextHook(log.ErrorLevel, log.WarnLevel, log.DebugLevel, log.TraceLevel, log.FatalLevel))
 	if writefile {

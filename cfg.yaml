@@ -34,7 +34,7 @@ GoOut: "./msgproto"
 
 #mongodb
 MongoConnStr: "mongodb://localhost:27017"
-Mongodb: "slggame"
+Mongodb: "gamedemo"
 
 #redis
 RedisConnStr: "localhost:6379"

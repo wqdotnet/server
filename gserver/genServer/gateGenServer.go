@@ -6,8 +6,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+//接收处理socket 发送过来的信息
+// 处理玩家独立无交互的游戏逻辑
+// 在socket中断后 此进程会保留一段时间以便于重新建立连接
+
 // GenServer implementation structure
-type GateWayGenServer struct {
+type GateGenServer struct {
 	ergo.GenServer
 	process *ergo.Process
 }
@@ -17,7 +21,7 @@ type gateState struct {
 
 // Init initializes process state using arbitrary arguments
 // Init(...) -> state
-func (dgs *GateWayGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
+func (dgs *GateGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
 	log.Info("Init (%s): args %v \n", p.Name(), args)
 	dgs.process = p
 	return gateState{}
@@ -26,7 +30,7 @@ func (dgs *GateWayGenServer) Init(p *ergo.Process, args ...interface{}) interfac
 // HandleCast serves incoming messages sending via gen_server:cast
 // HandleCast -> ("noreply", state) - noreply
 //		         ("stop", reason) - stop with reason
-func (dgs *GateWayGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *GateGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
 	log.Info("HandleCast (%s): %#v\n", dgs.process.Name(), message)
 	switch message {
 	case etf.Atom("stop"):
@@ -39,7 +43,7 @@ func (dgs *GateWayGenServer) HandleCast(message etf.Term, state interface{}) (st
 // HandleCall -> ("reply", message, state) - reply
 //				 ("noreply", _, state) - noreply
 //		         ("stop", reason, _) - normal stop
-func (dgs *GateWayGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
+func (dgs *GateGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
 	log.Info("HandleCall (%s): %#v, From: %#v\n", dgs.process.Name(), message, from)
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
@@ -54,12 +58,12 @@ func (dgs *GateWayGenServer) HandleCall(from etf.Tuple, message etf.Term, state 
 // HandleInfo serves all another incoming messages (Pid ! message)
 // HandleInfo -> ("noreply", state) - noreply
 //		         ("stop", reason) - normal stop
-func (dgs *GateWayGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *GateGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
 	log.Info("HandleInfo (%s): %#v\n", dgs.process.Name(), message)
 	return "noreply", state
 }
 
 // Terminate called when process died
-func (dgs *GateWayGenServer) Terminate(reason string, state interface{}) {
+func (dgs *GateGenServer) Terminate(reason string, state interface{}) {
 	log.Info("Terminate (%s): %#v\n", dgs.process.Name(), reason)
 }

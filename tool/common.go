@@ -133,10 +133,6 @@ func DiffCronStrNowTime(difftime time.Time, startStr, endStr string) bool {
 	}
 	//log.Debug("活动开放时间：", startTime.Next(time.Now()), endTime.Next(time.Now()))
 
-	fmt.Println(startTime.Next(difftime))
-	fmt.Println(difftime)
-	fmt.Println(endTime.Next(difftime))
-
 	return startTime.Next(difftime).Unix() > endTime.Next(difftime).Unix()
 }
 

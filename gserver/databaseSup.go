@@ -19,7 +19,7 @@ func (ds *DataBaseSup) Init(args ...interface{}) ergo.SupervisorSpec {
 				Child: &genserver.DbGenServer{},
 				//Restart: ergo.SupervisorChildRestartTemporary,
 				Restart: ergo.SupervisorChildRestartTransient,
-				// Restart: ergo.SupervisorChildRestartPermanent,
+				//Restart: ergo.SupervisorChildRestartPermanent,
 				Args: []interface{}{ServerCfg.Mongodb, ServerCfg.MongoConnStr, ServerCfg.RedisConnStr, ServerCfg.RedisDB},
 
 				// temporary:进程永远都不会被重启
@@ -40,9 +40,9 @@ func (ds *DataBaseSup) Init(args ...interface{}) ergo.SupervisorSpec {
 			// },
 		},
 		Strategy: ergo.SupervisorStrategy{
-			Type: ergo.SupervisorStrategyOneForAll,
-			// Type:      ergo.SupervisorStrategyRestForOne,
-			// Type:      ergo.SupervisorStrategyOneForOne,
+			Type: ergo.SupervisorStrategyOneForOne,
+			//Type: ergo.SupervisorStrategyOneForAll,
+			//Type: ergo.SupervisorStrategyRestForOne,
 
 			//重启策略
 			// one_for_one : 把子进程当成各自独立的,一个进程出现问题其它进程不会受到崩溃的进程的影响.该子进程死掉,只有这个进程会被重启

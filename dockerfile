@@ -30,10 +30,10 @@ ENTRYPOINT ["./server","start","--config=/home/server/config/cfg.yaml"]
 #sudo docker build -t slgdocker .
 
 #运行容器 -v[本地配置地址 :docker内读取配置固定地址"/home/server/config"]
-#sudo docker run -t -i -d -v /mnt/e/dockerconfig:/home/server/config -p 3344:3344 -p 8080:8080 -p 8081:8081 --name slggame  slgdocker:latest
+#sudo docker run -t -i -d -v /mnt/e/dockerconfig:/home/server/config -p 3344:3344 -p 8080:8080 -p 8081:8081 --name gamedemo  slgdocker:latest
 
 #进入容器 
-#sudo docker exec -it slggame /bin/sh
+#sudo docker exec -it gamedemo /bin/sh
 
 #保存 加载 镜像
 #sudo docker save slgdocker:latest  -o  /home/wq/slgdocker:latest.tar

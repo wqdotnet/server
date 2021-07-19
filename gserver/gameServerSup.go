@@ -6,6 +6,9 @@ import (
 	"github.com/halturin/ergo"
 )
 
+//游戏内公共服务
+//地图、组队、公会、世界 等等需要同步的独立进程
+
 type GameServerSup struct {
 	ergo.Supervisor
 }
