@@ -16,7 +16,7 @@ import (
 
 // protobufCmd build protobuf
 var protobufCmd = &cobra.Command{
-	Use:   "protobuf",
+	Use:   "pb",
 	Short: "protobuf [int] [obj] ",
 	Long:  `protobuf [只生成 int 分钟内修改文件] [生成客户端pb]`,
 	Run: func(cmd *cobra.Command, args []string) {

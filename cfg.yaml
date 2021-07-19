@@ -1,6 +1,6 @@
 ServerName: "server"
 ServerID:   1
-Version: "0.0.1"
+#Version: "1.0.1"
   
 #守护进程  
 Daemon: false

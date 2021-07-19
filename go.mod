@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/aws/aws-sdk-go v1.39.3 // indirect
+	github.com/containerd/console v1.0.2
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-echarts/go-echarts/v2 v2.2.4 // indirect
 	github.com/go-echarts/statsview v0.3.4

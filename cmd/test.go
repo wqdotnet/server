@@ -3,12 +3,13 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"time"
 
 	pool "github.com/jolestar/go-commons-pool/v2"
-	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -34,24 +35,24 @@ type teststr struct {
 
 func exectest(cmd *cobra.Command, args []string) {
 
-	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
-	startTime, _ := parser.Parse("0 0 0 8 6 ? ")
-	endTime, _ := parser.Parse("0 0 0 15 6 ? ")
+	// parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+	// startTime, _ := parser.Parse("0 0 0 8 6 ? ")
+	// endTime, _ := parser.Parse("0 0 0 15 6 ? ")
 
-	fmt.Printf("%v   %v ", startTime.Next(time.Now()), endTime.Next(time.Now()))
-	fmt.Println()
-	stime := startTime.Next(time.Now())
-	etime := endTime.Next(time.Now())
-	fmt.Printf("%v   %v ", startTime.Next(time.Now()).Unix(), endTime.Next(time.Now()).Unix())
-	fmt.Println()
-	fmt.Println(stime.Unix() > etime.Unix())
+	// fmt.Printf("%v   %v ", startTime.Next(time.Now()), endTime.Next(time.Now()))
+	// fmt.Println()
+	// stime := startTime.Next(time.Now())
+	// etime := endTime.Next(time.Now())
+	// fmt.Printf("%v   %v ", startTime.Next(time.Now()).Unix(), endTime.Next(time.Now()).Unix())
+	// fmt.Println()
+	// fmt.Println(stime.Unix() > etime.Unix())
 
-	//slice()
-	//time.Sleep(time.Second * 10)
-	//objectPool()
+	// //slice()
+	// //time.Sleep(time.Second * 10)
+	// //objectPool()
 
-	Record := make(map[uint32]uint32)
-	Record[2] = 34
+	// Record := make(map[uint32]uint32)
+	// Record[2] = 34
 
 }
 
@@ -179,5 +180,62 @@ func objectPool() {
 	err = p.ReturnObject(ctx, obj)
 	if err != nil {
 		log.Error(err)
+	}
+}
+
+//======reflect
+
+var execfuncname reflect.Value
+
+func sssssdc() {
+
+	execfuncname.Call(nil)
+}
+
+func testfun() {
+
+}
+
+func reflex() {
+	execfuncname = reflect.ValueOf(testfun)
+	t1 := time.Now()
+	for i := 0; i < 10000; i++ {
+		sssssdc()
+	}
+	elapsed := time.Since(t1)
+	fmt.Println("App elapsed: ", elapsed)
+
+	//funtype:= reflect.ValueOf(f).Type(),
+
+}
+
+func reflectField(structName interface{}, v *viper.Viper) {
+	t := reflect.ValueOf(structName)
+
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		log.Fatal("Check type error not Struct")
+		return
+	}
+
+	fieldNum := t.NumField()
+	for i := 0; i < fieldNum; i++ {
+		fieldname := t.Type().Field(i).Name
+		typename := t.Field(i).Type().Name()
+		field := t.Field(i).Interface()
+
+		log.Info("init config :", fieldname)
+		v.SetConfigName(fieldname)
+
+		if err := v.ReadInConfig(); err != nil {
+			log.Fatalf("read: %v [%v][%v]", err, typename, fieldname)
+		}
+
+		if err := v.UnmarshalExact(&field); err != nil {
+			log.Fatal("err:", err)
+		}
+		t.FieldByName(fieldname).Set(reflect.ValueOf(field))
 	}
 }
