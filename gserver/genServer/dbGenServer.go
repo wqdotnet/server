@@ -23,7 +23,7 @@ type dbState struct {
 // Init initializes process state using arbitrary arguments
 // Init(...) -> state
 func (dgs *DbGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
-	log.Infof("Init Gen_Server:(%v): args %v ", p.Name(), args)
+	log.Infof("Init (%v): args %v ", p.Name(), args)
 
 	db.StartMongodb(args[0].(string), args[1].(string))
 	db.StartRedis(args[2].(string), args[3].(int))

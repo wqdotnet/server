@@ -19,10 +19,12 @@ func Init(loglevel log.Level, writefile bool, LogName string, path string) {
 		//DisableTimestamp: false,
 		FullTimestamp: true,
 		// 定义时间戳格式
-		TimestampFormat: tool.TimeFormat,
+		TimestampFormat: tool.DateTimeFormat,
+		DisableSorting:  true,
 	})
 	log.AddHook(NewContextHook(log.ErrorLevel, log.WarnLevel, log.DebugLevel, log.TraceLevel, log.FatalLevel))
 	if writefile {
+		log.Infof("log path: [%v]", path)
 		log.AddHook(fileHook(fmt.Sprintf("%v/%v_%v.log", path, LogName, "%Y%m%d%H%M")))
 	}
 

@@ -3,8 +3,6 @@ module server
 go 1.15
 
 require (
-	github.com/aws/aws-sdk-go v1.39.3 // indirect
-	github.com/containerd/console v1.0.2
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-echarts/go-echarts/v2 v2.2.4 // indirect
 	github.com/go-echarts/statsview v0.3.4
@@ -20,7 +18,7 @@ require (
 	github.com/klauspost/reedsolomon v1.9.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
-	github.com/lestrrat-go/strftime v1.0.4 // indirect
+	github.com/lestrrat-go/strftime v1.0.5 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
@@ -37,8 +35,9 @@ require (
 	github.com/xtaci/kcp-go v5.4.20+incompatible
 	github.com/xtaci/lossyconn v0.0.0-20200209145036-adba10fffc37 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
-	go.mongodb.org/mongo-driver v1.5.4
-	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
+	go.mongodb.org/mongo-driver v1.6.0
+	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
+	golang.org/x/net v0.0.0-20210716203947-853a461950ff // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	google.golang.org/protobuf v1.27.1
 )

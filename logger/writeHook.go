@@ -10,7 +10,6 @@ import (
 )
 
 func fileHook(path string) *lfshook.LfsHook {
-	log.Debug("log path:", path)
 	writer, _ := rotatelogs.New(
 		path,
 		rotatelogs.WithLinkName(path),

@@ -34,18 +34,20 @@ type gameServer struct {
 }
 
 func (g *gameServer) Start() {
-	//启动网络
-	g.nw.Start()
 	gateNodeName := fmt.Sprintf("gatewayNode%v@127.0.0.1", g.serverid)
 	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", g.serverid)
 	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", g.serverid)
 
-	gateNode, _ := StartGateSupNode(gateNodeName)
-	serverNode, _ := StartGameServerSupNode(serverNodeName)
 	dbNode, _ := StartDataBaseSupSupNode(dbNodeName)
+	serverNode, _ := StartGameServerSupNode(serverNodeName)
+	gateNode, _ := StartGateSupNode(gateNodeName)
+
 	g.nodes[gateNode.FullName] = gateNode
 	g.nodes[serverNode.FullName] = serverNode
 	g.nodes[dbNode.FullName] = dbNode
+
+	//启动网络
+	g.nw.Start()
 }
 
 func (g *gameServer) Close() {
@@ -55,7 +57,7 @@ func (g *gameServer) Close() {
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
-	log.Infof("====================== Begin Start [%v][%v] ======================", ServerCfg.ServerName, ServerCfg.ServerID)
+	log.Infof("============================= Begin Start [%v][%v] ===============================", ServerCfg.ServerName, ServerCfg.ServerID)
 	if level, err := log.ParseLevel(ServerCfg.Loglevel); err == nil {
 		logger.Init(level, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
 	} else {
