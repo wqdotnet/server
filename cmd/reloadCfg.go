@@ -25,7 +25,7 @@ import (
 
 // upcfgCmd represents the upcfg command
 var upcfgCmd = &cobra.Command{
-	Use:   "reloadCfg",
+	Use:   "reloadcfg",
 	Short: "Reload Config",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -38,7 +38,7 @@ var upcfgCmd = &cobra.Command{
 		}
 
 		if pong {
-			send("ReloadCfg")
+			call("ReloadCfg")
 			time.Sleep(time.Second)
 		}
 	},

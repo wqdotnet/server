@@ -9,7 +9,6 @@ import (
 
 //数据落地服务
 
-// GenServer implementation structure
 type DbGenServer struct {
 	ergo.GenServer
 	process *ergo.Process

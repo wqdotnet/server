@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"server/gserver"
 	"strconv"
@@ -66,8 +67,16 @@ func debug(serverid, ip string) {
 
 		switch cmd {
 		case "getroleinfo":
-			call(cmd)
+			term, err := call(args...)
+			if err != nil {
+				fmt.Printf("err: %v \n", err)
+			} else {
+
+				fmt.Printf("term: %v \n", term)
+			}
+
 		case "quit":
+			send(args...)
 			return
 		case "EOF":
 			return

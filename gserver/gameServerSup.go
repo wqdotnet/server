@@ -2,6 +2,7 @@ package gserver
 
 import (
 	genserver "server/gserver/genServer"
+	"server/tools"
 
 	"github.com/halturin/ergo"
 )
@@ -18,16 +19,25 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 		Name: "GameServerSup",
 		Children: []ergo.SupervisorChildSpec{
 			{
-				Name:    "gameServer",
-				Child:   &genserver.GameGenServer{},
-				Restart: ergo.SupervisorChildRestartTemporary,
-				// Restart: ergo.SupervisorChildRestartTransient,
+				Name:  "gameServer",
+				Child: &genserver.GameGenServer{},
+				//Restart: ergo.SupervisorChildRestartTemporary,
+				Restart: ergo.SupervisorChildRestartTransient,
 				// Restart: ergo.SupervisorChildRestartPermanent,
 				Args: []interface{}{},
 
 				// temporary:进程永远都不会被重启
 				// transient: 只有进程异常终止的时候会被重启
 				// permanent:遇到任何错误导致进程终止就会重启
+			},
+			{
+				Name:    "CmdServer",
+				Child:   &genserver.CmdGenServer{},
+				Restart: ergo.SupervisorChildRestartTransient,
+				Args: []interface{}{
+					tools.AbsPathify(ServerCfg.CfgPath),
+					ServerCfg.CfgType,
+				},
 			},
 			// {
 			// 	Name:    "demoServer02",
@@ -43,9 +53,9 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 			// },
 		},
 		Strategy: ergo.SupervisorStrategy{
-			Type: ergo.SupervisorStrategyOneForAll,
+			//Type: ergo.SupervisorStrategyOneForAll,
 			// Type:      ergo.SupervisorStrategyRestForOne,
-			// Type:      ergo.SupervisorStrategyOneForOne,
+			Type: ergo.SupervisorStrategyOneForOne,
 
 			//重启策略
 			// one_for_one : 把子进程当成各自独立的,一个进程出现问题其它进程不会受到崩溃的进程的影响.该子进程死掉,只有这个进程会被重启

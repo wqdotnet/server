@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// GenServer implementation structure
+//游戏逻辑服务
 type GameGenServer struct {
 	ergo.GenServer
 	process *ergo.Process

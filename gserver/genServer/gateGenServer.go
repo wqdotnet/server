@@ -10,7 +10,6 @@ import (
 // 处理玩家独立无交互的游戏逻辑
 // 在socket中断后 此进程会保留一段时间以便于重新建立连接
 
-// GenServer implementation structure
 type GateGenServer struct {
 	ergo.GenServer
 	process *ergo.Process

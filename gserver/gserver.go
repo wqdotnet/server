@@ -34,7 +34,7 @@ type gameServer struct {
 }
 
 func (g *gameServer) Start() {
-	gateNodeName := fmt.Sprintf("gatewayNode%v@127.0.0.1", g.serverid)
+	gateNodeName := fmt.Sprintf("gatewayNode_%v@127.0.0.1", g.serverid)
 	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", g.serverid)
 	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", g.serverid)
 
@@ -120,6 +120,7 @@ func StartGServer() {
 		nodes:    make(map[string]*ergo.Node),
 		serverid: ServerCfg.ServerID,
 	}
+
 	GameServerInfo.Start()
 	defer GameServerInfo.Close()
 
