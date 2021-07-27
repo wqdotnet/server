@@ -17,6 +17,7 @@ import (
 	//msg "server/proto"
 
 	"github.com/halturin/ergo"
+	"github.com/halturin/ergo/etf"
 )
 
 //GameServerInfo game info
@@ -38,9 +39,9 @@ func (g *gameServer) Start() {
 	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", g.serverid)
 	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", g.serverid)
 
-	dbNode, _ := StartDataBaseSupSupNode(dbNodeName)
-	serverNode, _ := StartGameServerSupNode(serverNodeName)
+	serverNode, _ := StartGameServerSupNode(serverNodeName, g.command)
 	gateNode, _ := StartGateSupNode(gateNodeName)
+	dbNode, _ := StartDataBaseSupSupNode(dbNodeName)
 
 	g.nodes[gateNode.FullName] = gateNode
 	g.nodes[serverNode.FullName] = serverNode
@@ -51,12 +52,24 @@ func (g *gameServer) Start() {
 }
 
 func (g *gameServer) Close() {
+	for _, node := range g.nodes {
+		for _, p := range node.GetProcessList() {
+			p.Cast(p.Self(), etf.Atom("stop"))
+		}
+		// node.Stop()
+		// node.Wait()
+	}
 	g.nw.Close()
+
 }
 
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
+	if ServerRunState() {
+		log.Infof("[%v][%v] runing", ServerCfg.ServerName, ServerCfg.ServerID)
+	}
+
 	log.Infof("============================= Begin Start [%v][%v] ===============================", ServerCfg.ServerName, ServerCfg.ServerID)
 	if level, err := log.ParseLevel(ServerCfg.Loglevel); err == nil {
 		logger.Init(level, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
@@ -120,8 +133,9 @@ func StartGServer() {
 		nodes:    make(map[string]*ergo.Node),
 		serverid: ServerCfg.ServerID,
 	}
-
 	GameServerInfo.Start()
+
+	defer ClonseServer()
 	defer GameServerInfo.Close()
 
 	//退出消息监控
@@ -137,8 +151,10 @@ func StartGServer() {
 			switch command {
 			case "StartSuccess":
 				log.Info("====================== Start Game Server Success =========================")
-			case "down":
+				StartSuccess()
+			case "shutdown":
 				log.Warn("Shut down the game server")
+				return
 			default:
 				log.Warn("command:", command)
 			}
@@ -152,9 +168,22 @@ func StartGServer() {
 			//log.Infof("time: [%v]  online:[%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"))
 		}
 	}
+
 }
 
 //SendGameServerMsg game system msg
 func SendGameServerMsg(msg string) {
 	GameServerInfo.command <- msg
+}
+
+func ServerRunState() bool {
+	return false
+}
+
+//成功启动
+func StartSuccess() {
+}
+
+//关闭服务
+func ClonseServer() {
 }

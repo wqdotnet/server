@@ -26,18 +26,6 @@ func (ds *DataBaseSup) Init(args ...interface{}) ergo.SupervisorSpec {
 				// transient: 只有进程异常终止的时候会被重启
 				// permanent:遇到任何错误导致进程终止就会重启
 			},
-			// {
-			// 	Name:    "demoServer02",
-			// 	Child:   &demoGenServ{},
-			// 	Restart: ergo.SupervisorChildRestartPermanent,
-			// 	Args:    []interface{}{12345},
-			// },
-			// {
-			// 	Name:    "demoServer03",
-			// 	Child:   &demoGenServ{},
-			// 	Restart: ergo.SupervisorChildRestartPermanent,
-			// 	Args:    []interface{}{"abc", 67890},
-			// },
 		},
 		Strategy: ergo.SupervisorStrategy{
 			Type: ergo.SupervisorStrategyOneForOne,

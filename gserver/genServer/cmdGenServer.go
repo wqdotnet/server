@@ -13,9 +13,10 @@ import (
 // GenServer implementation structure
 type CmdGenServer struct {
 	ergo.GenServer
-	process *ergo.Process
-	CfgPath string
-	CfgType string
+	process   *ergo.Process
+	CfgPath   string
+	CfgType   string
+	ServerCmd chan string
 }
 
 type cmdState struct {
@@ -28,6 +29,7 @@ func (dgs *CmdGenServer) Init(p *ergo.Process, args ...interface{}) interface{} 
 	dgs.process = p
 	dgs.CfgPath = args[0].(string)
 	dgs.CfgType = args[1].(string)
+	dgs.ServerCmd = args[2].(chan string)
 	return cmdState{}
 }
 
@@ -38,7 +40,10 @@ func (dgs *CmdGenServer) HandleCast(message etf.Term, state interface{}) (string
 	log.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
 	switch message {
 	case etf.Atom("stop"):
-		return "stop", "they said"
+		return "stop", "normal"
+	case etf.Atom("shutdown"):
+		log.Debug("send shutdown2222222")
+		dgs.ServerCmd <- "shutdown"
 	}
 	return "noreply", state
 }
@@ -49,14 +54,12 @@ func (dgs *CmdGenServer) HandleCast(message etf.Term, state interface{}) (string
 //		         ("stop", reason, _) - normal stop
 func (dgs *CmdGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
 	log.Infof("HandleCall (%v): %v ", dgs.process.Name(), message)
-
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
 
 	switch message {
 	case etf.Atom("ping"):
 		reply = etf.Term(etf.Atom("pong"))
-	case "ReloadCfg":
-		log.Debug("ReloadCfg==>")
+	case etf.Atom("ReloadCfg"):
 		cfg.InitViperConfig(dgs.CfgPath, dgs.CfgType)
 		reply = etf.Term(etf.Atom("success"))
 	}
@@ -68,10 +71,12 @@ func (dgs *CmdGenServer) HandleCall(from etf.Tuple, message etf.Term, state inte
 //		         ("stop", reason) - normal stop
 func (dgs *CmdGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
 	log.Infof("HandleInfo (%v): %v", dgs.process.Name(), message)
+
 	return "noreply", state
 }
 
 // Terminate called when process died
 func (dgs *CmdGenServer) Terminate(reason string, state interface{}) {
 	log.Infof("Terminate (%v): %v", dgs.process.Name(), reason)
+
 }

@@ -12,6 +12,7 @@ import (
 
 type GameServerSup struct {
 	ergo.Supervisor
+	ServerCmd chan string
 }
 
 func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
@@ -31,26 +32,15 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 				// permanent:遇到任何错误导致进程终止就会重启
 			},
 			{
-				Name:    "CmdServer",
+				Name:    "cmdServer",
 				Child:   &genserver.CmdGenServer{},
 				Restart: ergo.SupervisorChildRestartTransient,
 				Args: []interface{}{
 					tools.AbsPathify(ServerCfg.CfgPath),
 					ServerCfg.CfgType,
+					ds.ServerCmd,
 				},
 			},
-			// {
-			// 	Name:    "demoServer02",
-			// 	Child:   &demoGenServ{},
-			// 	Restart: ergo.SupervisorChildRestartPermanent,
-			// 	Args:    []interface{}{12345},
-			// },
-			// {
-			// 	Name:    "demoServer03",
-			// 	Child:   &demoGenServ{},
-			// 	Restart: ergo.SupervisorChildRestartPermanent,
-			// 	Args:    []interface{}{"abc", 67890},
-			// },
 		},
 		Strategy: ergo.SupervisorStrategy{
 			//Type: ergo.SupervisorStrategyOneForAll,
@@ -68,7 +58,7 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 	}
 }
 
-func StartGameServerSupNode(nodeName string) (*ergo.Node, *ergo.Process) {
+func StartGameServerSupNode(nodeName string, cmd chan string) (*ergo.Node, *ergo.Process) {
 	opts := ergo.NodeOptions{
 		ListenRangeBegin: uint16(ServerCfg.ListenRangeBegin),
 		ListenRangeEnd:   uint16(ServerCfg.ListenRangeEnd),
@@ -78,6 +68,6 @@ func StartGameServerSupNode(nodeName string) (*ergo.Node, *ergo.Process) {
 	node := ergo.CreateNode(nodeName, ServerCfg.Cookie, opts)
 
 	// Spawn supervisor process
-	process, _ := node.Spawn("gameServer_sup", ergo.ProcessOptions{}, &GameServerSup{})
+	process, _ := node.Spawn("gameServer_sup", ergo.ProcessOptions{}, &GameServerSup{ServerCmd: cmd})
 	return node, process
 }

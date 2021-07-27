@@ -34,7 +34,7 @@ func (dgs *GateGenServer) HandleCast(message etf.Term, state interface{}) (strin
 	log.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
 	switch message {
 	case etf.Atom("stop"):
-		return "stop", "they said"
+		return "stop", "normal"
 	}
 	return "noreply", state
 }
@@ -60,6 +60,7 @@ func (dgs *GateGenServer) HandleCall(from etf.Tuple, message etf.Term, state int
 //		         ("stop", reason) - normal stop
 func (dgs *GateGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
 	log.Infof("HandleInfo (%v): %v", dgs.process.Name(), message)
+
 	return "noreply", state
 }
 

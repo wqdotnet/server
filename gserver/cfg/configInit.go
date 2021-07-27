@@ -45,7 +45,7 @@ func reflectField(structName interface{}, v *viper.Viper) {
 		typename := t.Field(i).Type().Name()
 		field := t.Field(i).Interface()
 
-		log.Info("init config :", fieldname)
+		log.Info("load init config :", fieldname)
 		v.SetConfigName(fieldname)
 
 		if err := v.ReadInConfig(); err != nil {

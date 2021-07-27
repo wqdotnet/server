@@ -16,15 +16,23 @@ var (
 
 func call(cmd ...string) (etf.Term, error) {
 	if len(cmd) == 1 {
-		return process.Call(etf.Tuple{genServerName, gateNodeName}, cmd[0])
+		return process.Call(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
 	} else {
 		return process.Call(etf.Tuple{genServerName, gateNodeName}, cmd)
 	}
 }
 
+func cast(cmd ...string) {
+	if len(cmd) == 1 {
+		process.Cast(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
+	} else {
+		process.Cast(etf.Tuple{genServerName, gateNodeName}, cmd)
+	}
+}
+
 func send(cmd ...string) {
 	if len(cmd) == 1 {
-		process.Send(etf.Tuple{genServerName, gateNodeName}, cmd[0])
+		process.Send(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
 	} else {
 		process.Send(etf.Tuple{genServerName, gateNodeName}, cmd)
 	}
@@ -33,7 +41,7 @@ func send(cmd ...string) {
 //"gatewayNode[serverid]@[ip]"
 func connGenServer(serverid, ip string) bool {
 	_, process = startDebugGen("debug_server@127.0.0.1")
-	genServerName = "CmdServer"
+	genServerName = "cmdServer"
 	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
 
 	fmt.Printf("---------- Console  connect  {'%v','%v'} ----------- \n", genServerName, gateNodeName)
