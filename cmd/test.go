@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"time"
 
 	pool "github.com/jolestar/go-commons-pool/v2"
 	log "github.com/sirupsen/logrus"
@@ -185,27 +184,10 @@ func objectPool() {
 
 //======reflect
 
-var execfuncname reflect.Value
-
-func sssssdc() {
-
-	execfuncname.Call(nil)
-}
-
-func testfun() {
-
-}
-
 func reflex() {
-	execfuncname = reflect.ValueOf(testfun)
-	t1 := time.Now()
-	for i := 0; i < 10000; i++ {
-		sssssdc()
-	}
-	elapsed := time.Since(t1)
-	fmt.Println("App elapsed: ", elapsed)
 
-	//funtype:= reflect.ValueOf(f).Type(),
+	//Function :=  reflect.ValueOf(reflectField),
+	//FuncType:=  reflect.ValueOf(reflectField).Type(),
 
 }
 

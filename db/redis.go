@@ -38,6 +38,14 @@ func StartRedis(address string, selectdb int) {
 	}
 }
 
+func RedisConn() (bool, error) {
+	con := redis.pool.Get()
+	if err := con.Err(); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 //RedisExec 命令
 func RedisExec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
 	con := redis.pool.Get()

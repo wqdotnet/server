@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"server/tool"
+	"server/tools"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -37,7 +37,7 @@ func fileHook(path string) *lfshook.LfsHook {
 		},
 		&log.TextFormatter{
 			ForceColors:     true,
-			TimestampFormat: tool.DateTimeFormat,
+			TimestampFormat: tools.DateTimeFormat,
 		},
 	)
 }

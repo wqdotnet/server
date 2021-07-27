@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 	"server/gserver"
-	"server/tool"
+	"server/tools"
 	"strconv"
 	"time"
 
@@ -33,7 +33,7 @@ var protobufCmd = &cobra.Command{
 
 		pbpath := gserver.ServerCfg.ProtoPath
 		outpath := gserver.ServerCfg.GoOut
-		timeformat := tool.DateTimeFormat
+		timeformat := tools.DateTimeFormat
 
 		if !PathExists(pbpath) || !PathExists(outpath) {
 			fmt.Println("文件夹不存在:", pbpath, outpath)
@@ -92,8 +92,8 @@ func PathExists(path string) bool {
 //获取相差时间
 func getHourDiffer(startTime, endTime string) int64 {
 	var hour int64
-	t1, err := time.ParseInLocation(tool.DateTimeFormat, startTime, time.Local)
-	t2, err2 := time.ParseInLocation(tool.DateTimeFormat, endTime, time.Local)
+	t1, err := time.ParseInLocation(tools.DateTimeFormat, startTime, time.Local)
+	t2, err2 := time.ParseInLocation(tools.DateTimeFormat, endTime, time.Local)
 
 	if err == nil && err2 == nil && t1.Before(t2) {
 		diff := t2.Unix() - t1.Unix() //

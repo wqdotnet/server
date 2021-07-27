@@ -1,8 +1,6 @@
 package genserver
 
 import (
-	"server/db"
-
 	log "github.com/sirupsen/logrus"
 
 	"github.com/halturin/ergo"
@@ -24,9 +22,6 @@ type dbState struct {
 // Init(...) -> state
 func (dgs *DbGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
 	log.Infof("Init (%v): args %v ", p.Name(), args)
-
-	db.StartMongodb(args[0].(string), args[1].(string))
-	db.StartRedis(args[2].(string), args[3].(int))
 
 	dgs.process = p
 	return dbState{}

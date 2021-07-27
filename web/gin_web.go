@@ -53,7 +53,7 @@ func Start(Port int32) {
 
 	router.GET("/map", func(c *gin.Context) {
 
-		//tool.HandleImage(c.Writer, c.Request)
+		//tools.HandleImage(c.Writer, c.Request)
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})

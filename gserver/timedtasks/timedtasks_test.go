@@ -1,7 +1,7 @@
 package timedtasks
 
 import (
-	"server/tool"
+	"server/tools"
 	"testing"
 	"time"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	log.Info("start task:", tool.GoID())
+	log.Info("start task:", tools.GoID())
 	StartCronTasks()
 }
 func TestInit(t *testing.T) {

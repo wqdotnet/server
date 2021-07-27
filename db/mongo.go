@@ -36,6 +36,19 @@ func StartMongodb(dbname string, url string) {
 	clientPool = pool.NewObjectPoolWithDefaultConfig(ctx, factory)
 }
 
+func MongodbPing() (bool, error) {
+	ctx := context.Background()
+	obj, err := clientPool.BorrowObject(ctx)
+	if err != nil {
+		log.Error(err)
+	}
+	client := obj.(*mongo.Client)
+	if err := client.Ping(context.TODO(), nil); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 //GetDatabase connectPool mongodb database
 func GetDatabase() (*mongo.Client, *mongo.Database) {
 	ctx := context.Background()

@@ -46,7 +46,7 @@ CfgPath: "./config"
 CfgType: "json"
 
 #log
-LogWrite: true
+LogWrite: false
 Loglevel: "debug"   #panic  fatal  error  warn  info  debug  trace
 LogPath:  "./log"
 LogName: "log"

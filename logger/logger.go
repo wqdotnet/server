@@ -3,7 +3,7 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"server/tool"
+	"server/tools"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -19,7 +19,7 @@ func Init(loglevel log.Level, writefile bool, LogName string, path string) {
 		//DisableTimestamp: false,
 		FullTimestamp: true,
 		// 定义时间戳格式
-		TimestampFormat: tool.DateTimeFormat,
+		TimestampFormat: tools.DateTimeFormat,
 		DisableSorting:  true,
 	})
 	log.AddHook(NewContextHook(log.ErrorLevel, log.WarnLevel, log.DebugLevel, log.TraceLevel, log.FatalLevel))
@@ -47,8 +47,8 @@ func (mf *MyFormatter) Format(entry *log.Entry) ([]byte, error) {
 	// entry.Message 就是需要打印的日志
 	b.WriteString(fmt.Sprintf("[%s][%v][%s]:  %s\n",
 		entry.Level,
-		tool.GoID(),
-		entry.Time.Format(tool.DateTimeFormat),
+		tools.GoID(),
+		entry.Time.Format(tools.DateTimeFormat),
 		entry.Message))
 	return b.Bytes(), nil
 }

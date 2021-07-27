@@ -78,6 +78,20 @@ func StartGServer() {
 	// })
 	//defer timedtasks.RemoveTasks("loop")
 
+	db.StartMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
+	if ok, err := db.MongodbPing(); ok {
+		log.Info("mongodb conn success")
+	} else {
+		panic(err)
+	}
+
+	db.StartRedis(ServerCfg.RedisConnStr, ServerCfg.RedisDB)
+	if ok, err := db.RedisConn(); ok {
+		log.Info("redis conn success")
+	} else {
+		panic(err)
+	}
+
 	if ServerCfg.OpenHTTP {
 		go web.Start(ServerCfg.HTTPPort)
 	}
@@ -134,7 +148,7 @@ func StartGServer() {
 				return
 			}
 			//case <-time.After(60 * time.Second):
-			//log.Infof("time: [%v]  online:[%v]", time.Now().Format(tool.DateTimeFormat), db.RedisGetInt("ConnectNumber"))
+			//log.Infof("time: [%v]  online:[%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"))
 		}
 	}
 }

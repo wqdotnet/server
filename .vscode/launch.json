@@ -5,13 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
+            "name": "server",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceRoot}",
-            "env": {"go.gopath": "E:/gopath"},  
-            "args": [" start"]
+            "env": {},  
+            "args": ["start"]
         }
     ]
+ 
 }
