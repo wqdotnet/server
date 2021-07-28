@@ -3,10 +3,17 @@
 💡❌💙 💔💜 💚💬⭐️⚠️💃🏻📄📚🛠 😎 🔧 🐭🐮🐯🐇🐉🐍🐎🐑🐒🐔🐶🐷
 
 ## 🔨 command
-- server start    &emsp;&emsp;&emsp;    start game server   
-- server protobuf &emsp;    protobuf 协议生成  
-- server clean&emsp;&emsp;&emsp;  清理数据
+Available Commands:
+-  clean       &emsp;&emsp;&emsp;清理数据
+-  completion  &emsp;生成补全脚本
+-  debug       &emsp;&emsp;&emsp;控制台
+-  pb  [int] [obj]         &emsp;生成protobuf 
+-  reloadcfg   &emsp;&emsp;&emsp;重新加载配置
+-  start       &emsp;&emsp;&emsp;启动服务
+-  state       &emsp;&emsp;&emsp;获取服务器运行状态
+-  stop        &emsp;&emsp;&emsp;关闭服务器
 
+ 
 
 
 ### ✅ 安全退出
