@@ -1,6 +1,7 @@
 package gserver
 
 import (
+	"fmt"
 	genserver "server/gserver/genServer"
 	"server/tools"
 
@@ -12,7 +13,7 @@ import (
 
 type GameServerSup struct {
 	ergo.Supervisor
-	ServerCmd chan string
+	ServerCmdChan chan string
 }
 
 func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
@@ -38,7 +39,8 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 				Args: []interface{}{
 					tools.AbsPathify(ServerCfg.CfgPath),
 					ServerCfg.CfgType,
-					ds.ServerCmd,
+					ds.ServerCmdChan,
+					fmt.Sprintf("%v_%v", ServerCfg.ServerName, ServerCfg.ServerID),
 				},
 			},
 		},
@@ -52,7 +54,7 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 			// one_for_all : 如果子进程终止,所有其它子进程也都会被终止,然后所有进程都会被重启.
 			// rest_for_one:如果一个子进程终止,在这个进程启动之后启动的进程都会被终止掉.然后终止掉的进程和连带关闭的进程都会被重启.
 			// simple_one_for_one 是one_for_one的简化版 ,所有子进程都动态添加同一种进程的实例
-			Intensity: 2, //次数
+			Intensity: 3, //次数
 			Period:    5, //时间  1 -0 代表不重启
 		},
 	}
@@ -68,6 +70,6 @@ func StartGameServerSupNode(nodeName string, cmd chan string) (*ergo.Node, *ergo
 	node := ergo.CreateNode(nodeName, ServerCfg.Cookie, opts)
 
 	// Spawn supervisor process
-	process, _ := node.Spawn("gameServer_sup", ergo.ProcessOptions{}, &GameServerSup{ServerCmd: cmd})
+	process, _ := node.Spawn("gameServer_sup", ergo.ProcessOptions{}, &GameServerSup{ServerCmdChan: cmd})
 	return node, process
 }

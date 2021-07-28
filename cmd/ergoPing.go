@@ -39,21 +39,17 @@ func send(cmd ...string) {
 }
 
 //"gatewayNode[serverid]@[ip]"
-func connGenServer(serverid, ip string) bool {
+func ping(serverid, ip string) bool {
 	_, process = startDebugGen("debug_server@127.0.0.1")
 	genServerName = "cmdServer"
 	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
 
-	fmt.Printf("---------- Console  connect  {'%v','%v'} ----------- \n", genServerName, gateNodeName)
-
 	//process.Send(etf.Tuple{"gateServer", "demo@127.0.0.1"}, etf.Map{"abc": []byte("operation cwal")})
-	if info, err := process.Call(etf.Tuple{genServerName, gateNodeName}, etf.Atom("ping")); err != nil {
-		fmt.Printf("[pang]   err:[%v]\n", err)
+	if _, err := process.Call(etf.Tuple{genServerName, gateNodeName}, etf.Atom("ping")); err != nil {
 		return false
-	} else {
-		fmt.Printf("[%v] \n", info)
-		return true
 	}
+	return true
+
 }
 
 func startDebugGen(nodeName string) (*ergo.Node, *ergo.Process) {

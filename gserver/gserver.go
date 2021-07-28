@@ -2,6 +2,7 @@ package gserver
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"runtime"
@@ -15,7 +16,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	//msg "server/proto"
-
+	"github.com/facebookgo/pidfile"
 	"github.com/halturin/ergo"
 	"github.com/halturin/ergo/etf"
 )
@@ -60,7 +61,6 @@ func (g *gameServer) Close() {
 		// node.Wait()
 	}
 	g.nw.Close()
-
 }
 
 //StartGServer 启动game server
@@ -140,18 +140,23 @@ func StartGServer() {
 
 	//退出消息监控
 	var exitChan = make(chan os.Signal)
+
 	if runtime.GOOS == "linux" {
 		//signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
 		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
 	}
+
+	//create pid
+	file, _ := ioutil.TempFile("", fmt.Sprintf("pid_%v_%v", ServerCfg.ServerName, ServerCfg.ServerID))
+	pidfile.SetPidfilePath(file.Name())
 
 	for {
 		select {
 		case command := <-GameServerInfo.command:
 			switch command {
 			case "StartSuccess":
-				log.Info("====================== Start Game Server Success =========================")
-				StartSuccess()
+				pid := StartSuccess()
+				log.Infof("====================== Start Game Server pid:[%v] Success =========================", pid)
 			case "shutdown":
 				log.Warn("Shut down the game server")
 				return
@@ -181,9 +186,14 @@ func ServerRunState() bool {
 }
 
 //成功启动
-func StartSuccess() {
+func StartSuccess() int {
+	pidfile.Write()
+	log.Infof("pidfile :%v", pidfile.GetPidfilePath())
+	i, _ := pidfile.Read()
+	return i
 }
 
 //关闭服务
 func ClonseServer() {
+	os.Remove(pidfile.GetPidfilePath())
 }

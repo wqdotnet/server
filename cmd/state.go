@@ -23,11 +23,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// stopCmd represents the stop command
-var stopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "关闭服务器",
-	Long:  `shut down game server`,
+// stateCmd represents the state command
+var stateCmd = &cobra.Command{
+	Use:   "state",
+	Short: "获取服务器运行状态",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		var pong bool
 
@@ -38,27 +38,25 @@ var stopCmd = &cobra.Command{
 		}
 
 		if pong {
-			if info, err := call("shutdown"); err == nil {
-				fmt.Printf("[%v] shutdown  \n", info)
-			} else {
-				fmt.Print("err:", err)
+			if info, err := call("state"); err == nil {
+				fmt.Printf(" %v \n", info)
 			}
 		} else {
-			fmt.Printf("not running \n")
+			fmt.Printf(" not running \n")
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(stopCmd)
+	rootCmd.AddCommand(stateCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// stopCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// stateCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// stopCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// stateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

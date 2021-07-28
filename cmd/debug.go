@@ -52,7 +52,7 @@ func debug(serverid, ip string) {
 	// }
 	// rootCmd.Println(rootCmd.UsageString())
 
-	if !connGenServer(serverid, ip) {
+	if !ping(serverid, ip) {
 		return
 	}
 
@@ -76,7 +76,6 @@ func debug(serverid, ip string) {
 			}
 
 		case "quit":
-			send(args...)
 			return
 		case "EOF":
 			return

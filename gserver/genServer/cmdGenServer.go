@@ -1,8 +1,10 @@
 package genserver
 
 import (
+	"fmt"
 	"server/gserver/cfg"
 
+	"github.com/facebookgo/pidfile"
 	"github.com/halturin/ergo"
 	"github.com/halturin/ergo/etf"
 	log "github.com/sirupsen/logrus"
@@ -13,10 +15,11 @@ import (
 // GenServer implementation structure
 type CmdGenServer struct {
 	ergo.GenServer
-	process   *ergo.Process
-	CfgPath   string
-	CfgType   string
-	ServerCmd chan string
+	process       *ergo.Process
+	CfgPath       string
+	CfgType       string
+	ServerCmdChan chan string
+	ServerNmae    string
 }
 
 type cmdState struct {
@@ -29,7 +32,9 @@ func (dgs *CmdGenServer) Init(p *ergo.Process, args ...interface{}) interface{} 
 	dgs.process = p
 	dgs.CfgPath = args[0].(string)
 	dgs.CfgType = args[1].(string)
-	dgs.ServerCmd = args[2].(chan string)
+	dgs.ServerCmdChan = args[2].(chan string)
+	dgs.ServerNmae = args[3].(string)
+
 	return cmdState{}
 }
 
@@ -41,9 +46,6 @@ func (dgs *CmdGenServer) HandleCast(message etf.Term, state interface{}) (string
 	switch message {
 	case etf.Atom("stop"):
 		return "stop", "normal"
-	case etf.Atom("shutdown"):
-		log.Debug("send shutdown2222222")
-		dgs.ServerCmd <- "shutdown"
 	}
 	return "noreply", state
 }
@@ -58,10 +60,16 @@ func (dgs *CmdGenServer) HandleCall(from etf.Tuple, message etf.Term, state inte
 
 	switch message {
 	case etf.Atom("ping"):
-		reply = etf.Term(etf.Atom("pong"))
+		reply = etf.Term(etf.Atom(dgs.ServerNmae))
 	case etf.Atom("ReloadCfg"):
 		cfg.InitViperConfig(dgs.CfgPath, dgs.CfgType)
-		reply = etf.Term(etf.Atom("success"))
+		reply = etf.Term(etf.Atom(dgs.ServerNmae))
+	case etf.Atom("shutdown"):
+		dgs.ServerCmdChan <- "shutdown"
+		reply = etf.Term(etf.Atom(dgs.ServerNmae))
+	case etf.Atom("state"):
+		i, _ := pidfile.Read()
+		reply = etf.Term(etf.Atom(fmt.Sprintf(" [%v] pid:[%v]", dgs.ServerNmae, i)))
 	}
 	return "reply", reply, state
 }

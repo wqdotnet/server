@@ -16,9 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"server/gserver"
 	"strconv"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -26,20 +26,23 @@ import (
 // upcfgCmd represents the upcfg command
 var upcfgCmd = &cobra.Command{
 	Use:   "reloadcfg",
-	Short: "Reload Config",
+	Short: "重新加载配置",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		var pong bool
 
 		if len(args) == 2 {
-			pong = connGenServer(args[0], args[1])
+			pong = ping(args[0], args[1])
 		} else {
-			pong = connGenServer(strconv.Itoa(int(gserver.ServerCfg.ServerID)), "127.0.0.1")
+			pong = ping(strconv.Itoa(int(gserver.ServerCfg.ServerID)), "127.0.0.1")
 		}
 
 		if pong {
-			call("ReloadCfg")
-			time.Sleep(time.Second)
+			if info, err := call("ReloadCfg"); err == nil {
+				fmt.Printf("[%v] ReloadCfg  \n", info)
+			} else {
+				fmt.Print("err:", err)
+			}
 		}
 	},
 }
