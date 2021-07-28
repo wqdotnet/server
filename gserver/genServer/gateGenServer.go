@@ -1,9 +1,12 @@
 package genserver
 
 import (
+	"net"
+
 	"github.com/halturin/ergo"
 	"github.com/halturin/ergo/etf"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
 //接收处理socket 发送过来的信息
@@ -16,6 +19,18 @@ type GateGenServer struct {
 }
 
 type gateState struct {
+}
+
+func (dgs *GateGenServer) OnConnect(sendchan chan []byte, packet int32, msgchan chan []byte, addr net.Addr) {
+}
+func (dgs *GateGenServer) OnClose() {
+}
+func (dgs *GateGenServer) OnMessage(module int32, method int32, buf []byte) {
+}
+func (dgs *GateGenServer) Send(module int32, method int32, pb proto.Message) {
+}
+func (dgs *GateGenServer) ProcessMessage(msg []byte) bool {
+	return false
 }
 
 // Init initializes process state using arbitrary arguments
@@ -32,10 +47,25 @@ func (dgs *GateGenServer) Init(p *ergo.Process, args ...interface{}) interface{}
 //		         ("stop", reason) - stop with reason
 func (dgs *GateGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
 	log.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
-	switch message {
-	case etf.Atom("stop"):
-		return "stop", "normal"
+
+	switch info := message.(type) {
+	case etf.Atom:
+		switch info {
+		case "stop":
+			return "stop", "normal"
+		case "SocketStop":
+			return "stop", "normal"
+		}
+
+	case []byte:
+		log.Debug("[]byte", info)
 	}
+
+	// switch message {
+	// case etf.Atom("stop"):
+	// 	return "stop", "normal"
+	// case etf.List([]byte):
+	// }
 	return "noreply", state
 }
 

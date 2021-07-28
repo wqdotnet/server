@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"server/db"
 	"server/gserver/cfg"
+	genserver "server/gserver/genServer"
 	"server/logger"
 	"server/network"
 	"server/web"
@@ -49,7 +50,7 @@ func (g *gameServer) Start() {
 	g.nodes[dbNode.FullName] = dbNode
 
 	//启动网络
-	g.nw.Start()
+	g.nw.Start(dbNode)
 }
 
 func (g *gameServer) Close() {
@@ -116,7 +117,7 @@ func StartGServer() {
 	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(&sync.Pool{
 			New: func() interface{} {
-				return nil // clienconnect.NewClient() //new(clienconnect.Client)
+				return &genserver.GateGenServer{}
 			}},
 			ServerCfg.Port,
 			ServerCfg.Packet,

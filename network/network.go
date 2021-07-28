@@ -12,19 +12,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/google/uuid"
+	"github.com/halturin/ergo"
+	"github.com/halturin/ergo/etf"
 	log "github.com/sirupsen/logrus"
 )
 
 //ClientInterface client hander
-type ClientInterface interface {
-	//OnConnect(sendchan chan []byte, packet int32, msgchan chan commonstruct.ProcessMsg, addr net.Addr)
-	OnClose()
-	OnMessage(module int32, method int32, buf []byte)
-	Send(module int32, method int32, pb proto.Message)
-	//ProcessMessage(msg commonstruct.ProcessMsg) bool
-
-}
+// type ClientInterface interface {
+// 	//OnConnect(sendchan chan []byte, packet int32, msgchan chan commonstruct.ProcessMsg, addr net.Addr)
+// 	OnClose()
+// 	OnMessage(module int32, method int32, buf []byte)
+// 	Send(module int32, method int32, pb proto.Message)
+// 	ProcessMessage(msg []byte) bool
+// }
 
 //NetInterface network
 type NetInterface interface {
@@ -36,7 +37,7 @@ type NetInterface interface {
 type NetWorkx struct {
 	//tcp/udp/kcp
 	src NetInterface
-	//ClientHander ClientInterface
+
 	//包长度0 2 4
 	Packet int32
 	//读取超时时间
@@ -51,8 +52,7 @@ type NetWorkx struct {
 	Port int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
 	UserPool *sync.Pool
-	//连接用户
-	//userlist map[string]ClientInterface
+
 	//启动成功后回调
 	StartHook func()
 
@@ -62,6 +62,8 @@ type NetWorkx struct {
 	closedConnectHook func()
 	//socket 关闭回调
 	closeHook func()
+
+	dbNode *ergo.Node
 }
 
 //NewNetWorkX    instance
@@ -84,7 +86,8 @@ func NewNetWorkX(pool *sync.Pool, port, packet, readtimeout int32, nettype strin
 }
 
 //Start 启动网络服务
-func (n *NetWorkx) Start() {
+func (n *NetWorkx) Start(dbNode *ergo.Node) {
+	n.dbNode = dbNode
 	switch n.NetType {
 	case "kcp":
 		log.Info("NetWorkx [kcp] port:", n.Port)
@@ -102,15 +105,35 @@ func (n *NetWorkx) Start() {
 
 }
 
+func (n *NetWorkx) createProcess() (*ergo.Process, error) {
+	genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
+
+	uid, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+
+	process, err := n.dbNode.Spawn(uid.String(), ergo.ProcessOptions{}, genserver)
+	if err != nil {
+		return nil, err
+	}
+	return process, nil
+}
+
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
-	c := n.UserPool.Get().(ClientInterface)
+	p, err := n.createProcess()
+	if err != nil {
+		log.Error("createProcess err: [%v]", err)
+		return
+	}
+
 	n.onConnect()
 
-	defer n.UserPool.Put(c)
+	defer n.UserPool.Put(p)
 	defer n.onClosedConnect()
 	defer conn.Close()
-	defer c.OnClose()
+	defer p.Cast(p.Self(), etf.Atom("SocketStop"))
 
 	// sendc := make(chan []byte, 1)
 	//c.OnConnect(conn.RemoteAddr(), sendc)
@@ -128,10 +151,10 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// }(conn)
 
 	rootContext := context.Background()
-	ctx, cancelFunc := context.WithCancel(rootContext)
 	sendctx, sendcancelFunc := context.WithCancel(rootContext)
+	defer sendcancelFunc()
 
-	readchan := make(chan []byte, 1)
+	//readchan := make(chan []byte, 1)
 	sendchan := make(chan []byte, 1)
 	// gamechan := make(chan commonstruct.ProcessMsg)
 	// c.OnConnect(sendchan, n.Packet, gamechan, conn.RemoteAddr())
@@ -174,60 +197,58 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		}
 	}(conn)
 
-	go func(conn net.Conn, cancelfunc, sendcancelFunc context.CancelFunc) {
-		unix := time.Now().Unix()
-		msgNum := 0
-		for {
-			//超时
-			if n.Readtimeout != 0 {
-				readtimeout := time.Minute * time.Duration(n.Readtimeout)
-				conn.SetReadDeadline(time.Now().Add(readtimeout))
-			}
-
-			_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
-			if e != nil {
-				switch e {
-				case io.EOF:
-					cancelfunc()
-					sendcancelFunc()
-				default:
-					cancelfunc()
-					sendcancelFunc()
-					log.Warn("socket closed:", e.Error())
-				}
-				return
-			}
-			readchan <- buf
-
-			//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
-			now := time.Now().Unix()
-			msgNum++
-
-			if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
-				//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
-
-				//gamechan <- commonstruct.ProcessMsg{MsgType: commonstruct.ProcessMsgTimeInterval, Data: msgNum}
-				unix = now
-				msgNum = 0
-			}
-		}
-	}(conn, cancelFunc, sendcancelFunc)
-
+	//go func(conn net.Conn, sendcancelFunc context.CancelFunc) {
+	unix := time.Now().Unix()
+	msgNum := 0
 	for {
-		select {
-		case buf := <-readchan:
-			module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
-			method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
-			c.OnMessage(module, method, buf[n.Packet+4:])
-		// case msg := <-gamechan:
-		// 	if !c.ProcessMessage(msg) {
-		// 		return
-		// 	}
-		case <-ctx.Done():
-			//log.Debug("exit role goroutine")
+		//超时
+		if n.Readtimeout != 0 {
+			readtimeout := time.Minute * time.Duration(n.Readtimeout)
+			conn.SetReadDeadline(time.Now().Add(readtimeout))
+		}
+
+		_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
+		if e != nil {
+			switch e {
+			case io.EOF:
+				log.Debug("socket closed:", e.Error())
+			default:
+				log.Warn("socket closed:", e.Error())
+			}
 			return
 		}
+		//readchan <- buf
+		p.Send(p.Self(), buf)
+
+		//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
+		now := time.Now().Unix()
+		msgNum++
+
+		if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
+			//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
+			p.Cast(p.Self(), "timeloop")
+			//gamechan <- commonstruct.ProcessMsg{MsgType: commonstruct.ProcessMsgTimeInterval, Data: msgNum}
+			unix = now
+			msgNum = 0
+		}
 	}
+	//}(conn, sendcancelFunc)
+
+	// for {
+	// 	select {
+	// 	case buf := <-readchan:
+	// 		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
+	// 		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
+	// 		c.OnMessage(module, method, buf[n.Packet+4:])
+	// 	// case msg := <-gamechan:
+	// 	// 	if !c.ProcessMessage(msg) {
+	// 	// 		return
+	// 	// 	}
+	// 	case <-ctx.Done():
+	// 		//log.Debug("exit role goroutine")
+	// 		return
+	// 	}
+	// }
 
 }
 
@@ -285,7 +306,7 @@ func UnpackToBlockFromReader(reader io.Reader, packet int32) (int32, []byte, err
 	if reader == nil {
 		return 0, nil, errors.New("reader is nil")
 	}
-	var info = make([]byte, packet, packet)
+	var info = make([]byte, packet)
 	if e := readUntil(reader, info); e != nil {
 		if e == io.EOF {
 			return 0, nil, e
@@ -297,7 +318,7 @@ func UnpackToBlockFromReader(reader io.Reader, packet int32) (int32, []byte, err
 	if e != nil {
 		return 0, nil, e
 	}
-	var content = make([]byte, length, length)
+	var content = make([]byte, length)
 	if e := readUntil(reader, content); e != nil {
 		if e == io.EOF {
 			return 0, nil, e
