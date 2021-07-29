@@ -1,4 +1,4 @@
-package genserver
+package genServer
 
 import (
 	log "github.com/sirupsen/logrus"

@@ -1,4 +1,4 @@
-package genserver
+package genServer
 
 import (
 	"github.com/halturin/ergo"

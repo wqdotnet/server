@@ -1,7 +1,7 @@
 package nodeManange
 
 import (
-	genserver "server/gserver/genServer"
+	"server/gserver/genServer"
 
 	"github.com/halturin/ergo"
 )
@@ -16,7 +16,7 @@ func (ds *DataBaseSup) Init(args ...interface{}) ergo.SupervisorSpec {
 		Children: []ergo.SupervisorChildSpec{
 			{
 				Name:  "dbServer",
-				Child: &genserver.DbGenServer{},
+				Child: &genServer.DbGenServer{},
 				//Restart: ergo.SupervisorChildRestartTemporary,
 				Restart: ergo.SupervisorChildRestartTransient,
 				//Restart: ergo.SupervisorChildRestartPermanent,

@@ -2,7 +2,7 @@ package nodeManange
 
 import (
 	"fmt"
-	genserver "server/gserver/genServer"
+	"server/gserver/genServer"
 	"server/tools"
 
 	"github.com/halturin/ergo"
@@ -22,7 +22,7 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 		Children: []ergo.SupervisorChildSpec{
 			{
 				Name:  "gameServer",
-				Child: &genserver.GameGenServer{},
+				Child: &genServer.GameGenServer{},
 				//Restart: ergo.SupervisorChildRestartTemporary,
 				Restart: ergo.SupervisorChildRestartTransient,
 				// Restart: ergo.SupervisorChildRestartPermanent,
@@ -34,7 +34,7 @@ func (ds *GameServerSup) Init(args ...interface{}) ergo.SupervisorSpec {
 			},
 			{
 				Name:    "cmdServer",
-				Child:   &genserver.CmdGenServer{},
+				Child:   &genServer.CmdGenServer{},
 				Restart: ergo.SupervisorChildRestartTransient,
 				Args: []interface{}{
 					tools.AbsPathify(serverCfg.CfgPath),

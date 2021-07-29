@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"server/db"
 	"server/gserver/cfg"
-	genserver "server/gserver/genServer"
+	"server/gserver/genServer"
 	"server/gserver/nodeManange"
 	"server/logger"
 	"server/network"
@@ -110,7 +110,7 @@ func StartGServer() {
 	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(&sync.Pool{
 			New: func() interface{} {
-				return &genserver.GateGenServer{}
+				return &genServer.GateGenServer{}
 			}},
 			ServerCfg.Port,
 			ServerCfg.Packet,
