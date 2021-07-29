@@ -11,11 +11,10 @@ import (
 var serverCfg *commonstruct.ServerConfig
 
 //ergo.Node 节点管理
-var NodeManage = &nodeManange{}
-
-type nodeManange struct {
+var (
 	nodesMap sync.Map
-}
+	//remoteMap sync.Map  //远程连接节目
+)
 
 func Start(cfg *commonstruct.ServerConfig, command chan string) {
 	serverCfg = cfg
@@ -37,13 +36,13 @@ func Start(cfg *commonstruct.ServerConfig, command chan string) {
 		panic(derr)
 	}
 
-	NodeManage.nodesMap.Store(serverNode.FullName, serverNode)
-	NodeManage.nodesMap.Store(gateNode.FullName, gateNode)
-	NodeManage.nodesMap.Store(dbNode.FullName, dbNode)
+	nodesMap.Store(serverNode.FullName, serverNode)
+	nodesMap.Store(gateNode.FullName, gateNode)
+	nodesMap.Store(dbNode.FullName, dbNode)
 }
 
 func GetNode(nodename string) *ergo.Node {
-	if v, ok := NodeManage.nodesMap.Load(nodename); ok {
+	if v, ok := nodesMap.Load(nodename); ok {
 		return v.(*ergo.Node)
 	}
 	return nil
@@ -51,7 +50,7 @@ func GetNode(nodename string) *ergo.Node {
 
 func GetNodes() map[string]*ergo.Node {
 	nodemap := map[string]*ergo.Node{}
-	NodeManage.nodesMap.Range(func(key, value interface{}) bool {
+	nodesMap.Range(func(key, value interface{}) bool {
 		nodemap[key.(string)] = value.(*ergo.Node)
 		return true
 	})
