@@ -43,6 +43,8 @@ var upcfgCmd = &cobra.Command{
 			} else {
 				fmt.Print("err:", err)
 			}
+		} else {
+			fmt.Printf(" not running \n")
 		}
 	},
 }

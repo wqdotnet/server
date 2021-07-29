@@ -1,8 +1,6 @@
 package gserver
 
 import (
-	genserver "server/gserver/genServer"
-
 	"github.com/halturin/ergo"
 )
 
@@ -12,24 +10,25 @@ type GateWaySup struct {
 
 func (ds *GateWaySup) Init(args ...interface{}) ergo.SupervisorSpec {
 	return ergo.SupervisorSpec{
-		Name: "GateWaySup",
+		Name:     "GateWaySup",
 		Children: []ergo.SupervisorChildSpec{
-			{
-				Name:  "gateServer",
-				Child: &genserver.GateGenServer{},
-				//Restart: ergo.SupervisorChildRestartTemporary,
-				Restart: ergo.SupervisorChildRestartTransient,
-				// Restart: ergo.SupervisorChildRestartPermanent,
-				Args: []interface{}{},
-				// temporary:进程永远都不会被重启
-				// transient: 只有进程异常终止的时候会被重启
-				// permanent:遇到任何错误导致进程终止就会重启
-			},
+			// {
+			// 	Name:  "gateServer",
+			// 	Child: &genserver.GateGenServer{},
+			// 	//Restart: ergo.SupervisorChildRestartTemporary,
+			// 	Restart: ergo.SupervisorChildRestartTransient,
+			// 	// Restart: ergo.SupervisorChildRestartPermanent,
+			// 	Args: []interface{}{},
+			// 	// temporary:进程永远都不会被重启
+			// 	// transient: 只有进程异常终止的时候会被重启
+			// 	// permanent:遇到任何错误导致进程终止就会重启
+			// },
 		},
 		Strategy: ergo.SupervisorStrategy{
-			Type: ergo.SupervisorStrategyOneForAll,
+			//Type: ergo.SupervisorStrategyOneForAll,
 			// Type:      ergo.SupervisorStrategyRestForOne,
-			// Type:      ergo.SupervisorStrategyOneForOne,
+			//Type: ergo.SupervisorStrategyOneForOne,
+			Type: ergo.SupervisorStrategySimpleOneForOne,
 
 			//重启策略
 			// one_for_one : 把子进程当成各自独立的,一个进程出现问题其它进程不会受到崩溃的进程的影响.该子进程死掉,只有这个进程会被重启

@@ -56,11 +56,12 @@ var ServerCfg = ServerConfig{
 	RestartNum: 2,
 
 	// http
-	OpenHTTP: true,
+	OpenHTTP: false,
 	HTTPPort: 8080,
 
-	StatsView:     true,
-	StatsViewPort: 8087,
+	StatsView:     false,
+	StatsViewPort: 8081,
+
 	// #network : tcp/udp
 	NetType:     "tcp",
 	Port:        3344,
@@ -72,16 +73,16 @@ var ServerCfg = ServerConfig{
 
 	// #protobuf path
 	ProtoPath: "./proto",
-	GoOut:     "./proto",
+	GoOut:     "./msgproto",
 
 	MongoConnStr: "mongodb://localhost:27017",
 	Mongodb:      "mygame",
 
-	RedisConnStr: "127.0.0.1:6379",
+	RedisConnStr: "localhost:6379",
 	RedisDB:      0,
 
 	CfgPath: "./config",
-	CfgType: "",
+	CfgType: "json",
 
 	Loglevel: "info",
 	LogPath:  "./log",
