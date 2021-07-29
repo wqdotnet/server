@@ -9,6 +9,7 @@ import (
 	"server/db"
 	"server/gserver/cfg"
 	genserver "server/gserver/genServer"
+	nodemanange "server/gserver/nodeManange"
 	"server/logger"
 	"server/network"
 	"server/web"
@@ -26,9 +27,8 @@ import (
 var GameServerInfo *gameServer
 
 type gameServer struct {
-	nw       *network.NetWorkx
-	serverid int32
-	command  chan string
+	nw      *network.NetWorkx
+	command chan string
 
 	//由于没有 erlang:nodes()  手动维护所有节点信息
 	//三种节点类型 gate server db
@@ -37,18 +37,11 @@ type gameServer struct {
 }
 
 func (g *gameServer) Start() {
-	gateNodeName := fmt.Sprintf("gatewayNode_%v@127.0.0.1", g.serverid)
-	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", g.serverid)
-	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", g.serverid)
-
-	serverNode, _ := StartGameServerSupNode(serverNodeName, g.command)
-	gateNode, _ := StartGateSupNode(gateNodeName)
-	dbNode, _ := StartDataBaseSupSupNode(dbNodeName)
-
-	g.nodes[gateNode.FullName] = gateNode
-	g.nodes[serverNode.FullName] = serverNode
-	g.nodes[dbNode.FullName] = dbNode
-
+	nodemanange.Start(&ServerCfg, g.command)
+	dbNode := nodemanange.GetNode(fmt.Sprintf("dbNode_%v@127.0.0.1", ServerCfg.ServerID))
+	if dbNode == nil {
+		panic("节点启动失败")
+	}
 	//启动网络
 	g.nw.Start(dbNode)
 }
@@ -130,9 +123,8 @@ func StartGServer() {
 			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", 1)) },
 			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", -1)) },
 		),
-		command:  make(chan string),
-		nodes:    make(map[string]*ergo.Node),
-		serverid: ServerCfg.ServerID,
+		command: make(chan string),
+		nodes:   make(map[string]*ergo.Node),
 	}
 	GameServerInfo.Start()
 
