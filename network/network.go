@@ -192,7 +192,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 				le := IntToBytes(int32(len(buf)), n.Packet)
 				conn.Write(BytesCombine(le, buf))
 			case <-sendctx.Done():
-				log.Debug("exit role sendGO")
+				//log.Debug("exit role sendGO")
 				return
 			}
 		}

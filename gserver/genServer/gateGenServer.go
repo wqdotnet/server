@@ -16,6 +16,14 @@ type GateGenServer struct {
 	sendChan chan []byte
 }
 
+func (gateGS *GateGenServer) Unregister() {
+	gateGS.process.Node.Unregister(gateGS.process.Name())
+}
+
+func (gateGS *GateGenServer) Register(name string) {
+	gateGS.process.Node.Register(name, gateGS.process.Self())
+}
+
 type gateState struct {
 }
 
@@ -88,5 +96,6 @@ func (gateGS *GateGenServer) HandleInfo(message etf.Term, state interface{}) (st
 
 // Terminate called when process died
 func (gateGS *GateGenServer) Terminate(reason string, state interface{}) {
+	gateGS.Unregister()
 	log.Infof("Terminate (%v): %v", gateGS.process.Name(), reason)
 }
