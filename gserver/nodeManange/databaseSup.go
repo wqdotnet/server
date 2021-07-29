@@ -1,4 +1,4 @@
-package nodemanange
+package nodeManange
 
 import (
 	genserver "server/gserver/genServer"

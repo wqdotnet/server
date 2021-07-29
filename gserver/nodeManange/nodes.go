@@ -1,4 +1,4 @@
-package nodemanange
+package nodeManange
 
 import (
 	"fmt"
@@ -10,7 +10,12 @@ import (
 
 var serverCfg *commonstruct.ServerConfig
 
-var nodesMap sync.Map
+//ergo.Node 节点管理
+var NodeManage = &nodeManange{}
+
+type nodeManange struct {
+	nodesMap sync.Map
+}
 
 func Start(cfg *commonstruct.ServerConfig, command chan string) {
 	serverCfg = cfg
@@ -32,14 +37,23 @@ func Start(cfg *commonstruct.ServerConfig, command chan string) {
 		panic(derr)
 	}
 
-	nodesMap.Store(serverNode.FullName, serverNode)
-	nodesMap.Store(gateNode.FullName, gateNode)
-	nodesMap.Store(dbNode.FullName, dbNode)
+	NodeManage.nodesMap.Store(serverNode.FullName, serverNode)
+	NodeManage.nodesMap.Store(gateNode.FullName, gateNode)
+	NodeManage.nodesMap.Store(dbNode.FullName, dbNode)
 }
 
 func GetNode(nodename string) *ergo.Node {
-	if v, ok := nodesMap.Load(nodename); ok {
+	if v, ok := NodeManage.nodesMap.Load(nodename); ok {
 		return v.(*ergo.Node)
 	}
 	return nil
+}
+
+func GetNodes() map[string]*ergo.Node {
+	nodemap := map[string]*ergo.Node{}
+	NodeManage.nodesMap.Range(func(key, value interface{}) bool {
+		nodemap[key.(string)] = value.(*ergo.Node)
+		return true
+	})
+	return nodemap
 }

@@ -1,4 +1,4 @@
-package nodemanange
+package nodeManange
 
 import (
 	"github.com/halturin/ergo"

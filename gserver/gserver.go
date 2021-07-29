@@ -9,7 +9,7 @@ import (
 	"server/db"
 	"server/gserver/cfg"
 	genserver "server/gserver/genServer"
-	nodemanange "server/gserver/nodeManange"
+	"server/gserver/nodeManange"
 	"server/logger"
 	"server/network"
 	"server/web"
@@ -37,8 +37,8 @@ type gameServer struct {
 }
 
 func (g *gameServer) Start() {
-	nodemanange.Start(&ServerCfg, g.command)
-	dbNode := nodemanange.GetNode(fmt.Sprintf("dbNode_%v@127.0.0.1", ServerCfg.ServerID))
+	nodeManange.Start(&ServerCfg, g.command)
+	dbNode := nodeManange.GetNode(fmt.Sprintf("dbNode_%v@127.0.0.1", ServerCfg.ServerID))
 	if dbNode == nil {
 		panic("节点启动失败")
 	}
