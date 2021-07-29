@@ -37,7 +37,6 @@ func (dgs *GateGenServer) ProcessMessage(msg []byte) bool {
 // Init(...) -> state
 func (dgs *GateGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
 	log.Infof("Init (%v): args %v ", p.Name(), args)
-
 	dgs.process = p
 	return gateState{}
 }
@@ -56,9 +55,16 @@ func (dgs *GateGenServer) HandleCast(message etf.Term, state interface{}) (strin
 		case "SocketStop":
 			return "stop", "normal"
 		}
-
+	case etf.Tuple:
+		module := info[0]
+		method := info[1]
+		buf := info[2].([]byte)
+		log.Debug("socket info ", module, method, buf)
 	case []byte:
 		log.Debug("[]byte", info)
+
+		// c.OnMessage(module, method, info[n.Packet+4:])
+
 	}
 
 	// switch message {

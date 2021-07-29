@@ -191,7 +191,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 				le := IntToBytes(int32(len(buf)), n.Packet)
 				conn.Write(BytesCombine(le, buf))
 			case <-sendctx.Done():
-				//log.Debug("exit role sendGO")
+				log.Debug("exit role sendGO")
 				return
 			}
 		}
@@ -218,7 +218,10 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 			return
 		}
 		//readchan <- buf
-		p.Send(p.Self(), buf)
+
+		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
+		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
+		p.Cast(p.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
 
 		//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
 		now := time.Now().Unix()
