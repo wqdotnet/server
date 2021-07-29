@@ -19,7 +19,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	//msg "server/proto"
 	"github.com/facebookgo/pidfile"
-	"github.com/halturin/ergo"
 	"github.com/halturin/ergo/etf"
 )
 
@@ -29,11 +28,6 @@ var GameServerInfo *gameServer
 type gameServer struct {
 	nw      *network.NetWorkx
 	command chan string
-
-	//由于没有 erlang:nodes()  手动维护所有节点信息
-	//三种节点类型 gate server db
-	//gate、db 集群可能会有多个
-	nodes map[string]*ergo.Node
 }
 
 func (g *gameServer) Start() {
@@ -47,7 +41,7 @@ func (g *gameServer) Start() {
 }
 
 func (g *gameServer) Close() {
-	for _, node := range g.nodes {
+	for _, node := range nodeManange.GetNodes() {
 		for _, p := range node.GetProcessList() {
 			p.Cast(p.Self(), etf.Atom("stop"))
 		}
@@ -124,7 +118,6 @@ func StartGServer() {
 			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", -1)) },
 		),
 		command: make(chan string),
-		nodes:   make(map[string]*ergo.Node),
 	}
 	GameServerInfo.Start()
 
