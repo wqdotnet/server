@@ -22,21 +22,21 @@ func call(cmd ...string) (etf.Term, error) {
 	}
 }
 
-func cast(cmd ...string) {
-	if len(cmd) == 1 {
-		process.Cast(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
-	} else {
-		process.Cast(etf.Tuple{genServerName, gateNodeName}, cmd)
-	}
-}
+// func cast(cmd ...string) {
+// 	if len(cmd) == 1 {
+// 		process.Cast(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
+// 	} else {
+// 		process.Cast(etf.Tuple{genServerName, gateNodeName}, cmd)
+// 	}
+// }
 
-func send(cmd ...string) {
-	if len(cmd) == 1 {
-		process.Send(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
-	} else {
-		process.Send(etf.Tuple{genServerName, gateNodeName}, cmd)
-	}
-}
+// func send(cmd ...string) {
+// 	if len(cmd) == 1 {
+// 		process.Send(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
+// 	} else {
+// 		process.Send(etf.Tuple{genServerName, gateNodeName}, cmd)
+// 	}
+// }
 
 //"gatewayNode[serverid]@[ip]"
 func ping(serverid, ip string) bool {

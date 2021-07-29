@@ -19,10 +19,9 @@ StatsViewPort: 8081
 NetType: tcp
 Port: 3344
 Packet : 2
-Readtimeout: 1
+Readtimeout: 60  #超时(秒)
 
 
-# ClientInterface 接口 commonstruct.ProcessMsg{MsgType: "TimeInterval", Data: msgNum} 消息包
 # MsgTime 多少秒后  
 # MsgNum 多少条消息后
 MsgTime: 300

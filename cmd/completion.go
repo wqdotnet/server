@@ -24,7 +24,7 @@ import (
 // completionCmd represents the completion command
 var completionCmd = &cobra.Command{
 	Use:   "completion [bash|zsh|fish|powershell]",
-	Short: "生成补全脚本",
+	Short: "[bash|zsh|fish|powershell] 生成补全脚本",
 	Long: `To load completions:
 
 Bash:

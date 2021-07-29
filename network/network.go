@@ -40,7 +40,7 @@ type NetWorkx struct {
 
 	//包长度0 2 4
 	Packet int32
-	//读取超时时间
+	//读取超时时间(秒)
 	Readtimeout int32
 
 	MsgTime int32
@@ -105,24 +105,25 @@ func (n *NetWorkx) Start(dbNode *ergo.Node) {
 
 }
 
-func (n *NetWorkx) createProcess() (*ergo.Process, error) {
+func (n *NetWorkx) createProcess() (*ergo.Process, chan []byte, error) {
 	genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
 
 	uid, err := uuid.NewRandom()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	process, err := n.dbNode.Spawn(uid.String(), ergo.ProcessOptions{}, genserver)
+	sendchan := make(chan []byte, 1)
+	process, err := n.dbNode.Spawn(uid.String(), ergo.ProcessOptions{}, genserver, sendchan)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return process, nil
+	return process, sendchan, nil
 }
 
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
-	p, err := n.createProcess()
+	p, sendchan, err := n.createProcess()
 	if err != nil {
 		log.Error("createProcess err: [%v]", err)
 		return
@@ -155,7 +156,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	defer sendcancelFunc()
 
 	//readchan := make(chan []byte, 1)
-	sendchan := make(chan []byte, 1)
+	//sendchan := make(chan []byte, 1)
 	// gamechan := make(chan commonstruct.ProcessMsg)
 	// c.OnConnect(sendchan, n.Packet, gamechan, conn.RemoteAddr())
 
@@ -203,7 +204,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	for {
 		//超时
 		if n.Readtimeout != 0 {
-			readtimeout := time.Minute * time.Duration(n.Readtimeout)
+			readtimeout := time.Second * time.Duration(n.Readtimeout)
 			conn.SetReadDeadline(time.Now().Add(readtimeout))
 		}
 
