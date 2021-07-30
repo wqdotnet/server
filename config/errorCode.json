@@ -34,36 +34,6 @@
       "key": "RoleNameExists",
       "Name": "角色名已存在",
       "Code": 100007
-    },
-    {
-      "key": "TROOPS_NULL",
-      "Name": "部队不存在",
-      "Code": 300001
-    },
-    {
-      "key": "TROOPS_TYPE_NULL",
-      "Name": "部队类型不存在",
-      "Code": 300602
-    },
-    {
-      "key": "TROOPS_ONSTAGE_ERROR",
-      "Name": "上阵位置错误",
-      "Code": 300603
-    },
-    {
-      "key": "TROOPS_FIGHT",
-      "Name": "部队正在战斗状态",
-      "Code": 300002
-    },
-    {
-      "key": "TROOPS_NOT_ONSTAGE",
-      "Name": "部队未上阵",
-      "Code": 300003
-    },
-    {
-      "key": "FIGHT_OVER",
-      "Name": "战斗已结束",
-      "Code": 300004
     }
   ]
 }

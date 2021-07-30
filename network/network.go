@@ -9,7 +9,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -51,7 +50,9 @@ type NetWorkx struct {
 	//监听端口.
 	Port int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
-	UserPool *sync.Pool
+	//UserPool *sync.Pool
+
+	Create func() ergo.GenServerBehaviour
 
 	//启动成功后回调
 	StartHook func()
@@ -67,14 +68,15 @@ type NetWorkx struct {
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(pool *sync.Pool, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
+func NewNetWorkX(create func() ergo.GenServerBehaviour, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
 	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
 	return &NetWorkx{
-		Packet:   packet,
-		NetType:  nettype,
-		Port:     port,
-		UserPool: pool,
+		Packet:  packet,
+		NetType: nettype,
+		Port:    port,
+		//UserPool: pool,
 		//userlist:    make(map[string]ClientInterface),
+		Create:            create,
 		Readtimeout:       readtimeout,
 		MsgTime:           msgtime,
 		MsgNum:            msgnum,
@@ -106,7 +108,8 @@ func (n *NetWorkx) Start(dbNode *ergo.Node) {
 }
 
 func (n *NetWorkx) createProcess() (*ergo.Process, chan []byte, error) {
-	genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
+	//genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
+	genserver := n.Create()
 
 	uid, err := uuid.NewRandom()
 	if err != nil {
@@ -131,7 +134,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 	n.onConnect()
 
-	defer n.UserPool.Put(p)
+	//defer n.UserPool.Put(p)
 	defer n.onClosedConnect()
 	defer conn.Close()
 	defer p.Cast(p.Self(), etf.Atom("SocketStop"))

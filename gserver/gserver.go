@@ -13,12 +13,12 @@ import (
 	"server/logger"
 	"server/network"
 	"server/web"
-	"sync"
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	//msg "server/proto"
 	"github.com/facebookgo/pidfile"
+	"github.com/halturin/ergo"
 	"github.com/halturin/ergo/etf"
 )
 
@@ -102,10 +102,14 @@ func StartGServer() {
 	}
 
 	GameServerInfo = &gameServer{
-		nw: network.NewNetWorkX(&sync.Pool{
-			New: func() interface{} {
+		nw: network.NewNetWorkX(
+			func() ergo.GenServerBehaviour {
 				return &genServer.GateGenServer{}
-			}},
+			},
+			// &sync.Pool{
+			// New: func() interface{} {
+			// 	return &genServer.GateGenServer{}
+			// }},
 			ServerCfg.Port,
 			ServerCfg.Packet,
 			ServerCfg.Readtimeout,
@@ -114,8 +118,8 @@ func StartGServer() {
 			ServerCfg.MsgNum,
 			func() { SendGameServerMsg("StartSuccess") },
 			func() { db.RedisExec("del", "ConnectNumber") },
-			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", 1)) },
-			func() { log.Info("connect number: ", db.INCRBY("ConnectNumber", -1)) },
+			func() { log.Info("connect number: ", db.RedisINCRBY("ConnectNumber", 1)) },
+			func() { log.Info("connect number: ", db.RedisINCRBY("ConnectNumber", -1)) },
 		),
 		command: make(chan string),
 	}
@@ -130,6 +134,8 @@ func StartGServer() {
 	if runtime.GOOS == "linux" {
 		//signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
 		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
+	} else {
+		signal.Notify(exitChan, os.Interrupt)
 	}
 
 	//create pid
@@ -151,10 +157,12 @@ func StartGServer() {
 			}
 		case s := <-exitChan:
 			log.Info("收到信号: ", s)
-			if s.String() == "quit" || s.String() == "terminated" {
-				//os.Exit(1)
+			if runtime.GOOS == "linux" && s.String() == "quit" || s.String() == "terminated" {
+				return
+			} else if runtime.GOOS == "windows" && s.String() == "interrupt" {
 				return
 			}
+
 			//case <-time.After(60 * time.Second):
 			//log.Infof("time: [%v]  online:[%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"))
 		}

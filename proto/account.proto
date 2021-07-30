@@ -21,17 +21,6 @@ enum MSG_ACCOUNT {
     S2C_UpdateRoleName= 1006;
 
     S2C_RoleAddExp =1010; //角色获取经验
-    //C2S_DeleteRole= 1007;//删除角色
-    //S2C_DeleteRole= 1008;
-
-    //C2S_EnterGame= 1009;//进入游戏
-    //S2C_EnterGame= 1010;
-
-    //C2S_Reconnection= 1011;//游戏重连
-    //S2C_Reconnection= 1012;
-
-    //C2S_LogOut= 1013;//登出
-    //S2C_LogOut= 1014;
 }
 
 
@@ -86,35 +75,4 @@ message  s2c_CreateRole {
     string msg = 2;
     int32 roleid =3;
 }
-
-
-// 修改角色名
-message c2s_UpdateRoleName {
-    string UpdateName =1;
-}
-
-message s2c_UpdateRoleName {
-    bool success =1;
-    string msg = 2;
-}
-
-
-message s2c_RoleAddExp {
-    int64 addExp =1;
-    int64 NewExp =2;
-    int64 NewLevel =3;
-}
-
-// 删除角色
-//message c2s_DeleteRole {}
-
-//进入游戏
-//message c2s_EnterGame {}
-
-//游戏重连
-//message c2s_Reconnection {}
-
-//登出
-//message c2s_LogOut {
-//}
 

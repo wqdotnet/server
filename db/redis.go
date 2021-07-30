@@ -71,13 +71,20 @@ func GetAutoID(tabname string) int32 {
 	return int32(autoid)
 }
 
-//INCRBY INCRBY num
-func INCRBY(tabname string, num int32) int32 {
+//RedisINCRBY RedisINCRBY num
+func RedisINCRBY(tabname string, num int32) int32 {
 	autoid, err := red.Int(RedisExec("INCRBY", tabname, num))
 	if err != nil {
 		log.Error(err)
 	}
 	return int32(autoid)
+}
+
+func RedisDel(key string) {
+	_, err := RedisExec("del", key)
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 //RedisGetInt get redis int

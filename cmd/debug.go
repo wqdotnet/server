@@ -16,12 +16,15 @@ limitations under the License.
 package cmd
 
 import (
-	"bufio"
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"runtime"
 	"server/gserver"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -56,43 +59,72 @@ func debug(serverid, ip string) {
 		return
 	}
 
-	for {
-		print("-> ")
-		cmd := getInput()
+	//退出消息监控
+	var exitChan = make(chan os.Signal)
+	if runtime.GOOS == "linux" {
+		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
+	} else {
+		signal.Notify(exitChan, os.Interrupt)
+	}
 
-		args := strings.Split(cmd, " ")
-		if len(args) > 0 {
-			cmd = args[0]
-		}
+	rootContext := context.Background()
+	ctx, cancelFunc := context.WithCancel(rootContext)
 
-		switch cmd {
-		case "getroleinfo":
-			term, err := call(args...)
-			if err != nil {
-				fmt.Printf("err: %v \n", err)
-			} else {
-
-				fmt.Printf("term: %v \n", term)
+	go func() {
+		for {
+			print("-> ")
+			cmd := "" //getInput()
+			fmt.Scanln(&cmd)
+			args := strings.Split(cmd, " ")
+			if len(args) > 0 {
+				cmd = args[0]
 			}
 
-		case "quit":
-			return
-		case "EOF":
+			switch cmd {
+			case "getroleinfo":
+				term, err := call(args...)
+				if err != nil {
+					fmt.Printf("err: %v \n", err)
+				} else {
+
+					fmt.Printf("term: %v \n", term)
+				}
+
+			case "quit":
+				cancelFunc()
+				return
+			case "EOF":
+				cancelFunc()
+				return
+			}
+		}
+	}()
+
+	for {
+		select {
+		case s := <-exitChan:
+			if s.String() == "quit" || s.String() == "terminated" || s.String() == "interrupt" {
+				fmt.Println()
+				return
+			}
+		case <-ctx.Done():
+			fmt.Println()
 			return
 		}
 	}
+
 }
 
-func getInput() string {
-	//使用os.Stdin开启输入流
-	//函数原型 func NewReader(rd io.Reader) *Reader
-	//NewReader创建一个具有默认大小缓冲、从r读取的*Reader 结构见官方文档
-	in := bufio.NewReader(os.Stdin)
-	//in.ReadLine函数具有三个返回值 []byte bool error
-	//分别为读取到的信息 是否数据太长导致缓冲区溢出 是否读取失败
-	str, _, err := in.ReadLine()
-	if err != nil {
-		return err.Error()
-	}
-	return string(str)
-}
+// func getInput() string {
+// 	//使用os.Stdin开启输入流
+// 	//函数原型 func NewReader(rd io.Reader) *Reader
+// 	//NewReader创建一个具有默认大小缓冲、从r读取的*Reader 结构见官方文档
+// 	in := bufio.NewReader(os.Stdin)
+// 	//in.ReadLine函数具有三个返回值 []byte bool error
+// 	//分别为读取到的信息 是否数据太长导致缓冲区溢出 是否读取失败
+// 	str, _, err := in.ReadLine()
+// 	if err != nil {
+// 		return err.Error()
+// 	}
+// 	return string(str)
+// }

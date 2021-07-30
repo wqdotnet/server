@@ -51,11 +51,11 @@ func TestHMGET(t *testing.T) {
 	RedisExec("del", "field")
 
 	log.Info("RedisGetInt:", RedisGetInt("test11"))
-	log.Info("INCRBY:", INCRBY("test11", 1))
+	log.Info("INCRBY:", RedisINCRBY("test11", 1))
 	log.Info("RedisGetInt:", RedisGetInt("test11"))
-	log.Info("INCRBY:", INCRBY("test11", 1))
+	log.Info("INCRBY:", RedisINCRBY("test11", 1))
 	log.Info("RedisGetInt:", RedisGetInt("test11"))
-	log.Info("INCRBY:", INCRBY("test11", -1))
+	log.Info("INCRBY:", RedisINCRBY("test11", -1))
 	log.Info("RedisGetInt:", RedisGetInt("test11"))
 	RedisExec("del", "test11")
 }
