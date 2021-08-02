@@ -2,6 +2,26 @@
 
 💡❌💙 💔💜 💚💬⭐️⚠️💃🏻📄📚🛠 😎 🔧 🐭🐮🐯🐇🐉🐍🐎🐑🐒🐔🐶🐷
 
+### 基于  [halturin/ergo](https://github.com/sanderland/katrain) 以erlang otp 模型方式组织创建的游戏服务器解决方案
+
+##### 服务启动时会创建3个节点 
+
+- gatewayNode 用户连接后创建网关连接
+- serverNode  创建游戏公共服务 [cmdGenserver]
+- dbNode      用做数据落地
+
+serverNode 节点启动会创建一个 cmdGenserver 用于接收外部发送过来的命令，以
+便于从内部 获取信息、更新配置、关闭服务
+
+server运行时 执行 cmd [state|stop|debug|reloadcfg] 命令 
+
+会在创建一个 debugNode 节点去接连服务器内部 serverNode 节点下的 cmdGenserver 发送命令消息
+
+
+ 
+
+
+
 ## 🔨 command
 Available Commands:
 -  clean       &emsp;&emsp;&emsp;清理数据
@@ -12,7 +32,7 @@ Available Commands:
 -  start       &emsp;&emsp;&emsp;启动服务
 -  state       &emsp;&emsp;&emsp;获取服务器运行状态
 -  stop        &emsp;&emsp;&emsp;关闭服务器
-
+##### 使用 [spf13/cobra](https://github.com/spf13/cobra)  创建的服务器命令
  
 
 

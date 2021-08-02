@@ -51,8 +51,7 @@ type NetWorkx struct {
 	Port int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
 	//UserPool *sync.Pool
-
-	Create func() ergo.GenServerBehaviour
+	CreateGenServerObj func() ergo.GenServerBehaviour
 
 	//启动成功后回调
 	StartHook func()
@@ -68,7 +67,7 @@ type NetWorkx struct {
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(create func() ergo.GenServerBehaviour, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
+func NewNetWorkX(createObj func() ergo.GenServerBehaviour, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
 	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
 	return &NetWorkx{
 		Packet:  packet,
@@ -76,14 +75,14 @@ func NewNetWorkX(create func() ergo.GenServerBehaviour, port, packet, readtimeou
 		Port:    port,
 		//UserPool: pool,
 		//userlist:    make(map[string]ClientInterface),
-		Create:            create,
-		Readtimeout:       readtimeout,
-		MsgTime:           msgtime,
-		MsgNum:            msgnum,
-		StartHook:         startHook,
-		closeHook:         closeHook,
-		connectHook:       connectHook,
-		closedConnectHook: closedConnectHook,
+		CreateGenServerObj: createObj,
+		Readtimeout:        readtimeout,
+		MsgTime:            msgtime,
+		MsgNum:             msgnum,
+		StartHook:          startHook,
+		closeHook:          closeHook,
+		connectHook:        connectHook,
+		closedConnectHook:  closedConnectHook,
 	}
 }
 
@@ -109,7 +108,7 @@ func (n *NetWorkx) Start(dbNode *ergo.Node) {
 
 func (n *NetWorkx) createProcess() (*ergo.Process, chan []byte, error) {
 	//genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
-	genserver := n.Create()
+	genserver := n.CreateGenServerObj()
 
 	uid, err := uuid.NewRandom()
 	if err != nil {
