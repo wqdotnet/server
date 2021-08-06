@@ -9,10 +9,12 @@ type ErrorCodeCfg struct {
 
 //GetErrorCodeNumber 错误提示码
 func GetErrorCodeNumber(code string) string {
-	for _, v := range GameCfg.ErrorCode.CfgList {
+	cfg := GetGameCfg()
+	for _, v := range cfg.ErrorCode.CfgList {
 		if code == v.Key {
 			return v.Name // strconv.Itoa(v.Code)
 		}
 	}
+	SaveCfg(cfg)
 	return "0"
 }

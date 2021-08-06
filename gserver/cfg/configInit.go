@@ -18,7 +18,9 @@ func InitViperConfig(CfgPath string, CfgType string) {
 	v.AddConfigPath(CfgPath)
 	v.SetConfigType(CfgType)
 
-	reflectField(&GameCfg, v)
+	cfg := &cfgCollection{}
+	reflectField(cfg, v)
+	gameCfg.Store(cfg)
 
 	// v.WatchConfig()
 	// v.OnConfigChange(fileChanged)

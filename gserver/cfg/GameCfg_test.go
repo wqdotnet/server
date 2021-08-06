@@ -4,14 +4,19 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
+	"go.uber.org/atomic"
 )
 
 func init() {
 	InitViperConfig("../../config", "json")
 
+	var atom atomic.Bool
+	atom.Load()
+	atom.Store(false)
+
 	//viper.AddConfigPath("./config")
 	//viper.SetConfigName("mapinfo")
-	log.Info("err:", GameCfg.ErrorCode.CfgList)
+	log.Info("err:", GetGameCfg().ErrorCode.CfgList)
 	// log.Info("MapInfo :", len(GameCfg.MapInfo.Areas))
 	// log.Infof("troops:%v", len(GameCfg.Troops.CfgList))
 	// log.Infof("ErrorCode:%v", len(GameCfg.ErrorCode.CfgList))

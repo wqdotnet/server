@@ -1,9 +1,22 @@
 package cfg
 
-var (
-	//GameCfg 全局配置
-	GameCfg cfgCollection
+import (
+	"go.uber.org/atomic"
 )
+
+var (
+	//gameCfg 全局配置
+	gameCfg atomic.Value
+)
+
+func GetGameCfg() *cfgCollection {
+	cfg := gameCfg.Load().(*cfgCollection)
+	return cfg
+}
+
+func SaveCfg(cfg *cfgCollection) {
+	gameCfg.Store(cfg)
+}
 
 type cfgCollection struct {
 	//错误提示码
