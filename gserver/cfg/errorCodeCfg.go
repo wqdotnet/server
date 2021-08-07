@@ -15,6 +15,5 @@ func GetErrorCodeNumber(code string) string {
 			return v.Name // strconv.Itoa(v.Code)
 		}
 	}
-	SaveCfg(cfg)
 	return "0"
 }

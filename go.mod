@@ -38,10 +38,10 @@ require (
 	github.com/xtaci/lossyconn v0.0.0-20200209145036-adba10fffc37 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.mongodb.org/mongo-driver v1.7.1
-	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/atomic v1.9.0
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	google.golang.org/protobuf v1.27.1
 )
 
-replace github.com/uber-go/atomic => github.com/uber-go/atomic v1.4.0
+replace github.com/uber-go/atomic => github.com/uber-go/atomic v1.9.0

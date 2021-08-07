@@ -14,7 +14,7 @@ func GetGameCfg() *cfgCollection {
 	return cfg
 }
 
-func SaveCfg(cfg *cfgCollection) {
+func saveCfg(cfg *cfgCollection) {
 	gameCfg.Store(cfg)
 }
 
