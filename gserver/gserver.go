@@ -139,7 +139,7 @@ func StartGServer() {
 	}
 
 	//create pid
-	file, _ := ioutil.TempFile("", fmt.Sprintf("pid_%v_%v", ServerCfg.ServerName, ServerCfg.ServerID))
+	file, _ := ioutil.TempFile("", fmt.Sprintf("pid_%v_%v_", ServerCfg.ServerName, ServerCfg.ServerID))
 	pidfile.SetPidfilePath(file.Name())
 
 	for {

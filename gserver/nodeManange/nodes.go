@@ -13,7 +13,7 @@ var serverCfg *commonstruct.ServerConfig
 //ergo.Node 节点管理
 var (
 	nodesMap sync.Map
-	//remoteMap sync.Map  //远程连接节目
+	//remoteMap sync.Map  //远程连接节点
 )
 
 func Start(cfg *commonstruct.ServerConfig, command chan string) {

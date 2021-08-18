@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/go-playground/validator/v10"
 	pool "github.com/jolestar/go-commons-pool/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,49 +33,33 @@ type teststr struct {
 	id   int
 }
 
-func exectest(cmd *cobra.Command, args []string) {
-
-	// parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
-	// startTime, _ := parser.Parse("0 0 0 8 6 ? ")
-	// endTime, _ := parser.Parse("0 0 0 15 6 ? ")
-
-	// fmt.Printf("%v   %v ", startTime.Next(time.Now()), endTime.Next(time.Now()))
-	// fmt.Println()
-	// stime := startTime.Next(time.Now())
-	// etime := endTime.Next(time.Now())
-	// fmt.Printf("%v   %v ", startTime.Next(time.Now()).Unix(), endTime.Next(time.Now()).Unix())
-	// fmt.Println()
-	// fmt.Println(stime.Unix() > etime.Unix())
-
-	// //slice()
-	// //time.Sleep(time.Second * 10)
-	// //objectPool()
-
-	// Record := make(map[uint32]uint32)
-	// Record[2] = 34
-
+type MyStruct struct {
+	FirstName string `json:"firstname" validate:"required"`
 }
 
-func slice() {
-	var ss []string
-	fmt.Printf("[ local print ]\t:\t length:%v\taddr:%p\tisnil:%v\n", len(ss), ss, ss == nil)
-	fmt.Println("func print", ss)
-	//切片尾部追加元素append elemnt
-	for i := 0; i < 10; i++ {
-		ss = append(ss, fmt.Sprintf("s%d", i))
-	}
-	fmt.Printf("[ local print ]\t:\tlength:%v\taddr:%p\tisnil:%v\n", len(ss), ss, ss == nil)
-	fmt.Println("after append", ss)
-	//删除切片元素remove element at index
-	index := 5
-	ss = append(ss[:index], ss[index+1:]...)
-	fmt.Println("after delete", ss)
-	//在切片中间插入元素insert element at index;
-	//注意：保存后部剩余元素，必须新建一个临时切片
-	rear := append([]string{}, ss[index:]...)
-	ss = append(ss[0:index], "inserted")
-	ss = append(ss, rear...)
-	fmt.Println("after insert\n", ss)
+func exectest(cmd *cobra.Command, args []string) {
+
+	v := validator.New()
+
+	s := MyStruct{"blabla"}
+	err := v.Struct(s)
+	fmt.Printf("数据验证：%+v \n", err)
+
+	s2 := MyStruct{}
+	err = v.Struct(s2)
+	fmt.Printf("数据验证：%+v \n", err)
+
+	// list := []*pbRole.RoleSimpleInfo{
+	// 	{RoleID: 1, Name: "asd"},
+	// 	{RoleID: 2, Name: "abc"},
+	// 	{RoleID: 3, Name: "22342"},
+	// 	{RoleID: 4, Name: "showwme"},
+	// }
+	// stream := koazee.StreamOf(list)
+	// list2, ok := stream.Filter(func(rsi *pbRole.RoleSimpleInfo) bool {
+	// 	return rsi.RoleID == 3
+	// }).First().Val().(*pbRole.RoleSimpleInfo)
+	// console.Info("TestKoazee:", ok, list2)
 
 }
 
