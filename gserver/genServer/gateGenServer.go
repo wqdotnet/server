@@ -1,9 +1,12 @@
 package genServer
 
 import (
+	"server/network"
+
 	"github.com/halturin/ergo"
 	"github.com/halturin/ergo/etf"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
 //接收处理socket 发送过来的信息
@@ -51,16 +54,16 @@ func (gateGS *GateGenServer) HandleCast(message etf.Term, state interface{}) (st
 			return "stop", "normal"
 		}
 	case etf.Tuple:
-		module := info[0]
-		method := info[1]
+		module := info[0].(int)
+		method := info[1].(int)
 		buf := info[2].([]byte)
+
 		log.Debug("socket info ", module, method, buf)
 		//gateGS.sendChan <- []byte("send msg test")
 	case []byte:
 		log.Debug("[]byte", info)
 
 	}
-
 	// switch message {
 	// case etf.Atom("stop"):
 	// 	return "stop", "normal"
@@ -98,4 +101,37 @@ func (gateGS *GateGenServer) HandleInfo(message etf.Term, state interface{}) (st
 func (gateGS *GateGenServer) Terminate(reason string, state interface{}) {
 	gateGS.Unregister()
 	log.Infof("Terminate (%v): %v", gateGS.process.Name(), reason)
+}
+
+// //Send 发送消息
+func (gateGS *GateGenServer) Send(module int32, method int32, pb proto.Message) {
+	//log.Debugf("client send msg [%v] [%v] [%v]", module, method, pb)
+	data, err := proto.Marshal(pb)
+	if err != nil {
+		log.Errorf("proto encode error[%v] [%v][%v] [%v]", err.Error(), module, method, pb)
+		return
+	}
+	// msginfo := &common.NetworkMsg{}
+	// msginfo.Module = module
+	// msginfo.Method = method
+	// msginfo.MsgBytes = data
+	// msgdata, err := proto.Marshal(msginfo)
+	// if err != nil {
+	// 	log.Errorf("msg encode error[%s]\n", err.Error())
+	// }
+	// gateGS.sendChan <- msgdata
+
+	mldulebuf := network.IntToBytes(module, 2)
+	methodbuf := network.IntToBytes(method, 2)
+	gateGS.sendChan <- network.BytesCombine(mldulebuf, methodbuf, data)
+
+}
+
+//protobuf 解码
+func decode(pb proto.Message, buf []byte) bool {
+	if e := proto.Unmarshal(buf, pb); e != nil {
+		log.Error(e)
+		return false
+	}
+	return true
 }

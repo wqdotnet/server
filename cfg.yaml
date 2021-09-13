@@ -43,6 +43,7 @@ RedisDB: 0
 #game confg
 CfgPath: "./config"
 CfgType: "json"
+WatchConfig: true
 
 #log
 LogWrite: false

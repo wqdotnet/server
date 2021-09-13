@@ -32,8 +32,9 @@ type ServerConfig struct {
 	RedisConnStr string
 	RedisDB      int
 
-	CfgPath string
-	CfgType string
+	CfgPath     string
+	CfgType     string
+	WatchConfig bool
 
 	LogWrite bool
 	Loglevel string

@@ -2,7 +2,7 @@
   "CfgList": [
     {
       "key": "PARAMETER_EMPTY",
-      "Name": "参数不能为空",
+      "Name": "参数不能为空1",
       "Code": 100001
     },
     {

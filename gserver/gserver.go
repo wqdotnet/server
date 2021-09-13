@@ -15,7 +15,9 @@ import (
 	"server/web"
 	"syscall"
 
+	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
+
 	//msg "server/proto"
 	"github.com/facebookgo/pidfile"
 	"github.com/halturin/ergo"
@@ -70,6 +72,12 @@ func StartGServer() {
 	// }
 
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
+	if ServerCfg.WatchConfig {
+		cfg.WatchConfig(ServerCfg.CfgPath, func(in fsnotify.Event) {
+			log.Debug("Config file changed: [%v]  ", in.Name)
+			cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
+		})
+	}
 
 	//启动定时器
 	//timedtasks.StartCronTasks()

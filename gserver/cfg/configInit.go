@@ -5,29 +5,26 @@ import (
 	// "github.com/google/wire"
 
 	"reflect"
+	"sync"
 
+	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 // InitViperConfig 初始化viper
-func InitViperConfig(CfgPath string, CfgType string) {
-	log.Infof("loanding config [%s]  [%s]", CfgPath, CfgType)
+func InitViperConfig(cfgPath string, cfgType string) *viper.Viper {
+	log.Infof("loanding config [%s]  [%s]", cfgPath, cfgType)
 
 	v := viper.New()
-	v.AddConfigPath(CfgPath)
-	v.SetConfigType(CfgType)
+	v.AddConfigPath(cfgPath)
+	v.SetConfigType(cfgType)
 
 	cfg := &cfgCollection{}
 	reflectField(cfg, v)
 	saveCfg(cfg)
-	// v.WatchConfig()
-	// v.OnConfigChange(fileChanged)
+	return v
 }
-
-// func fileChanged(e fsnotify.Event) {
-// 	log.Info("Config file changed:", e.Name)
-// }
 
 func reflectField(structName interface{}, v *viper.Viper) {
 	t := reflect.ValueOf(structName)
@@ -58,4 +55,57 @@ func reflectField(structName interface{}, v *viper.Viper) {
 		}
 		t.FieldByName(fieldname).Set(reflect.ValueOf(field))
 	}
+}
+
+func WatchConfig(configDir string, run func(in fsnotify.Event)) {
+	initWG := sync.WaitGroup{}
+	initWG.Add(1)
+	go func() {
+		watcher, err := fsnotify.NewWatcher()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer watcher.Close()
+		// we have to watch the entire directory to pick up renames/atomic saves in a cross-platform way
+
+		if err != nil {
+			log.Printf("error: %v\n", err)
+			initWG.Done()
+			return
+		}
+
+		eventsWG := sync.WaitGroup{}
+		eventsWG.Add(1)
+		go func() {
+			for {
+				select {
+				case event, ok := <-watcher.Events:
+					if !ok { // 'Events' channel is closed
+						eventsWG.Done()
+						return
+					}
+					// we only care about the config file with the following cases:
+					// 1 - if the config file was modified or created
+					// 2 - if the real path to the config file changed (eg: k8s ConfigMap replacement)
+					const writeOrCreateMask = fsnotify.Write | fsnotify.Create
+					if event.Op&writeOrCreateMask != 0 {
+						if run != nil {
+							run(event)
+						}
+					}
+
+				case err, ok := <-watcher.Errors:
+					if ok { // 'Errors' channel is not closed
+						log.Printf("watcher error: %v\n", err)
+					}
+					eventsWG.Done()
+					return
+				}
+			}
+		}()
+		watcher.Add(configDir)
+		initWG.Done()   // done initializing the watch in this go routine, so the parent routine can move on...
+		eventsWG.Wait() // now, wait for event loop to end in this go-routine...
+	}()
+	initWG.Wait() // make sure that the go routine above fully ended before returning
 }

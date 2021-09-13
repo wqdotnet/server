@@ -37,8 +37,9 @@ var ServerCfg = commonstruct.ServerConfig{
 	RedisConnStr: "localhost:6379",
 	RedisDB:      0,
 
-	CfgPath: "./config",
-	CfgType: "json",
+	CfgPath:     "./config",
+	CfgType:     "json",
+	WatchConfig: false,
 
 	Loglevel: "info",
 	LogPath:  "./log",
