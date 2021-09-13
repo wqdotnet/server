@@ -15,83 +15,63 @@ limitations under the License.
 */
 package cmd
 
-// import (
-// 	"server/gserver/cfg"
+import (
+	"fmt"
+	"strconv"
+	"strings"
 
-// 	"github.com/spf13/cobra"
-// )
+	"github.com/go-basic/uuid"
+	"github.com/spf13/cobra"
+	"github.com/xuri/excelize/v2"
+)
 
-// // excelCmd represents the excel command
-// var excelCmd = &cobra.Command{
-// 	Use:   "excel",
-// 	Short: "A brief description of your command",
-// 	Long: `A longer description that spans multiple lines and likely contains examples
-// and usage of using your command. For example:
+// excelCmd represents the excel command
+var excelCmd = &cobra.Command{
+	Use:   "excel",
+	Short: "excel [数量] [长度] 生成字符串cdk",
+	Long:  `生成excel 字符串cdk`,
+	Args:  cobra.ExactValidArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		num, _ := strconv.Atoi(args[0])
+		lennum, _ := strconv.Atoi(args[1])
+		excel(num, lennum)
+	},
+}
 
-// Cobra is a CLI library for Go that empowers applications.
-// This application is a tool to generate the needed files
-// to quickly create a Cobra application.`,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		excel()
-// 	},
-// }
+func init() {
+	rootCmd.AddCommand(excelCmd)
+}
 
-// func init() {
-// 	rootCmd.AddCommand(excelCmd)
+func excel(num, lennum int) {
+	fmt.Println("生成excel")
+	f := excelize.NewFile()
+	// Create a new sheet.
+	index := f.NewSheet("CDKList")
 
-// 	// Here you will define your flags and configuration settings.
+	f.DeleteSheet("Sheet1")
 
-// 	// Cobra supports Persistent Flags which will work for this command
-// 	// and all subcommands, e.g.:
-// 	// excelCmd.PersistentFlags().String("foo", "", "A help for foo")
+	tmpmap := map[string]interface{}{}
 
-// 	// Cobra supports local flags which will only run when this command
-// 	// is called directly, e.g.:
-// 	// excelCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-// }
+	i := 0
+	for {
+		uuid := uuid.New()
+		strNum := strings.Replace(uuid, "-", "", -1)[0:lennum]
 
-// func excel() {
-// 	cfg.InitViperConfig("config", "json")
-// 	// cfg.CheckBigMapConfig()
+		if _, ok := tmpmap[strNum]; ok {
+			continue
+		}
 
-// 	// f := excelize.NewFile()
-// 	// // Create a new sheet.
-// 	// index := f.NewSheet("AreasList")
+		i++
+		f.SetCellValue("CDKList", fmt.Sprintf("A%v", i), strNum)
+		f.SetCellValue("CDKList", fmt.Sprintf("B%v", i), uuid)
+		if i >= num {
+			break
+		}
+	}
 
-// 	// f.DeleteSheet("Sheet1")
+	f.SetActiveSheet(index)
+	if err := f.SaveAs(fmt.Sprintf("%v个随机长度为%v的cdk.xlsx", num, lennum)); err != nil {
+		fmt.Println(err)
+	}
 
-// 	// // Set value of a cell.
-// 	// //f.SetCellValue("AreasList", "B2", 100)
-// 	// f.SetCellValue("AreasList", "A1", 100)
-
-// 	// areaslist := cfg.GameCfg.MapInfo.Areas
-
-// 	// f.SetCellValue("AreasList", "A1", "AreasIndex")
-// 	// f.SetCellValue("AreasList", "A2", "int")
-// 	// f.SetCellValue("AreasList", "A3", "区域城池索引")
-// 	// f.SetCellValue("AreasList", "B1", "Beside")
-// 	// f.SetCellValue("AreasList", "B2", "int")
-// 	// f.SetCellValue("AreasList", "B3", "相邻城池")
-
-// 	// for num, arecfg := range areaslist {
-// 	// 	// index := cfg.GameCfg.MapInfo.IndexCfg[arecfg.Setindex-1]
-// 	// 	// tmpareas := GameCfg.MapInfo.Areas[index-1]
-// 	// 	f.SetCellValue("AreasList", fmt.Sprintf("A%v", num+4), arecfg.Setindex)
-
-// 	// 	beside := []int{}
-// 	// 	for _, v := range arecfg.Beside {
-// 	// 		tmpbaside := cfg.GameCfg.MapInfo.Areas[v-1]
-// 	// 		beside = append(beside, tmpbaside.Setindex)
-// 	// 	}
-// 	// 	f.SetCellValue("AreasList", fmt.Sprintf("B%v", num+4), beside)
-
-// 	// }
-
-// 	// // Set active sheet of the workbook.
-// 	// f.SetActiveSheet(index)
-// 	// // Save spreadsheet by the given path.
-// 	// if err := f.SaveAs("bigmap.xlsx"); err != nil {
-// 	// 	fmt.Println(err)
-// 	// }
-
-// }
+}
