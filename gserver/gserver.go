@@ -2,7 +2,6 @@ package gserver
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"runtime"
@@ -65,6 +64,15 @@ func StartGServer() {
 		logger.Init(level, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
 	} else {
 		logger.Init(log.InfoLevel, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
+	}
+
+	//set pid file
+	//file, _ := ioutil.TempFile("", fmt.Sprintf("pid_%v_%v_", ServerCfg.ServerName, ServerCfg.ServerID))
+	filename := fmt.Sprintf("/tmp/pid_%v_%v", ServerCfg.ServerName, ServerCfg.ServerID)
+	pidfile.SetPidfilePath(filename)
+	if i, _ := pidfile.Read(); i != 0 {
+		log.Warnf("已启动服务 请检查或清除 pid 文件 [%v]", filename)
+		return
 	}
 
 	// if ServerCfg.Daemon {
@@ -131,8 +139,8 @@ func StartGServer() {
 		),
 		command: make(chan string),
 	}
-	GameServerInfo.Start()
 
+	GameServerInfo.Start()
 	defer ClonseServer()
 	defer GameServerInfo.Close()
 
@@ -145,10 +153,6 @@ func StartGServer() {
 	} else {
 		signal.Notify(exitChan, os.Interrupt)
 	}
-
-	//create pid
-	file, _ := ioutil.TempFile("", fmt.Sprintf("pid_%v_%v_", ServerCfg.ServerName, ServerCfg.ServerID))
-	pidfile.SetPidfilePath(file.Name())
 
 	for {
 		select {
@@ -197,5 +201,6 @@ func StartSuccess() int {
 
 //关闭服务
 func ClonseServer() {
+	log.Info("delete pidfile: ", pidfile.GetPidfilePath())
 	os.Remove(pidfile.GetPidfilePath())
 }

@@ -45,4 +45,6 @@ type ServerConfig struct {
 	ListenRangeEnd   int
 	EPMDPort         int
 	Cookie           string
+
+	Pid int
 }
