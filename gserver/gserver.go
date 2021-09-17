@@ -71,7 +71,7 @@ func StartGServer() {
 	filename := fmt.Sprintf("/tmp/pid_%v_%v", ServerCfg.ServerName, ServerCfg.ServerID)
 	pidfile.SetPidfilePath(filename)
 	if i, _ := pidfile.Read(); i != 0 {
-		log.Warnf("已启动服务 请检查或清除 pid 文件 [%v]", filename)
+		log.Warnf("服务已启动请检查或清除 进程id [%v] pidfile: [%v]  ", i, filename)
 		return
 	}
 
