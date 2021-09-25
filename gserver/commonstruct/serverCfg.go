@@ -12,8 +12,8 @@ type ServerConfig struct {
 	OpenHTTP bool
 	HTTPPort int32
 
-	StatsView     bool
-	StatsViewPort int32
+	OpenPyroscope bool
+	PyroscopeHost string
 
 	NetType     string
 	Port        int32

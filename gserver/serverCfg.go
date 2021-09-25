@@ -15,8 +15,8 @@ var ServerCfg = commonstruct.ServerConfig{
 	OpenHTTP: false,
 	HTTPPort: 8080,
 
-	StatsView:     false,
-	StatsViewPort: 8081,
+	OpenPyroscope: false,
+	PyroscopeHost: "http://localhost:4040",
 
 	// #network : tcp/udp
 	NetType:     "tcp",

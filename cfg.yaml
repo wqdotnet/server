@@ -11,9 +11,9 @@ RestartNum: 2
 OpenHTTP: false
 HTTPPort: 8080
 
-#web StartStatsView
-StatsView: false
-StatsViewPort: 8081
+#pyroscope
+OpenPyroscope: false
+PyroscopeHost: "http://localhost:4040"
 
 #NetType : tcp/kcp
 NetType: tcp

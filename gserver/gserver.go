@@ -15,6 +15,7 @@ import (
 	"syscall"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
 	log "github.com/sirupsen/logrus"
 
 	//msg "server/proto"
@@ -113,8 +114,11 @@ func StartGServer() {
 		go web.Start(ServerCfg.HTTPPort)
 	}
 
-	if ServerCfg.StatsView {
-		go web.StartStatsView(ServerCfg.StatsViewPort)
+	if ServerCfg.OpenPyroscope {
+		profiler.Start(profiler.Config{
+			ApplicationName: fmt.Sprintf("%v_%v", ServerCfg.ServerName, ServerCfg.ServerID),
+			ServerAddress:   ServerCfg.PyroscopeHost,
+		})
 	}
 
 	GameServerInfo = &gameServer{

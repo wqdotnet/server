@@ -5,20 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-echarts/statsview"
-	"github.com/go-echarts/statsview/viewer"
 	log "github.com/sirupsen/logrus"
 )
-
-//StartStatsView 监控
-// localhost:18066/debug/statsview
-func StartStatsView(Port int32) {
-	httppath := fmt.Sprintf("localhost:%v", Port)
-	log.Infof("Start [StatsView] [%v/debug/statsview]", httppath)
-	viewer.SetConfiguration(viewer.WithTheme(viewer.ThemeMacarons), viewer.WithAddr(httppath))
-	mgr := statsview.New()
-	mgr.Start()
-}
 
 // Start gin web interface
 func Start(Port int32) {
