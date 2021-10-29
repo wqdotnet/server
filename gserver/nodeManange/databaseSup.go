@@ -3,32 +3,28 @@ package nodeManange
 import (
 	"server/gserver/genServer"
 
-	"github.com/halturin/ergo"
+	"github.com/ergo-services/ergo"
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
+	"github.com/ergo-services/ergo/node"
 )
 
 type DataBaseSup struct {
-	ergo.Supervisor
+	gen.Supervisor
 }
 
-func (ds *DataBaseSup) Init(args ...interface{}) ergo.SupervisorSpec {
-	return ergo.SupervisorSpec{
+func (ds *DataBaseSup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
+	return gen.SupervisorSpec{
 		Name: "DataBaseSup",
-		Children: []ergo.SupervisorChildSpec{
+		Children: []gen.SupervisorChildSpec{
 			{
 				Name:  "dbServer",
 				Child: &genServer.DbGenServer{},
-				//Restart: ergo.SupervisorChildRestartTemporary,
-				Restart: ergo.SupervisorChildRestartTransient,
-				//Restart: ergo.SupervisorChildRestartPermanent,
-				Args: []interface{}{},
-
-				// temporary:进程永远都不会被重启
-				// transient: 只有进程异常终止的时候会被重启
-				// permanent:遇到任何错误导致进程终止就会重启
+				//Args: []interface{}{},
 			},
 		},
-		Strategy: ergo.SupervisorStrategy{
-			Type: ergo.SupervisorStrategyOneForOne,
+		Strategy: gen.SupervisorStrategy{
+			Type: gen.SupervisorStrategyOneForOne,
 			//Type: ergo.SupervisorStrategyOneForAll,
 			//Type: ergo.SupervisorStrategyRestForOne,
 
@@ -39,19 +35,31 @@ func (ds *DataBaseSup) Init(args ...interface{}) ergo.SupervisorSpec {
 			// simple_one_for_one 是one_for_one的简化版 ,所有子进程都动态添加同一种进程的实例
 			Intensity: 3, //次数
 			Period:    5, //时间  1 -0 代表不重启
+
+			Restart: gen.SupervisorStrategyRestartTemporary,
+			//Restart:   gen.SupervisorStrategyRestartTemporary,
+			//Restart: gen.SupervisorStrategyRestartTransient,
+			//Restart: gen.SupervisorStrategyRestartPermanent,
+
+			// temporary:进程永远都不会被重启
+			// transient: 只有进程异常终止的时候会被重启
+			// permanent:遇到任何错误导致进程终止就会重启
 		},
-	}
+	}, nil
 }
 
-func StartDataBaseSupSupNode(nodeName string) (*ergo.Node, *ergo.Process, error) {
-	opts := ergo.NodeOptions{
+func StartDataBaseSupSupNode(nodeName string) (node.Node, gen.Process, error) {
+	opts := node.Options{
 		ListenRangeBegin: uint16(serverCfg.ListenRangeBegin),
 		ListenRangeEnd:   uint16(serverCfg.ListenRangeEnd),
 		EPMDPort:         uint16(serverCfg.EPMDPort),
 	}
 
-	node := ergo.CreateNode(nodeName, serverCfg.Cookie, opts)
+	node, err := ergo.StartNode(nodeName, serverCfg.Cookie, opts)
+	if err != nil {
+		return nil, nil, err
+	}
 	// Spawn supervisor process
-	process, err := node.Spawn("database_sup", ergo.ProcessOptions{}, &DataBaseSup{})
+	process, err := node.Spawn("database_sup", gen.ProcessOptions{}, &DataBaseSup{})
 	return node, process, err
 }

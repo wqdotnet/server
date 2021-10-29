@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"server/gserver"
 
-	"github.com/halturin/ergo"
-	"github.com/halturin/ergo/etf"
+	"github.com/ergo-services/ergo"
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
+	"github.com/ergo-services/ergo/node"
 )
 
 var (
 	genServerName string
 	gateNodeName  string
-	process       *ergo.Process
+	process       *gen.ServerProcess
 )
 
 func call(cmd ...string) (etf.Term, error) {
@@ -40,34 +42,36 @@ func call(cmd ...string) (etf.Term, error) {
 
 //"gatewayNode[serverid]@[ip]"
 func ping(serverid, ip string) bool {
-	_, process = startDebugGen("debug_server@127.0.0.1")
+	_, process := startDebugGen("debug_server@127.0.0.1")
 	genServerName = "cmdServer"
 	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
 
 	//process.Send(etf.Tuple{"gateServer", "demo@127.0.0.1"}, etf.Map{"abc": []byte("operation cwal")})
-	if _, err := process.Call(etf.Tuple{genServerName, gateNodeName}, etf.Atom("ping")); err != nil {
+
+	if err := process.Send(etf.Tuple{genServerName, gateNodeName}, etf.Atom("ping")); err != nil {
 		return false
 	}
 	return true
 
 }
 
-func startDebugGen(nodeName string) (*ergo.Node, *ergo.Process) {
-	opts := ergo.NodeOptions{
+func startDebugGen(nodeName string) (node.Node, gen.Process) {
+	opts := node.Options{
 		ListenRangeBegin: uint16(gserver.ServerCfg.ListenRangeBegin),
 		ListenRangeEnd:   uint16(gserver.ServerCfg.ListenRangeEnd),
 		EPMDPort:         uint16(gserver.ServerCfg.EPMDPort),
 	}
-	node := ergo.CreateNode(nodeName, gserver.ServerCfg.Cookie, opts)
+	node, _ := ergo.StartNode(nodeName, gserver.ServerCfg.Cookie, opts)
 	// Spawn supervisor process
-	process, _ := node.Spawn("deubg_gen", ergo.ProcessOptions{}, &DebugGenServer{})
+	process, _ := node.Spawn("deubg_gen", gen.ProcessOptions{}, &DebugGenServer{})
+
 	return node, process
 }
 
 // GenServer implementation structure
 type DebugGenServer struct {
-	ergo.GenServer
-	process *ergo.Process
+	gen.Server
+	process *gen.ServerProcess
 }
 
 type debugState struct {
@@ -75,7 +79,7 @@ type debugState struct {
 
 // Init initializes process state using arbitrary arguments
 // Init(...) -> state
-func (dgs *DebugGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
+func (dgs *DebugGenServer) Init(p *gen.ServerProcess, args ...interface{}) interface{} {
 	dgs.process = p
 	return debugState{}
 }

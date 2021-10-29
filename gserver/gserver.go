@@ -19,9 +19,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	//msg "server/proto"
+
+	"github.com/ergo-services/ergo/gen"
 	"github.com/facebookgo/pidfile"
-	"github.com/halturin/ergo"
-	"github.com/halturin/ergo/etf"
 )
 
 //GameServerInfo game info
@@ -44,11 +44,8 @@ func (g *gameServer) Start() {
 
 func (g *gameServer) Close() {
 	for _, node := range nodeManange.GetNodes() {
-		for _, p := range node.GetProcessList() {
-			p.Cast(p.Self(), etf.Atom("stop"))
-		}
-		// node.Stop()
-		// node.Wait()
+		node.Stop()
+		node.Wait()
 	}
 	g.nw.Close()
 }
@@ -123,7 +120,7 @@ func StartGServer() {
 
 	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(
-			func() ergo.GenServerBehaviour {
+			func() gen.ProcessBehavior {
 				return &genServer.GateGenServer{}
 			},
 			// &sync.Pool{

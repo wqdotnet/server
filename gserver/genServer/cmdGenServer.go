@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"server/gserver/cfg"
 
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
 	"github.com/facebookgo/pidfile"
-	"github.com/halturin/ergo"
-	"github.com/halturin/ergo/etf"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,47 +14,36 @@ import (
 
 // GenServer implementation structure
 type CmdGenServer struct {
-	ergo.GenServer
-	process       *ergo.Process
+	gen.Server
+	process       *gen.ServerProcess
 	CfgPath       string
 	CfgType       string
 	ServerCmdChan chan string
 	ServerNmae    string
 }
 
-type cmdState struct {
-}
+func (dgs *CmdGenServer) Init(process *gen.ServerProcess, args ...etf.Term) error {
 
-// Init initializes process state using arbitrary arguments
-// Init(...) -> state
-func (dgs *CmdGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
-	log.Infof("Init (%v): args %v ", p.Name(), args)
-	dgs.process = p
+	log.Infof("Init (%v): args %v ", process.Name(), args)
+	dgs.process = process
 	dgs.CfgPath = args[0].(string)
 	dgs.CfgType = args[1].(string)
 	dgs.ServerCmdChan = args[2].(chan string)
 	dgs.ServerNmae = args[3].(string)
 
-	return cmdState{}
+	return nil
 }
 
-// HandleCast serves incoming messages sending via gen_server:cast
-// HandleCast -> ("noreply", state) - noreply
-//		         ("stop", reason) - stop with reason
-func (dgs *CmdGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *CmdGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
 	switch message {
 	case etf.Atom("stop"):
-		return "stop", "normal"
+		return gen.ServerStatusStopWithReason("stop normal")
 	}
-	return "noreply", state
+	return gen.ServerStatusOK
 }
 
-// HandleCall serves incoming messages sending via gen_server:call
-// HandleCall -> ("reply", message, state) - reply
-//				 ("noreply", _, state) - noreply
-//		         ("stop", reason, _) - normal stop
-func (dgs *CmdGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
+func (dgs *CmdGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
 	log.Infof("HandleCall (%v): %v ", dgs.process.Name(), message)
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
 
@@ -71,20 +60,16 @@ func (dgs *CmdGenServer) HandleCall(from etf.Tuple, message etf.Term, state inte
 		i, _ := pidfile.Read()
 		reply = etf.Atom(fmt.Sprintf(" [%v] pid:[%v]", dgs.ServerNmae, i))
 	}
-	return "reply", reply, state
+	return reply, gen.ServerStatusOK
 }
 
-// HandleInfo serves all another incoming messages (Pid ! message)
-// HandleInfo -> ("noreply", state) - noreply
-//		         ("stop", reason) - normal stop
-func (dgs *CmdGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *CmdGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleInfo (%v): %v", dgs.process.Name(), message)
 
-	return "noreply", state
+	return gen.ServerStatusOK
 }
 
-// Terminate called when process died
-func (dgs *CmdGenServer) Terminate(reason string, state interface{}) {
+func (dgs *CmdGenServer) Terminate(process *gen.ServerProcess, reason string) {
 	log.Infof("Terminate (%v): %v", dgs.process.Name(), reason)
 
 }

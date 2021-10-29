@@ -5,7 +5,7 @@ import (
 	"server/gserver/commonstruct"
 	"sync"
 
-	"github.com/halturin/ergo"
+	"github.com/ergo-services/ergo/node"
 )
 
 var serverCfg *commonstruct.ServerConfig
@@ -36,22 +36,22 @@ func Start(cfg *commonstruct.ServerConfig, command chan string) {
 		panic(derr)
 	}
 
-	nodesMap.Store(serverNode.FullName, serverNode)
-	nodesMap.Store(gateNode.FullName, gateNode)
-	nodesMap.Store(dbNode.FullName, dbNode)
+	nodesMap.Store(serverNode.NodeName(), serverNode)
+	nodesMap.Store(gateNode.NodeName(), gateNode)
+	nodesMap.Store(dbNode.NodeName(), dbNode)
 }
 
-func GetNode(nodename string) *ergo.Node {
+func GetNode(nodename string) node.Node {
 	if v, ok := nodesMap.Load(nodename); ok {
-		return v.(*ergo.Node)
+		return v.(node.Node)
 	}
 	return nil
 }
 
-func GetNodes() map[string]*ergo.Node {
-	nodemap := map[string]*ergo.Node{}
+func GetNodes() map[string]node.Node {
+	nodemap := map[string]node.Node{}
 	nodesMap.Range(func(key, value interface{}) bool {
-		nodemap[key.(string)] = value.(*ergo.Node)
+		nodemap[key.(string)] = value.(node.Node)
 		return true
 	})
 	return nodemap

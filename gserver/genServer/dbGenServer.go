@@ -3,46 +3,31 @@ package genServer
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/halturin/ergo"
-	"github.com/halturin/ergo/etf"
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
 )
 
 //数据落地服务
 
 type DbGenServer struct {
-	ergo.GenServer
-	process *ergo.Process
+	gen.Server
+	process *gen.ServerProcess
 }
 
-type dbState struct {
+func (dgs *DbGenServer) Init(process *gen.ServerProcess, args ...etf.Term) error {
+	log.Infof("Init (%v): args %v ", process.Name(), args)
+
+	dgs.process = process
+	return nil
 }
 
-// Init initializes process state using arbitrary arguments
-// Init(...) -> state
-func (dgs *DbGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
-	log.Infof("Init (%v): args %v ", p.Name(), args)
-
-	dgs.process = p
-	return dbState{}
-}
-
-// HandleCast serves incoming messages sending via gen_server:cast
-// HandleCast -> ("noreply", state) - noreply
-//		         ("stop", reason) - stop with reason
-func (dgs *DbGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *DbGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
-	switch message {
-	case etf.Atom("stop"):
-		return "stop", "normal"
-	}
-	return "noreply", state
+
+	return gen.ServerStatusOK
 }
 
-// HandleCall serves incoming messages sending via gen_server:call
-// HandleCall -> ("reply", message, state) - reply
-//				 ("noreply", _, state) - noreply
-//		         ("stop", reason, _) - normal stop
-func (dgs *DbGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
+func (dgs *DbGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
 	log.Infof("HandleCall (%v): %v, From: %v", dgs.process.Name(), message, from)
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
@@ -51,20 +36,17 @@ func (dgs *DbGenServer) HandleCall(from etf.Tuple, message etf.Term, state inter
 	case etf.Atom("ping"):
 		reply = etf.Term(etf.Atom("pong"))
 	}
-	return "reply", reply, state
+
+	return reply, gen.ServerStatusOK
 }
 
-// HandleInfo serves all another incoming messages (Pid ! message)
-// HandleInfo -> ("noreply", state) - noreply
-//		         ("stop", reason) - normal stop
-func (dgs *DbGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
+func (dgs *DbGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleInfo (%v): %v", dgs.process.Name(), message)
 
-	return "noreply", state
+	return gen.ServerStatusOK
 }
 
-// Terminate called when process died
-func (dgs *DbGenServer) Terminate(reason string, state interface{}) {
+func (dgs *DbGenServer) Terminate(process *gen.ServerProcess, reason string) {
 	log.Infof("Terminate (%v): %v", dgs.process.Name(), reason)
 }
 

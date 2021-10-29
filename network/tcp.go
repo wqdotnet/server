@@ -31,7 +31,7 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 	log.Info(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", nw.Port))
-	defer listener.Close()
+	//defer listener.Close()
 	checkError(err)
 	if nw.StartHook != nil {
 		nw.StartHook()
@@ -46,6 +46,7 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 		log.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
 		go nw.HandleClient(conn)
 	}
+	listener.Close()
 }
 
 //Close 关闭

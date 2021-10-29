@@ -3,8 +3,8 @@ package genServer
 import (
 	"server/network"
 
-	"github.com/halturin/ergo"
-	"github.com/halturin/ergo/etf"
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 )
@@ -14,44 +14,34 @@ import (
 // 在socket中断后 此进程会保留一段时间以便于重新建立连接
 
 type GateGenServer struct {
-	ergo.GenServer
-	process  *ergo.Process
+	gen.Server
+	process  *gen.ServerProcess
 	sendChan chan []byte
 }
 
 func (gateGS *GateGenServer) Unregister() {
-	gateGS.process.Node.Unregister(gateGS.process.Name())
+	//gateGS.process.Node.Unregister(gateGS.process.Name())
 }
 
 func (gateGS *GateGenServer) Register(name string) {
-	gateGS.process.Node.Register(name, gateGS.process.Self())
+	//gateGS.process.Node.Register(name, gateGS.process.Self())
 }
 
-type gateState struct {
-}
-
-// Init initializes process state using arbitrary arguments
-// Init(...) -> state
-func (gateGS *GateGenServer) Init(p *ergo.Process, args ...interface{}) interface{} {
-	log.Infof("Init (%v): args %v ", p.Name(), args)
-	gateGS.process = p
+func (gateGS *GateGenServer) Init(process *gen.ServerProcess, args ...etf.Term) error {
+	log.Infof("Init (%v): args %v ", process.Name(), args)
+	gateGS.process = process
 	gateGS.sendChan = args[0].(chan []byte)
-	return gateState{}
+	return nil
 }
 
-// HandleCast serves incoming messages sending via gen_server:cast
-// HandleCast -> ("noreply", state) - noreply
-//		         ("stop", reason) - stop with reason
-func (gateGS *GateGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
+func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleCast (%v): %v", gateGS.process.Name(), message)
 
 	switch info := message.(type) {
 	case etf.Atom:
 		switch info {
-		case "stop":
-			return "stop", "normal"
 		case "SocketStop":
-			return "stop", "normal"
+			return gen.ServerStatusStopWithReason("stop normal")
 		}
 	case etf.Tuple:
 		module := info[0].(int)
@@ -64,19 +54,10 @@ func (gateGS *GateGenServer) HandleCast(message etf.Term, state interface{}) (st
 		log.Debug("[]byte", info)
 
 	}
-	// switch message {
-	// case etf.Atom("stop"):
-	// 	return "stop", "normal"
-	// case etf.List([]byte):
-	// }
-	return "noreply", state
+	return gen.ServerStatusOK
 }
 
-// HandleCall serves incoming messages sending via gen_server:call
-// HandleCall -> ("reply", message, state) - reply
-//				 ("noreply", _, state) - noreply
-//		         ("stop", reason, _) - normal stop
-func (gateGS *GateGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
+func (gateGS *GateGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
 	log.Infof("HandleCall (%v): %v, From: %v", gateGS.process.Name(), message, from)
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
@@ -85,20 +66,16 @@ func (gateGS *GateGenServer) HandleCall(from etf.Tuple, message etf.Term, state 
 	case etf.Atom("ping"):
 		reply = etf.Term(etf.Atom("pong"))
 	}
-	return "reply", reply, state
+	return reply, gen.ServerStatusOK
 }
 
-// HandleInfo serves all another incoming messages (Pid ! message)
-// HandleInfo -> ("noreply", state) - noreply
-//		         ("stop", reason) - normal stop
-func (gateGS *GateGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
+func (gateGS *GateGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleInfo (%v): %v", gateGS.process.Name(), message)
-
-	return "noreply", state
+	return gen.ServerStatusOK
 }
 
 // Terminate called when process died
-func (gateGS *GateGenServer) Terminate(reason string, state interface{}) {
+func (gateGS *GateGenServer) Terminate(process *gen.ServerProcess, reason string) {
 	gateGS.Unregister()
 	log.Infof("Terminate (%v): %v", gateGS.process.Name(), reason)
 }
@@ -128,10 +105,10 @@ func (gateGS *GateGenServer) Send(module int32, method int32, pb proto.Message) 
 }
 
 //protobuf 解码
-func decode(pb proto.Message, buf []byte) bool {
-	if e := proto.Unmarshal(buf, pb); e != nil {
-		log.Error(e)
-		return false
-	}
-	return true
-}
+// func decode(pb proto.Message, buf []byte) bool {
+// 	if e := proto.Unmarshal(buf, pb); e != nil {
+// 		log.Error(e)
+// 		return false
+// 	}
+// 	return true
+// }

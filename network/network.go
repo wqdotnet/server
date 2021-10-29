@@ -11,9 +11,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
+	"github.com/ergo-services/ergo/node"
 	"github.com/google/uuid"
-	"github.com/halturin/ergo"
-	"github.com/halturin/ergo/etf"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -51,7 +52,7 @@ type NetWorkx struct {
 	Port int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
 	//UserPool *sync.Pool
-	CreateGenServerObj func() ergo.GenServerBehaviour
+	CreateGenServerObj func() gen.ProcessBehavior
 
 	//启动成功后回调
 	StartHook func()
@@ -63,11 +64,11 @@ type NetWorkx struct {
 	//socket 关闭回调
 	closeHook func()
 
-	dbNode *ergo.Node
+	dbNode node.Node
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(createObj func() ergo.GenServerBehaviour, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
+func NewNetWorkX(createObj func() gen.ProcessBehavior, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
 	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
 	return &NetWorkx{
 		Packet:  packet,
@@ -87,7 +88,7 @@ func NewNetWorkX(createObj func() ergo.GenServerBehaviour, port, packet, readtim
 }
 
 //Start 启动网络服务
-func (n *NetWorkx) Start(dbNode *ergo.Node) {
+func (n *NetWorkx) Start(dbNode node.Node) {
 	n.dbNode = dbNode
 	switch n.NetType {
 	case "kcp":
@@ -106,7 +107,7 @@ func (n *NetWorkx) Start(dbNode *ergo.Node) {
 
 }
 
-func (n *NetWorkx) createProcess() (*ergo.Process, chan []byte, error) {
+func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
 	//genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
 	genserver := n.CreateGenServerObj()
 
@@ -116,7 +117,8 @@ func (n *NetWorkx) createProcess() (*ergo.Process, chan []byte, error) {
 	}
 
 	sendchan := make(chan []byte, 1)
-	process, err := n.dbNode.Spawn(uid.String(), ergo.ProcessOptions{}, genserver, sendchan)
+
+	process, err := n.dbNode.Spawn(uid.String(), gen.ProcessOptions{}, genserver, sendchan)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -136,7 +138,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	//defer n.UserPool.Put(p)
 	defer n.onClosedConnect()
 	defer conn.Close()
-	defer p.Cast(p.Self(), etf.Atom("SocketStop"))
+
+	defer p.Send(p.Self(), etf.Atom("SocketStop"))
 
 	// sendc := make(chan []byte, 1)
 	//c.OnConnect(conn.RemoteAddr(), sendc)
@@ -224,7 +227,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
-		p.Cast(p.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
+		p.Send(p.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
 
 		//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
 		now := time.Now().Unix()
@@ -232,7 +235,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 		if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
 			//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
-			p.Cast(p.Self(), "timeloop")
+			p.Send(p.Self(), "timeloop")
 			//gamechan <- commonstruct.ProcessMsg{MsgType: commonstruct.ProcessMsgTimeInterval, Data: msgNum}
 			unix = now
 			msgNum = 0
