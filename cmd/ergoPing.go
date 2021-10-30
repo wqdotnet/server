@@ -18,6 +18,7 @@ var (
 
 func call(cmd ...string) (etf.Term, error) {
 	if len(cmd) == 1 {
+
 		return debugGenServer.process.Call(gen.ProcessID{Name: genServerName, Node: gateNodeName}, etf.Atom(cmd[0]))
 	} else {
 		return debugGenServer.process.Call(gen.ProcessID{Name: genServerName, Node: gateNodeName}, cmd)

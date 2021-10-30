@@ -42,6 +42,8 @@ func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.
 		switch info {
 		case "SocketStop":
 			return gen.ServerStatusStopWithReason("stop normal")
+		case "timeloop":
+			log.Debug("time loop")
 		}
 	case etf.Tuple:
 		module := info[0].(int)
@@ -51,8 +53,7 @@ func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.
 		log.Debug("socket info ", module, method, buf)
 		//gateGS.sendChan <- []byte("send msg test")
 	case []byte:
-		log.Debug("[]byte", info)
-
+		log.Debug("[]byte:", info)
 	}
 	return gen.ServerStatusOK
 }
@@ -62,10 +63,6 @@ func (gateGS *GateGenServer) HandleCall(process *gen.ServerProcess, from gen.Ser
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
 
-	switch message {
-	case etf.Atom("ping"):
-		reply = etf.Term(etf.Atom("pong"))
-	}
 	return reply, gen.ServerStatusOK
 }
 

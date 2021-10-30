@@ -124,7 +124,7 @@ func StartGServer() {
 
 	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(
-			func() gen.ProcessBehavior {
+			func() gen.ServerBehavior {
 				return &genServer.GateGenServer{}
 			},
 			// &sync.Pool{

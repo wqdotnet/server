@@ -52,7 +52,7 @@ type NetWorkx struct {
 	Port int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
 	//UserPool *sync.Pool
-	CreateGenServerObj func() gen.ProcessBehavior
+	CreateGenServerObj func() gen.ServerBehavior
 
 	//启动成功后回调
 	StartHook func()
@@ -68,7 +68,7 @@ type NetWorkx struct {
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(createObj func() gen.ProcessBehavior, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
+func NewNetWorkX(createObj func() gen.ServerBehavior, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
 	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
 	return &NetWorkx{
 		Packet:  packet,
@@ -122,12 +122,13 @@ func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return process, sendchan, nil
 }
 
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
-	p, sendchan, err := n.createProcess()
+	process, sendchan, err := n.createProcess()
 	if err != nil {
 		log.Error("createProcess err: [%v]", err)
 		return
@@ -139,7 +140,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	defer n.onClosedConnect()
 	defer conn.Close()
 
-	defer p.Send(p.Self(), etf.Atom("SocketStop"))
+	defer process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), "SocketStop"}))
+	//defer process.Send(process.Self(), etf.Atom("SocketStop"))
 
 	// sendc := make(chan []byte, 1)
 	//c.OnConnect(conn.RemoteAddr(), sendc)
@@ -227,7 +229,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
-		p.Send(p.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
+		//process.Send(process.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
+		process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Tuple{module, method, buf[n.Packet+4:]}}))
 
 		//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
 		now := time.Now().Unix()
@@ -235,7 +238,10 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 
 		if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
 			//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
-			p.Send(p.Self(), "timeloop")
+
+			process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), "timeloop"}))
+			//process.Send(process.Self(), "timeloop")
+
 			//gamechan <- commonstruct.ProcessMsg{MsgType: commonstruct.ProcessMsgTimeInterval, Data: msgNum}
 			unix = now
 			msgNum = 0

@@ -21,7 +21,7 @@ require (
 	github.com/jonboulle/clockwork v0.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
-	github.com/klauspost/reedsolomon v1.9.13 // indirect
+	github.com/klauspost/reedsolomon v1.9.14 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.5 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -45,8 +45,8 @@ require (
 	go.mongodb.org/mongo-driver v1.7.3
 	go.uber.org/atomic v1.9.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect
-	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
+	golang.org/x/net v0.0.0-20211029224645-99673261e6eb // indirect
+	golang.org/x/sys v0.0.0-20211029165221-6e7872819dc8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1
 )

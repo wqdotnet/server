@@ -36,23 +36,16 @@ func (dgs *CmdGenServer) Init(process *gen.ServerProcess, args ...etf.Term) erro
 
 func (dgs *CmdGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
-	switch message {
-	case etf.Atom("stop"):
-		return gen.ServerStatusStopWithReason("stop normal")
-	}
+	// switch message {
+	// case etf.Atom("stop"):
+	// 	return gen.ServerStatusStopWithReason("stop normal")
+	// }
 	return gen.ServerStatusOK
 }
 
 func (gd *CmdGenServer) HandleDirect(process *gen.ServerProcess, message interface{}) (interface{}, error) {
 
-	switch message.(type) {
-	case string:
-		log.Infof("HandleDirect (%v)", message)
-		return nil, nil
-	default:
-		return nil, nil
-	}
-
+	return nil, nil
 }
 
 func (dgs *CmdGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {

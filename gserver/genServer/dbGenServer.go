@@ -32,11 +32,6 @@ func (dgs *DbGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFr
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
 
-	switch message {
-	case etf.Atom("ping"):
-		reply = etf.Term(etf.Atom("pong"))
-	}
-
 	return reply, gen.ServerStatusOK
 }
 
