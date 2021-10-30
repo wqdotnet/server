@@ -11,44 +11,26 @@ import (
 )
 
 var (
-	genServerName string
-	gateNodeName  string
-	process       *gen.ServerProcess
+	genServerName  string
+	gateNodeName   string
+	debugGenServer *DebugGenServer
 )
 
 func call(cmd ...string) (etf.Term, error) {
 	if len(cmd) == 1 {
-		return process.Call(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
+		return debugGenServer.process.Call(gen.ProcessID{Name: genServerName, Node: gateNodeName}, etf.Atom(cmd[0]))
 	} else {
-		return process.Call(etf.Tuple{genServerName, gateNodeName}, cmd)
+		return debugGenServer.process.Call(gen.ProcessID{Name: genServerName, Node: gateNodeName}, cmd)
 	}
 }
 
-// func cast(cmd ...string) {
-// 	if len(cmd) == 1 {
-// 		process.Cast(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
-// 	} else {
-// 		process.Cast(etf.Tuple{genServerName, gateNodeName}, cmd)
-// 	}
-// }
-
-// func send(cmd ...string) {
-// 	if len(cmd) == 1 {
-// 		process.Send(etf.Tuple{genServerName, gateNodeName}, etf.Atom(cmd[0]))
-// 	} else {
-// 		process.Send(etf.Tuple{genServerName, gateNodeName}, cmd)
-// 	}
-// }
-
-//"gatewayNode[serverid]@[ip]"
 func ping(serverid, ip string) bool {
 	_, process := startDebugGen("debug_server@127.0.0.1")
 	genServerName = "cmdServer"
 	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
 
-	//process.Send(etf.Tuple{"gateServer", "demo@127.0.0.1"}, etf.Map{"abc": []byte("operation cwal")})
-
-	if err := process.Send(etf.Tuple{genServerName, gateNodeName}, etf.Atom("ping")); err != nil {
+	if err := process.Send(gen.ProcessID{Name: genServerName, Node: gateNodeName}, etf.Term("ping")); err != nil {
+		fmt.Println(err)
 		return false
 	}
 	return true
@@ -62,8 +44,9 @@ func startDebugGen(nodeName string) (node.Node, gen.Process) {
 		EPMDPort:         uint16(gserver.ServerCfg.EPMDPort),
 	}
 	node, _ := ergo.StartNode(nodeName, gserver.ServerCfg.Cookie, opts)
+	debugGenServer = &DebugGenServer{}
 	// Spawn supervisor process
-	process, _ := node.Spawn("deubg_gen", gen.ProcessOptions{}, &DebugGenServer{})
+	process, _ := node.Spawn("deubg_gen", gen.ProcessOptions{}, debugGenServer)
 
 	return node, process
 }
@@ -74,38 +57,35 @@ type DebugGenServer struct {
 	process *gen.ServerProcess
 }
 
-type debugState struct {
-}
-
 // Init initializes process state using arbitrary arguments
 // Init(...) -> state
-func (dgs *DebugGenServer) Init(p *gen.ServerProcess, args ...interface{}) interface{} {
-	dgs.process = p
-	return debugState{}
+func (dgs *DebugGenServer) Init(process *gen.ServerProcess, args ...etf.Term) error {
+	dgs.process = process
+	return nil
 }
 
 // HandleCast serves incoming messages sending via gen_server:cast
 // HandleCast -> ("noreply", state) - noreply
 //		         ("stop", reason) - stop with reason
-func (dgs *DebugGenServer) HandleCast(message etf.Term, state interface{}) (string, interface{}) {
-	return "noreply", state
+func (dgs *DebugGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
+	return gen.ServerStatusOK
 }
 
 // HandleCall serves incoming messages sending via gen_server:call
 // HandleCall -> ("reply", message, state) - reply
 //				 ("noreply", _, state) - noreply
 //		         ("stop", reason, _) - normal stop
-func (dgs *DebugGenServer) HandleCall(from etf.Tuple, message etf.Term, state interface{}) (string, etf.Term, interface{}) {
-	return "reply", etf.Term(etf.Atom("")), state
+func (dgs *DebugGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
+	return etf.Term(""), gen.ServerStatusOK
 }
 
 // HandleInfo serves all another incoming messages (Pid ! message)
 // HandleInfo -> ("noreply", state) - noreply
 //		         ("stop", reason) - normal stop
-func (dgs *DebugGenServer) HandleInfo(message etf.Term, state interface{}) (string, interface{}) {
-	return "noreply", state
+func (dgs *DebugGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
+	return gen.ServerStatusOK
 }
 
 // Terminate called when process died
-func (dgs *DebugGenServer) Terminate(reason string, state interface{}) {
+func (dgs *DebugGenServer) Terminate(process *gen.ServerProcess, reason string) {
 }

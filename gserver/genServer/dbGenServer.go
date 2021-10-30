@@ -47,8 +47,6 @@ func (dgs *DbGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term)
 }
 
 func (dgs *DbGenServer) Terminate(process *gen.ServerProcess, reason string) {
+
 	log.Infof("Terminate (%v): %v", dgs.process.Name(), reason)
 }
-
-// //process.Send(etf.Tuple{GenServerName, NodeName}, etf.Atom("show me the money"))
-// process.Send(etf.Tuple{"example", "demo@127.0.0.1"}, etf.Map{"abc": []byte("operation cwal")})

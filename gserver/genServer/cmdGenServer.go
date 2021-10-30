@@ -43,6 +43,18 @@ func (dgs *CmdGenServer) HandleCast(process *gen.ServerProcess, message etf.Term
 	return gen.ServerStatusOK
 }
 
+func (gd *CmdGenServer) HandleDirect(process *gen.ServerProcess, message interface{}) (interface{}, error) {
+
+	switch message.(type) {
+	case string:
+		log.Infof("HandleDirect (%v)", message)
+		return nil, nil
+	default:
+		return nil, nil
+	}
+
+}
+
 func (dgs *CmdGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
 	log.Infof("HandleCall (%v): %v ", dgs.process.Name(), message)
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
