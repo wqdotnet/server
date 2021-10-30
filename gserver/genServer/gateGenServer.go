@@ -36,6 +36,11 @@ func (gateGS *GateGenServer) Init(process *gen.ServerProcess, args ...etf.Term) 
 
 func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
 	log.Infof("HandleCast (%v): %v", gateGS.process.Name(), message)
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
+	}()
 
 	switch info := message.(type) {
 	case etf.Atom:
@@ -46,8 +51,8 @@ func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.
 			log.Debug("time loop")
 		}
 	case etf.Tuple:
-		module := info[0].(int)
-		method := info[1].(int)
+		module := info[0].(int32)
+		method := info[1].(int32)
 		buf := info[2].([]byte)
 
 		log.Debug("socket info ", module, method, buf)
