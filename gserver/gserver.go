@@ -34,12 +34,12 @@ type gameServer struct {
 
 func (g *gameServer) Start() {
 	nodeManange.Start(&ServerCfg, g.command)
-	dbNode := nodeManange.GetNode(fmt.Sprintf("dbNode_%v@127.0.0.1", ServerCfg.ServerID))
-	if dbNode == nil {
+	gateNode := nodeManange.GetNode(fmt.Sprintf("gatewayNode_%v@127.0.0.1", ServerCfg.ServerID))
+	if gateNode == nil {
 		panic("节点启动失败")
 	}
 	//启动网络
-	g.nw.Start(dbNode)
+	g.nw.Start(gateNode)
 }
 
 func (g *gameServer) Close() {

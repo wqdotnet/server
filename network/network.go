@@ -66,7 +66,7 @@ type NetWorkx struct {
 	closeHook func()
 
 	ConnectCount int64
-	dbNode       node.Node
+	gateNode     node.Node
 }
 
 //NewNetWorkX    instance
@@ -93,8 +93,8 @@ func NewNetWorkX(createObj func() gen.ServerBehavior, port, packet, readtimeout 
 }
 
 //Start 启动网络服务
-func (n *NetWorkx) Start(dbNode node.Node) {
-	n.dbNode = dbNode
+func (n *NetWorkx) Start(gateNode node.Node) {
+	n.gateNode = gateNode
 	switch n.NetType {
 	case "kcp":
 		log.Info("NetWorkx [kcp] port:", n.Port)
@@ -123,7 +123,7 @@ func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
 
 	sendchan := make(chan []byte, 1)
 
-	process, err := n.dbNode.Spawn(uid.String(), gen.ProcessOptions{}, genserver, sendchan)
+	process, err := n.gateNode.Spawn(uid.String(), gen.ProcessOptions{}, genserver, sendchan)
 	if err != nil {
 		return nil, nil, err
 	}
