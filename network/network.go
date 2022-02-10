@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/ergo-services/ergo/etf"
@@ -64,13 +65,15 @@ type NetWorkx struct {
 	//socket 关闭回调
 	closeHook func()
 
-	dbNode node.Node
+	ConnectCount int64
+	dbNode       node.Node
 }
 
 //NewNetWorkX    instance
 func NewNetWorkX(createObj func() gen.ServerBehavior, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
 	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
-	return &NetWorkx{
+
+	netWorkx := &NetWorkx{
 		Packet:  packet,
 		NetType: nettype,
 		Port:    port,
@@ -85,6 +88,8 @@ func NewNetWorkX(createObj func() gen.ServerBehavior, port, packet, readtimeout 
 		connectHook:        connectHook,
 		closedConnectHook:  closedConnectHook,
 	}
+	atomic.StoreInt64(&netWorkx.ConnectCount, 0)
+	return netWorkx
 }
 
 //Start 启动网络服务
@@ -135,12 +140,14 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	}
 
 	n.onConnect()
+	atomic.AddInt64(&n.ConnectCount, 1)
+	defer atomic.AddInt64(&n.ConnectCount, -1)
 
 	//defer n.UserPool.Put(p)
 	defer n.onClosedConnect()
 	defer conn.Close()
 
-	defer process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), "SocketStop"}))
+	defer process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Atom("SocketStop")}))
 	//defer process.Send(process.Self(), etf.Atom("SocketStop"))
 
 	// sendc := make(chan []byte, 1)

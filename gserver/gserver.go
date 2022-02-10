@@ -179,9 +179,8 @@ func StartGServer() {
 			} else if runtime.GOOS == "windows" && s.String() == "interrupt" {
 				return
 			}
-
-			//case <-time.After(60 * time.Second):
-			//log.Infof("time: [%v]  online:[%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"))
+			// case <-time.After(1 * time.Second):
+			// 	log.Infof("time: [%v]  online:[%v]  [%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"), GameServerInfo.nw.ConnectCount)
 		}
 	}
 

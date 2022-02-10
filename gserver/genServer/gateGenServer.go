@@ -35,7 +35,7 @@ func (gateGS *GateGenServer) Init(process *gen.ServerProcess, args ...etf.Term) 
 }
 
 func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	log.Infof("HandleCast (%v): %v", gateGS.process.Name(), message)
+	log.Infof("gateGen HandleCast (%v): %v", gateGS.process.Name(), message)
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)
