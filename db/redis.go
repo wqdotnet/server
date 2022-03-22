@@ -6,9 +6,9 @@ import (
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/sirupsen/logrus"
 
 	red "github.com/gomodule/redigo/redis"
-	log "github.com/sirupsen/logrus"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -22,7 +22,7 @@ var redis *Redis
 
 //StartRedis 初始化
 func StartRedis(address string, selectdb int) {
-	log.Infof("StartRedis  create redis.pool:  [%v]", address)
+	logrus.Infof("StartRedis  create redis.pool:  [%v]", address)
 	redis = new(Redis)
 	redis.pool = &red.Pool{
 		MaxIdle:     256,
@@ -70,7 +70,7 @@ func RedisExec(cmd string, key interface{}, args ...interface{}) (interface{}, e
 func GetAutoID(tabname string) int32 {
 	autoid, err := red.Int(RedisExec("incr", tabname))
 	if err != nil {
-		log.Error(err)
+		logrus.Error(err)
 	}
 	return int32(autoid)
 }
@@ -79,7 +79,7 @@ func GetAutoID(tabname string) int32 {
 func RedisINCRBY(tabname string, num int32) int32 {
 	autoid, err := red.Int(RedisExec("INCRBY", tabname, num))
 	if err != nil {
-		log.Error(err)
+		logrus.Error(err)
 	}
 	return int32(autoid)
 }
@@ -87,7 +87,7 @@ func RedisINCRBY(tabname string, num int32) int32 {
 func RedisDel(key string) {
 	_, err := RedisExec("del", key)
 	if err != nil {
-		log.Error(err)
+		logrus.Error(err)
 	}
 }
 

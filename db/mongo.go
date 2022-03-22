@@ -4,7 +4,7 @@ import (
 	"context"
 
 	pool "github.com/jolestar/go-commons-pool/v2"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,7 +19,7 @@ var (
 
 //StartMongodb mongodb init
 func StartMongodb(dbname string, url string) {
-	log.Infof("StartMongodb  create sync.pool:[%v]   dbname:[%v]", url, dbname)
+	logrus.Infof("StartMongodb  create sync.pool:[%v]   dbname:[%v]", url, dbname)
 	database = dbname
 	urlstr = url
 
@@ -28,7 +28,7 @@ func StartMongodb(dbname string, url string) {
 			clientOptions := options.Client().ApplyURI(url)
 			client, err := mongo.Connect(context.TODO(), clientOptions)
 			if err != nil {
-				log.Error(err)
+				logrus.Error(err)
 			}
 			return client, nil
 		})
@@ -40,7 +40,7 @@ func MongodbPing() (bool, error) {
 	ctx := context.Background()
 	obj, err := clientPool.BorrowObject(ctx)
 	if err != nil {
-		log.Error(err)
+		logrus.Error(err)
 	}
 	client := obj.(*mongo.Client)
 	if err := client.Ping(context.TODO(), nil); err != nil {
@@ -54,16 +54,16 @@ func GetDatabase() (*mongo.Client, *mongo.Database) {
 	ctx := context.Background()
 	obj, err := clientPool.BorrowObject(ctx)
 	if err != nil {
-		log.Error(err)
+		logrus.Error(err)
 	}
 	client := obj.(*mongo.Client)
 
 	// 检查连接
 	if err := client.Ping(context.TODO(), nil); err != nil {
-		log.Warn(err)
+		logrus.Warn(err)
 		clientOptions := options.Client().ApplyURI(urlstr)
 		if client, err = mongo.Connect(context.TODO(), clientOptions); err != nil {
-			log.Error(err)
+			logrus.Error(err)
 		}
 	}
 
@@ -85,7 +85,7 @@ func InsertOne(tbname string, document interface{}) {
 	_, err := collection.InsertOne(context.TODO(), document)
 
 	if err != nil {
-		log.Error(err)
+		logrus.Error(err)
 	}
 
 	clientPool.ReturnObject(context.Background(), client)
@@ -122,14 +122,14 @@ func FindBson(tbname string, filter interface{}) (*mongo.Cursor, error) {
 	// 	var elem Trainer
 	// 	err := cur.Decode(&amp;elem)
 	// 	if err != nil {
-	// 		log.Fatal(err)
+	// 		logrus.Fatal(err)
 	// 	}
 
 	// 	results = append(results, &amp;elem)
 	// }
 
 	// if err := cur.Err(); err != nil {
-	// 	log.Fatal(err)
+	// 	logrus.Fatal(err)
 	// }
 
 	// // Close the cursor once finished
@@ -149,7 +149,7 @@ func Update(tbname string, Findfield interface{}, Upfield interface{}) (int64, e
 	if err != nil {
 		return 0, err
 	}
-	//log.Debug("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+	//logrus.Debug("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 	return updateResult.ModifiedCount, nil
 }
 
@@ -161,9 +161,9 @@ func Delete(tbname string, field string, value interface{}) int64 {
 	//删除所有
 	deleteResult, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
-		log.Error(err)
+		logrus.Error(err)
 	}
-	//log.Debugf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
+	//logrus.Debugf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
 
 	return deleteResult.DeletedCount
 }

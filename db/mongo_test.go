@@ -6,7 +6,7 @@ import (
 
 	//"github.com/go-playground/assert/v2"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -23,13 +23,13 @@ func TestInsertOne(t *testing.T) {
 
 	data := &Testdata{Name: "wq", Age: 18}
 	InsertOne("cron_log", &data)
-	log.Info("TestInsertOne")
+	logrus.Info("TestInsertOne")
 }
 
 func TestFindFieldMax(t *testing.T) {
 	var obj Testdata
 	FindFieldMax("cron_log", "age", &obj)
-	log.Info("TestFindFieldMax:", obj.Age)
+	logrus.Info("TestFindFieldMax:", obj.Age)
 	assert.Equal(t, obj.Age, int32(18))
 }
 
@@ -37,7 +37,7 @@ func TestFindBson(t *testing.T) {
 	var obj Testdata
 	filter := bson.D{{"name", "wq"}, {"age", 18}}
 	FindOneBson("cron_log", &obj, filter)
-	log.Info("TestFindObject", obj)
+	logrus.Info("TestFindObject", obj)
 
 }
 
@@ -55,7 +55,7 @@ func TestFindOne(t *testing.T) {
 	list["name"] = "Ash"
 	//list["age"] = 18
 	FindOneBson("cron_log", &obj, list)
-	log.Info("TestFindObject", obj)
+	logrus.Info("TestFindObject", obj)
 }
 
 func TestFind(t *testing.T) {
@@ -64,30 +64,30 @@ func TestFind(t *testing.T) {
 	var results []*Testdata
 	cur, err := FindBson("cron_log", filter)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	for cur.Next(context.TODO()) {
 		var elem Testdata
 		err := cur.Decode(&elem)
 		if err != nil {
-			log.Fatal(err)
+			logrus.Fatal(err)
 		}
 		results = append(results, &elem)
 	}
 	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	// Close the cursor once finished
 	cur.Close(context.TODO())
 
-	log.Info(results)
+	logrus.Info(results)
 }
 
 func TestDelete(t *testing.T) {
 	num := Delete("cron_log", "name", "Ash")
-	log.Info("TestDelete num:", num)
+	logrus.Info("TestDelete num:", num)
 	num = Delete("cron_log", "name", "wq")
-	log.Info("TestDelete num:", num)
+	logrus.Info("TestDelete num:", num)
 }
 
 type Testdata struct {
@@ -110,16 +110,16 @@ type Testdata struct {
 // 	// 建立mongodb连接
 // 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 // 	if client, err = mongo.Connect(context.TODO(), clientOptions); err != nil {
-// 		log.Error(err)
+// 		logrus.Error(err)
 // 		return
 // 	}
 
 // 	// 检查连接
 // 	err = client.Ping(context.TODO(), nil)
 // 	if err != nil {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
-// 	log.Info("Connected to MongoDB!")
+// 	logrus.Info("Connected to MongoDB!")
 
 // 	// 2, 选择数据库my_db
 // 	database := client.Database("gamedemo")
@@ -132,42 +132,42 @@ type Testdata struct {
 // 	brock := trainer{"Brock", 15, "Pewter City"}
 // 	insertResult, err := collection.InsertOne(context.TODO(), ash)
 // 	if err != nil {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
-// 	log.Info("Inserted a single document: ", insertResult)
+// 	logrus.Info("Inserted a single document: ", insertResult)
 
 // 	//插入列表数据
 // 	trainers := []interface{}{misty, brock}
 // 	insertManyResult, err := collection.InsertMany(context.TODO(), trainers)
 // 	if err != nil {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
-// 	log.Info("Inserted multiple documents: ", insertManyResult.InsertedIDs)
+// 	logrus.Info("Inserted multiple documents: ", insertManyResult.InsertedIDs)
 
 // 	// 更新
 // 	filter := bson.D{primitive.E{Key: "name", Value: "Ash"}}
 // 	update := bson.D{primitive.E{Key: "$inc", Value: bson.D{primitive.E{Key: "age", Value: 1}}}}
 // 	updateResult, err := collection.UpdateOne(context.TODO(), filter, update)
 // 	if err != nil {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
-// 	log.Infof("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+// 	logrus.Infof("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 
 // 	//查找
 // 	filter2 := bson.D{primitive.E{Key: "name", Value: "Ash"}}
 // 	var result trainer
 // 	err = collection.FindOne(context.TODO(), filter2).Decode(&result)
 // 	if err != nil {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
-// 	log.Infof("Found a single document: %+v\n", result)
+// 	logrus.Infof("Found a single document: %+v\n", result)
 
 // 	//删除所有
 // 	deleteResult, err := collection.DeleteMany(context.TODO(), bson.D{{}})
 // 	if err != nil {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
-// 	log.Infof("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
+// 	logrus.Infof("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
 // }
 
 // func objectPool() {
@@ -176,7 +176,7 @@ type Testdata struct {
 // 			clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 // 			client, err := mongo.Connect(context.TODO(), clientOptions)
 // 			if err != nil {
-// 				log.Error(err)
+// 				logrus.Error(err)
 // 			}
 // 			return client, nil
 // 		})
@@ -186,7 +186,7 @@ type Testdata struct {
 
 // 	obj, err := p.BorrowObject(ctx)
 // 	if err != nil {
-// 		log.Error(err)
+// 		logrus.Error(err)
 // 	}
 
 // 	client := obj.(*mongo.Client)
@@ -195,6 +195,6 @@ type Testdata struct {
 
 // 	err = p.ReturnObject(ctx, obj)
 // 	if err != nil {
-// 		log.Error(err)
+// 		logrus.Error(err)
 // 	}
 // }

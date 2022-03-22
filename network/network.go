@@ -17,7 +17,7 @@ import (
 	"github.com/ergo-services/ergo/gen"
 	"github.com/ergo-services/ergo/node"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 //ClientInterface client hander
@@ -98,13 +98,13 @@ func (n *NetWorkx) Start(gateNode node.Node) {
 	n.gateNode = gateNode
 	switch n.NetType {
 	case "kcp":
-		log.Info("NetWorkx [kcp] port:", n.Port)
+		logrus.Info("NetWorkx [kcp] port:", n.Port)
 		n.src = &KCPNetwork{}
 	case "tcp":
-		log.Info("NetWorkx [tcp] port:", n.Port)
+		logrus.Info("NetWorkx [tcp] port:", n.Port)
 		n.src = &TCPNetwork{}
 	default:
-		log.Info("NetWorkx default [tcp] port:", n.Port)
+		logrus.Info("NetWorkx default [tcp] port:", n.Port)
 		n.src = new(TCPNetwork)
 	}
 
@@ -136,7 +136,7 @@ func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
 func (n *NetWorkx) HandleClient(conn net.Conn) {
 	process, sendchan, err := n.createProcess()
 	if err != nil {
-		log.Error("createProcess err: [%v]", err)
+		logrus.Error("createProcess err: [%v]", err)
 		return
 	}
 
@@ -160,7 +160,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// 			le := IntToBytes(len(buf), n.Packet)
 	// 			conn.Write(BytesCombine(le, buf))
 	// 		case <-ctx.Done():
-	// 			log.Debug("exit role sendGO")
+	// 			logrus.Debug("exit role sendGO")
 	// 			return
 	// 		}
 	// 	}
@@ -178,7 +178,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// for {
 	// 	_, buf, e := UnpackToBlockFromReader(conn, n.Packet)
 	// 	if e != nil {
-	// 		log.Error("socket error:", e.Error())
+	// 		logrus.Error("socket error:", e.Error())
 	// 		return
 	// 	}
 	// 	module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
@@ -189,7 +189,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// 	msginfo := &common.NetworkMsg{}
 	// 	e = proto.Unmarshal(buf[n.Packet:], msginfo)
 	// 	if e != nil {
-	// 		log.Errorf("msg decode error[%s]", e.Error())
+	// 		logrus.Errorf("msg decode error[%s]", e.Error())
 	// 		msgdata, _ := proto.Marshal(&common.NetworkMsg{
 	// 			Module: 0,
 	// 			Method: 1,
@@ -207,7 +207,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 				le := tools.IntToBytes(int32(len(buf)), n.Packet)
 				conn.Write(tools.BytesCombine(le, buf))
 			case <-sendctx.Done():
-				//log.Debug("exit role sendGO")
+				//logrus.Debug("exit role sendGO")
 				return
 			}
 		}
@@ -227,9 +227,9 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		if e != nil {
 			switch e {
 			case io.EOF:
-				log.Debug("socket closed:", e.Error())
+				logrus.Debug("socket closed:", e.Error())
 			default:
-				log.Warn("socket closed:", e.Error())
+				logrus.Warn("socket closed:", e.Error())
 			}
 			return
 		}
@@ -245,7 +245,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		msgNum++
 
 		if now > unix+int64(n.MsgTime) || msgNum >= int(n.MsgNum) {
-			//log.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
+			//logrus.Infof("time:=======>[%v] [%v]", time.Now().Format("15:04:05"), msgNum)
 
 			process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), "timeloop"}))
 			//process.Send(process.Self(), "timeloop")
@@ -268,7 +268,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	// 	// 		return
 	// 	// 	}
 	// 	case <-ctx.Done():
-	// 		//log.Debug("exit role goroutine")
+	// 		//logrus.Debug("exit role goroutine")
 	// 		return
 	// 	}
 	// }
@@ -297,7 +297,7 @@ func (n *NetWorkx) Close() {
 
 func checkError(err error) {
 	if err != nil {
-		log.Errorf("Fatal error: %s", err.Error())
+		logrus.Errorf("Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
 }
@@ -362,7 +362,7 @@ func readUntil(reader io.Reader, buf []byte) error {
 			}
 			return e //errorx.Wrap(e)
 		}
-		//log.Debugf("offset:[%s]  buf[%s]", offset, len(buf))
+		//logrus.Debugf("offset:[%s]  buf[%s]", offset, len(buf))
 		offset += n
 		if offset >= len(buf) {
 			break

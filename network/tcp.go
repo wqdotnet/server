@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 //TCPNetwork tcp/ip
@@ -28,7 +28,7 @@ type TCPNetwork struct {
 
 //Start start
 func (c *TCPNetwork) Start(nw *NetWorkx) {
-	log.Info(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
+	logrus.Info(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", nw.Port))
 	//defer listener.Close()
@@ -40,10 +40,10 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Error(err.Error())
+			logrus.Error(err.Error())
 			break
 		}
-		log.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
+		logrus.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
 		go nw.HandleClient(conn)
 	}
 	listener.Close()

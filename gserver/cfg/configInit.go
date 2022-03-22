@@ -8,13 +8,13 @@ import (
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 // InitViperConfig 初始化viper
 func InitViperConfig(cfgPath string, cfgType string) *viper.Viper {
-	log.Infof("loanding config [%s]  [%s]", cfgPath, cfgType)
+	logrus.Infof("loanding config [%s]  [%s]", cfgPath, cfgType)
 
 	v := viper.New()
 	v.AddConfigPath(cfgPath)
@@ -33,7 +33,7 @@ func reflectField(structName interface{}, v *viper.Viper) {
 		t = t.Elem()
 	}
 	if t.Kind() != reflect.Struct {
-		log.Fatal("Check type error not Struct")
+		logrus.Fatal("Check type error not Struct")
 		return
 	}
 
@@ -43,15 +43,15 @@ func reflectField(structName interface{}, v *viper.Viper) {
 		typename := t.Field(i).Type().Name()
 		field := t.Field(i).Interface()
 
-		log.Info("load init config :", fieldname)
+		logrus.Info("load init config :", fieldname)
 		v.SetConfigName(fieldname)
 
 		if err := v.ReadInConfig(); err != nil {
-			log.Fatalf("read: %v [%v][%v]", err, typename, fieldname)
+			logrus.Fatalf("read: %v [%v][%v]", err, typename, fieldname)
 		}
 
 		if err := v.UnmarshalExact(&field); err != nil {
-			log.Fatal("err:", err)
+			logrus.Fatal("err:", err)
 		}
 		t.FieldByName(fieldname).Set(reflect.ValueOf(field))
 	}
@@ -63,13 +63,13 @@ func WatchConfig(configDir string, run func(in fsnotify.Event)) {
 	go func() {
 		watcher, err := fsnotify.NewWatcher()
 		if err != nil {
-			log.Fatal(err)
+			logrus.Fatal(err)
 		}
 		defer watcher.Close()
 		// we have to watch the entire directory to pick up renames/atomic saves in a cross-platform way
 
 		if err != nil {
-			log.Printf("error: %v\n", err)
+			logrus.Printf("error: %v\n", err)
 			initWG.Done()
 			return
 		}
@@ -96,7 +96,7 @@ func WatchConfig(configDir string, run func(in fsnotify.Event)) {
 
 				case err, ok := <-watcher.Errors:
 					if ok { // 'Errors' channel is not closed
-						log.Printf("watcher error: %v\n", err)
+						logrus.Printf("watcher error: %v\n", err)
 					}
 					eventsWG.Done()
 					return

@@ -17,7 +17,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	//msg "server/proto"
 
@@ -58,11 +58,11 @@ func (g *gameServer) Close() {
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
-	log.Infof("============================= Begin Start [%v][%v] ===============================", ServerCfg.ServerName, ServerCfg.ServerID)
-	if level, err := log.ParseLevel(ServerCfg.Loglevel); err == nil {
+	logrus.Infof("============================= Begin Start [%v][%v] ===============================", ServerCfg.ServerName, ServerCfg.ServerID)
+	if level, err := logrus.ParseLevel(ServerCfg.Loglevel); err == nil {
 		logger.Init(level, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
 	} else {
-		logger.Init(log.InfoLevel, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
+		logger.Init(logrus.InfoLevel, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
 	}
 
 	//set pid file
@@ -70,7 +70,7 @@ func StartGServer() {
 	filename := fmt.Sprintf("/tmp/pid_%v_%v", ServerCfg.ServerName, ServerCfg.ServerID)
 	pidfile.SetPidfilePath(filename)
 	if i, _ := pidfile.Read(); i != 0 {
-		log.Warnf("服务已启动请检查或清除 进程id [%v] pidfile: [%v]  ", i, filename)
+		logrus.Warnf("服务已启动请检查或清除 进程id [%v] pidfile: [%v]  ", i, filename)
 		return
 	}
 
@@ -81,7 +81,7 @@ func StartGServer() {
 	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
 	if ServerCfg.WatchConfig {
 		cfg.WatchConfig(ServerCfg.CfgPath, func(in fsnotify.Event) {
-			log.Debug("Config file changed: [%v]  ", in.Name)
+			logrus.Debug("Config file changed: [%v]  ", in.Name)
 			cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
 		})
 	}
@@ -90,20 +90,20 @@ func StartGServer() {
 	//timedtasks.StartCronTasks()
 	// //定时器
 	// timedtasks.AddTasks("loop", "* * * * * ?", func() {
-	// 	log.Info("server time:", time.Now())
+	// 	logrus.Info("server time:", time.Now())
 	// })
 	//defer timedtasks.RemoveTasks("loop")
 
 	db.StartMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
 	if ok, err := db.MongodbPing(); ok {
-		log.Info("mongodb conn success")
+		logrus.Info("mongodb conn success")
 	} else {
 		panic(err)
 	}
 
 	db.StartRedis(ServerCfg.RedisConnStr, ServerCfg.RedisDB)
 	if ok, err := db.RedisConn(); ok {
-		log.Info("redis conn success")
+		logrus.Info("redis conn success")
 	} else {
 		panic(err)
 	}
@@ -136,8 +136,8 @@ func StartGServer() {
 			ServerCfg.MsgNum,
 			func() { SendGameServerMsg("StartSuccess") },
 			func() { db.RedisExec("del", "ConnectNumber") },
-			func() { log.Info("connect number: ", db.RedisINCRBY("ConnectNumber", 1)) },
-			func() { log.Info("connect number: ", db.RedisINCRBY("ConnectNumber", -1)) },
+			func() { logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", 1)) },
+			func() { logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", -1)) },
 		),
 		command: make(chan string),
 	}
@@ -162,22 +162,22 @@ func StartGServer() {
 			switch command {
 			case "StartSuccess":
 				pid := StartSuccess()
-				log.Infof("====================== Start Game Server pid:[%v] Success =========================", pid)
+				logrus.Infof("====================== Start Game Server pid:[%v] Success =========================", pid)
 			case "shutdown":
-				log.Warn("Shut down the game server")
+				logrus.Warn("Shut down the game server")
 				return
 			default:
-				log.Warn("command:", command)
+				logrus.Warn("command:", command)
 			}
 		case s := <-exitChan:
-			log.Info("收到信号: ", s)
+			logrus.Info("收到信号: ", s)
 			if runtime.GOOS == "linux" && s.String() == "quit" || s.String() == "terminated" {
 				return
 			} else if runtime.GOOS == "windows" && s.String() == "interrupt" {
 				return
 			}
 			// case <-time.After(1 * time.Second):
-			// 	log.Infof("time: [%v]  online:[%v]  [%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"), GameServerInfo.nw.ConnectCount)
+			// 	logrus.Infof("time: [%v]  online:[%v]  [%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"), GameServerInfo.nw.ConnectCount)
 		}
 	}
 
@@ -191,13 +191,13 @@ func SendGameServerMsg(msg string) {
 //成功启动
 func StartSuccess() int {
 	pidfile.Write()
-	log.Infof("pidfile :%v", pidfile.GetPidfilePath())
+	logrus.Infof("pidfile :%v", pidfile.GetPidfilePath())
 	i, _ := pidfile.Read()
 	return i
 }
 
 //关闭服务
 func ClonseServer() {
-	log.Info("delete pidfile: ", pidfile.GetPidfilePath())
+	logrus.Info("delete pidfile: ", pidfile.GetPidfilePath())
 	os.Remove(pidfile.GetPidfilePath())
 }

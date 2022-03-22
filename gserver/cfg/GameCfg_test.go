@@ -3,7 +3,7 @@ package cfg
 import (
 	"testing"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"go.uber.org/atomic"
 )
 
@@ -16,15 +16,15 @@ func init() {
 
 	//viper.AddConfigPath("./config")
 	//viper.SetConfigName("mapinfo")
-	log.Info("err:", GetGameCfg().ErrorCode.CfgList)
-	// log.Info("MapInfo :", len(GameCfg.MapInfo.Areas))
-	// log.Infof("troops:%v", len(GameCfg.Troops.CfgList))
-	// log.Infof("ErrorCode:%v", len(GameCfg.ErrorCode.CfgList))
-	// log.Infof("role exp:%v", len(GameCfg.RoleExp.ExpList))
-	// log.Infof("global: %v", GetGlobalInt("expRole"))
-	// log.Infof("skill :%v", len(GameCfg.Skill.SkillList))
-	// log.Infof("SkillLandform :%v", len(GameCfg.Skill.SkillLandform))
-	// log.Infof("SkillBuff :%v", len(GameCfg.Skill.BuffList))
+	logrus.Info("err:", GetGameCfg().ErrorCode.CfgList)
+	// logrus.Info("MapInfo :", len(GameCfg.MapInfo.Areas))
+	// logrus.Infof("troops:%v", len(GameCfg.Troops.CfgList))
+	// logrus.Infof("ErrorCode:%v", len(GameCfg.ErrorCode.CfgList))
+	// logrus.Infof("role exp:%v", len(GameCfg.RoleExp.ExpList))
+	// logrus.Infof("global: %v", GetGlobalInt("expRole"))
+	// logrus.Infof("skill :%v", len(GameCfg.Skill.SkillList))
+	// logrus.Infof("SkillLandform :%v", len(GameCfg.Skill.SkillLandform))
+	// logrus.Infof("SkillBuff :%v", len(GameCfg.Skill.BuffList))
 }
 
 func TestMapCfg(t *testing.T) {

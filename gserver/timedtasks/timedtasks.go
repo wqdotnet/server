@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/robfig/cron/v3"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 
 //StartCronTasks spec := "* * * * * ?"
 func StartCronTasks() {
-	log.Infof("Start Cron")
+	logrus.Infof("Start Cron")
 	crontask = cron.New(cron.WithSeconds())
 	crontask.Start()
 }

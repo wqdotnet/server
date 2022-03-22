@@ -3,11 +3,11 @@ package clienconnect
 import (
 	"server/msgproto/account"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func msgCreateRole(msg *account.C2S_CreateRole) {
-	log.Info("create role ", msg.RoleName)
+	logrus.Info("create role ", msg.RoleName)
 }
 
 // //module 用户登陆模块
@@ -29,14 +29,14 @@ func msgCreateRole(msg *account.C2S_CreateRole) {
 // 			c.updateRole(upName)
 // 		}
 // 	default:
-// 		log.Info("loginModule null methodID:", method)
+// 		logrus.Info("loginModule null methodID:", method)
 // 	}
 // }
 
 // // func (c *Client) unmarshalExec(b []byte, m protoreflect.ProtoMessage, exec func(m protoreflect.ProtoMessage)) {
 // // 	e := proto.Unmarshal(b, m)
 // // 	if e != nil {
-// // 		log.Error(e)
+// // 		logrus.Error(e)
 // // 		return
 // // 	}
 // // 	exec(m)
@@ -55,9 +55,9 @@ func msgCreateRole(msg *account.C2S_CreateRole) {
 // 		return
 // 	}
 
-// 	log.Debugf("login %v %v  status:[%v]", userlogin.Account, userlogin.Password, c.status)
+// 	logrus.Debugf("login %v %v  status:[%v]", userlogin.Account, userlogin.Password, c.status)
 // 	if c.status != StatusSockert {
-// 		log.Warn(c.account, " 已登陆")
+// 		logrus.Warn(c.account, " 已登陆")
 // 		return
 // 	}
 // 	accountinfo := &commonstruct.AccountInfoStruct{}
@@ -98,7 +98,7 @@ func msgCreateRole(msg *account.C2S_CreateRole) {
 // 	var userinfo account.P_RoleInfo
 // 	filter = bson.D{primitive.E{Key: "roleid", Value: accountinfo.RoleID}}
 // 	if err := db.FindOneBson(db.UserTable, &userinfo, filter); err != nil {
-// 		log.Debug("未找到 角色ID:", accountinfo.RoleID)
+// 		logrus.Debug("未找到 角色ID:", accountinfo.RoleID)
 // 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_Login), &account.S2C_Login{Success: true})
 // 		return
 // 	}
@@ -215,7 +215,7 @@ func msgCreateRole(msg *account.C2S_CreateRole) {
 // 	filter := bson.D{primitive.E{Key: "rolename", Value: c.rolename}}
 // 	updatefilter := bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "rolename", Value: userlogin.UpdateName}}}}
 // 	if _, err := db.Update(db.UserTable, filter, updatefilter); err != nil {
-// 		log.Error(err)
+// 		logrus.Error(err)
 // 		c.Send(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_S2C_UpdateRoleName), returnmsg)
 // 		return
 // 	}

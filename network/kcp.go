@@ -3,8 +3,8 @@ package network
 import (
 	"crypto/sha1"
 	"fmt"
-	"log"
 
+	"github.com/sirupsen/logrus"
 	"github.com/xtaci/kcp-go"
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -27,13 +27,13 @@ func (c *KCPNetwork) Start(nw *NetWorkx) {
 		for {
 			s, err := listener.AcceptKCP()
 			if err != nil {
-				log.Fatal(err)
+				logrus.Fatal(err)
 			}
 			go nw.HandleClient(s)
 		}
 
 	} else {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }
 
@@ -52,12 +52,12 @@ func (c *KCPNetwork) Close() {
 // 		for {
 // 			s, err := listener.AcceptKCP()
 // 			if err != nil {
-// 				log.Fatal(err)
+// 				logrus.Fatal(err)
 // 			}
 // 			go handleEcho(s)
 // 		}
 // 	} else {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
 // }
 
@@ -67,13 +67,13 @@ func (c *KCPNetwork) Close() {
 // 	for {
 // 		n, err := conn.Read(buf)
 // 		if err != nil {
-// 			log.Println(err)
+// 			logrus.Println(err)
 // 			return
 // 		}
 
 // 		n, err = conn.Write(buf[:n])
 // 		if err != nil {
-// 			log.Println(err)
+// 			logrus.Println(err)
 // 			return
 // 		}
 // 	}
@@ -91,20 +91,20 @@ func (c *KCPNetwork) Close() {
 // 		for {
 // 			data := time.Now().String()
 // 			buf := make([]byte, len(data))
-// 			log.Println("sent:", data)
+// 			logrus.Println("sent:", data)
 // 			if _, err := sess.Write([]byte(data)); err == nil {
 // 				// read back the data
 // 				if _, err := io.ReadFull(sess, buf); err == nil {
-// 					log.Println("recv:", string(buf))
+// 					logrus.Println("recv:", string(buf))
 // 				} else {
-// 					log.Fatal(err)
+// 					logrus.Fatal(err)
 // 				}
 // 			} else {
-// 				log.Fatal(err)
+// 				logrus.Fatal(err)
 // 			}
 // 			time.Sleep(time.Second)
 // 		}
 // 	} else {
-// 		log.Fatal(err)
+// 		logrus.Fatal(err)
 // 	}
 // }

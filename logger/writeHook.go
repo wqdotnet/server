@@ -6,7 +6,7 @@ import (
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func fileHook(path string) *lfshook.LfsHook {
@@ -27,15 +27,15 @@ func fileHook(path string) *lfshook.LfsHook {
 	//panic  fatal  error  warn  info  debug  trace
 	return lfshook.NewHook(
 		lfshook.WriterMap{
-			log.PanicLevel: writer,
-			log.FatalLevel: writer,
-			log.ErrorLevel: writer,
-			log.WarnLevel:  writer,
-			log.InfoLevel:  writer,
-			log.DebugLevel: writer,
-			log.TraceLevel: writer,
+			logrus.PanicLevel: writer,
+			logrus.FatalLevel: writer,
+			logrus.ErrorLevel: writer,
+			logrus.WarnLevel:  writer,
+			logrus.InfoLevel:  writer,
+			logrus.DebugLevel: writer,
+			logrus.TraceLevel: writer,
 		},
-		&log.TextFormatter{
+		&logrus.TextFormatter{
 			ForceColors:     true,
 			TimestampFormat: tools.DateTimeFormat,
 		},

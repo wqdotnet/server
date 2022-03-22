@@ -1,31 +1,12 @@
 package clienconnect
 
 import (
-	"fmt"
 	"server/tools"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
-
-// import (
-// 	"net"
-// 	"server/db"
-// 	"server/gserver/commonstruct"
-// 	"server/gserver/process"
-// 	"server/msgproto/account"
-// 	"server/msgproto/bigmap"
-// 	"server/msgproto/protocol_base"
-// 	"server/msgproto/troops"
-// 	"server/network"
-func init() {
-	fmt.Print("client init --------------------------------------")
-}
-
-// 	"github.com/golang/protobuf/proto"
-// 	log "github.com/sirupsen/logrus"
-// )
 
 //Client 客户端连接
 type Client struct {
@@ -61,10 +42,10 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 
 // //Send 发送消息
 func (c *Client) Send(module int32, method int32, pb proto.Message) {
-	//log.Debugf("client send msg [%v] [%v] [%v]", module, method, pb)
+	//logrus.Debugf("client send msg [%v] [%v] [%v]", module, method, pb)
 	data, err := proto.Marshal(pb)
 	if err != nil {
-		log.Errorf("proto encode error[%v] [%v][%v] [%v]", err.Error(), module, method, pb)
+		logrus.Errorf("proto encode error[%v] [%v][%v] [%v]", err.Error(), module, method, pb)
 		return
 	}
 	// msginfo := &common.NetworkMsg{}
@@ -73,7 +54,7 @@ func (c *Client) Send(module int32, method int32, pb proto.Message) {
 	// msginfo.MsgBytes = data
 	// msgdata, err := proto.Marshal(msginfo)
 	// if err != nil {
-	// 	log.Errorf("msg encode error[%s]\n", err.Error())
+	// 	logrus.Errorf("msg encode error[%s]\n", err.Error())
 	// }
 	// gateGS.sendChan <- msgdata
 
@@ -89,7 +70,7 @@ func createRegisterFunc[T any](execfunc func(*T)) func(buf []byte) {
 		info := new(T)
 		err := decodeProto(info, buf)
 		if err != nil {
-			log.Errorf("decode error[%v]", err.Error())
+			logrus.Errorf("decode error[%v]", err.Error())
 		} else {
 			execfunc(info)
 		}

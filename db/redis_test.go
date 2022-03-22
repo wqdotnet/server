@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,16 +48,16 @@ func TestHMGET(t *testing.T) {
 	assert.Equal(t, data["show"], "23434")
 	assert.Equal(t, data["s"], "")
 
-	log.Info(data)
+	logrus.Info(data)
 	RedisExec("del", "field")
 
-	log.Info("RedisGetInt:", RedisGetInt("test11"))
-	log.Info("INCRBY:", RedisINCRBY("test11", 1))
-	log.Info("RedisGetInt:", RedisGetInt("test11"))
-	log.Info("INCRBY:", RedisINCRBY("test11", 1))
-	log.Info("RedisGetInt:", RedisGetInt("test11"))
-	log.Info("INCRBY:", RedisINCRBY("test11", -1))
-	log.Info("RedisGetInt:", RedisGetInt("test11"))
+	logrus.Info("RedisGetInt:", RedisGetInt("test11"))
+	logrus.Info("INCRBY:", RedisINCRBY("test11", 1))
+	logrus.Info("RedisGetInt:", RedisGetInt("test11"))
+	logrus.Info("INCRBY:", RedisINCRBY("test11", 1))
+	logrus.Info("RedisGetInt:", RedisGetInt("test11"))
+	logrus.Info("INCRBY:", RedisINCRBY("test11", -1))
+	logrus.Info("RedisGetInt:", RedisGetInt("test11"))
 	RedisExec("del", "test11")
 
 	SetStruct("test", &Test{Name: "test", Age: 18})
@@ -93,7 +93,7 @@ type Test struct {
 // 	for _, v := range value {
 // 		areas := &bigmapmanage.AreasInfo{}
 // 		json.Unmarshal(v, areas)
-// 		log.Infof("  %v", areas)
+// 		logrus.Infof("  %v", areas)
 // 	}
 
 // }

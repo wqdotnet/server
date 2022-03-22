@@ -39,7 +39,7 @@ package clienconnect
 // 	// hearbeat := &protocol_base.C2S_HeartBeat{}
 // 	// e := proto.Unmarshal(buf, hearbeat)
 // 	// if e != nil {
-// 	// 	log.Error(e)
+// 	// 	logrus.Error(e)
 // 	// }
 
 // 	c.Send(int32(protocol_base.MSG_BASE_PROTOCOL_BASE),
@@ -51,5 +51,5 @@ package clienconnect
 
 // //EmptyMsg 接收到未识别的消息号
 // func (c *Client) EmptyMsg(module int32, method int32) {
-// 	log.Warnf("Receive Empty Msg => [%v][%v] rolename:[%v]", module, method, c.rolename)
+// 	logrus.Warnf("Receive Empty Msg => [%v][%v] rolename:[%v]", module, method, c.rolename)
 // }

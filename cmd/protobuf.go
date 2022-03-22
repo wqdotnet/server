@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -66,9 +66,9 @@ var protobufCmd = &cobra.Command{
 
 					_, errout, err := Shellout(execstrpro)
 					if err != nil {
-						log.Errorf("protoc [%s] ==>: %v errout:%v", filename, err, errout)
+						logrus.Errorf("protoc [%s] ==>: %v errout:%v", filename, err, errout)
 					} else {
-						log.Infof("protoc [%s] ==> success", filename)
+						logrus.Infof("protoc [%s] ==> success", filename)
 					}
 				}
 

@@ -5,7 +5,7 @@ import (
 	"os"
 	"server/gserver"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	//"github.com/joho/godotenv"
@@ -77,6 +77,6 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		viper.Unmarshal(&gserver.ServerCfg)
-		log.Info("Using config file:", viper.ConfigFileUsed())
+		logrus.Info("Using config file:", viper.ConfigFileUsed())
 	}
 }

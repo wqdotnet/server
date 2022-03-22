@@ -5,20 +5,20 @@ import (
 	"testing"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
-	log.Info("start task:", tools.GoID())
+	logrus.Info("start task:", tools.GoID())
 	StartCronTasks()
 }
 func TestInit(t *testing.T) {
 	AddTasks("st", "* * * * * ?", func() {
-		log.Info("st loop")
+		logrus.Info("st loop")
 	})
 
 	time.Sleep(5000000000)
-	log.Info("RemoveTasks st")
+	logrus.Info("RemoveTasks st")
 	RemoveTasks("st")
 	time.Sleep(5000000000)
 }

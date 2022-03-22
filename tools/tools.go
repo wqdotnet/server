@@ -133,7 +133,7 @@ func DiffCronStrNowTime(difftime time.Time, startStr, endStr string) bool {
 		fmt.Println("不合法的 cron 格式 ", startStr, endStr)
 		return false
 	}
-	//log.Debug("活动开放时间：", startTime.Next(time.Now()), endTime.Next(time.Now()))
+	//logrus.Debug("活动开放时间：", startTime.Next(time.Now()), endTime.Next(time.Now()))
 
 	return startTime.Next(difftime).Unix() > endTime.Next(difftime).Unix()
 }

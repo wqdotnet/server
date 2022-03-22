@@ -5,27 +5,27 @@ import (
 	"fmt"
 	"server/tools"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 //Init add logrus hook
-func Init(loglevel log.Level, writefile bool, LogName string, path string) {
-	log.SetLevel(loglevel)
+func Init(loglevel logrus.Level, writefile bool, LogName string, path string) {
+	logrus.SetLevel(loglevel)
 
-	// if loglevel == log.DebugLevel || loglevel == log.TraceLevel {
-	// 	log.SetFormatter(new(MyFormatter))
+	// if loglevel == logrus.DebugLevel || loglevel == logrus.TraceLevel {
+	// 	logrus.SetFormatter(new(MyFormatter))
 	// }
-	log.SetFormatter(&log.TextFormatter{
+	logrus.SetFormatter(&logrus.TextFormatter{
 		//DisableTimestamp: false,
 		FullTimestamp: true,
 		// 定义时间戳格式
 		TimestampFormat: tools.DateTimeFormat,
 		DisableSorting:  true,
 	})
-	log.AddHook(NewContextHook(log.ErrorLevel, log.WarnLevel, log.DebugLevel, log.TraceLevel, log.FatalLevel))
+	logrus.AddHook(NewContextHook(logrus.ErrorLevel, logrus.WarnLevel, logrus.DebugLevel, logrus.TraceLevel, logrus.FatalLevel))
 	if writefile {
-		log.Infof("log path: [%v]", path)
-		log.AddHook(fileHook(fmt.Sprintf("%v/%v_%v.log", path, LogName, "%Y%m%d%H%M")))
+		logrus.Infof("log path: [%v]", path)
+		logrus.AddHook(fileHook(fmt.Sprintf("%v/%v_%v.log", path, LogName, "%Y%m%d%H%M")))
 	}
 
 }
@@ -37,7 +37,7 @@ type MyFormatter struct {
 }
 
 // Format implement the Formatter interface
-func (mf *MyFormatter) Format(entry *log.Entry) ([]byte, error) {
+func (mf *MyFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	var b *bytes.Buffer
 	if entry.Buffer != nil {
 		b = entry.Buffer
