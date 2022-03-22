@@ -7,7 +7,7 @@ import (
 	"github.com/ergo-services/ergo/etf"
 	"github.com/ergo-services/ergo/gen"
 	"github.com/facebookgo/pidfile"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 //命令服务 用于接收 外部发过来的服务命令
@@ -24,7 +24,7 @@ type CmdGenServer struct {
 
 func (dgs *CmdGenServer) Init(process *gen.ServerProcess, args ...etf.Term) error {
 
-	log.Infof("Init (%v): args %v ", process.Name(), args)
+	logrus.Infof("Init (%v): args %v ", process.Name(), args)
 	dgs.process = process
 	dgs.CfgPath = args[0].(string)
 	dgs.CfgType = args[1].(string)
@@ -35,7 +35,7 @@ func (dgs *CmdGenServer) Init(process *gen.ServerProcess, args ...etf.Term) erro
 }
 
 func (dgs *CmdGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	log.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
+	logrus.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
 	// switch message {
 	// case etf.Atom("stop"):
 	// 	return gen.ServerStatusStopWithReason("stop normal")
@@ -49,7 +49,7 @@ func (gd *CmdGenServer) HandleDirect(process *gen.ServerProcess, message interfa
 }
 
 func (dgs *CmdGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
-	log.Infof("HandleCall (%v): %v ", dgs.process.Name(), message)
+	logrus.Infof("HandleCall (%v): %v ", dgs.process.Name(), message)
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
 
 	switch message {
@@ -57,24 +57,26 @@ func (dgs *CmdGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerF
 		reply = etf.Atom(dgs.ServerNmae)
 	case etf.Atom("ReloadCfg"):
 		cfg.InitViperConfig(dgs.CfgPath, dgs.CfgType)
-		reply = etf.Atom(dgs.ServerNmae)
+		reply = etf.Atom("ReloadCfg ok")
 	case etf.Atom("shutdown"):
 		dgs.ServerCmdChan <- "shutdown"
 		reply = etf.Atom(dgs.ServerNmae)
 	case etf.Atom("state"):
 		i, _ := pidfile.Read()
 		reply = etf.Atom(fmt.Sprintf(" [%v] pid:[%v]", dgs.ServerNmae, i))
+	default:
+		logrus.Debug("info:", message)
 	}
 	return reply, gen.ServerStatusOK
 }
 
 func (dgs *CmdGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	log.Infof("HandleInfo (%v): %v", dgs.process.Name(), message)
+	logrus.Infof("HandleInfo (%v): %v", dgs.process.Name(), message)
 
 	return gen.ServerStatusOK
 }
 
 func (dgs *CmdGenServer) Terminate(process *gen.ServerProcess, reason string) {
-	log.Infof("Terminate (%v): %v", dgs.process.Name(), reason)
+	logrus.Infof("Terminate (%v): %v", dgs.process.Name(), reason)
 
 }

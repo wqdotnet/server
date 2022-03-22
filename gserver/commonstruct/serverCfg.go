@@ -46,5 +46,5 @@ type ServerConfig struct {
 	EPMDPort         int
 	Cookie           string
 
-	Pid int
+	StartList []string
 }

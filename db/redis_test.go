@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
@@ -58,6 +59,17 @@ func TestHMGET(t *testing.T) {
 	log.Info("INCRBY:", RedisINCRBY("test11", -1))
 	log.Info("RedisGetInt:", RedisGetInt("test11"))
 	RedisExec("del", "test11")
+
+	SetStruct("test", &Test{Name: "test", Age: 18})
+	info, e := GetStruct[Test]("test")
+	fmt.Println(e, info)
+
+	RedisExec("del", "test")
+}
+
+type Test struct {
+	Name string
+	Age  int
 }
 
 // func TestSyncMap(t *testing.T) {

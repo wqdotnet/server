@@ -11,26 +11,31 @@ import (
 )
 
 var (
-	genServerName  string
+	genServerName  string = "cmdServer"
 	gateNodeName   string
 	debugGenServer *DebugGenServer
 )
 
 func call(cmd ...string) (etf.Term, error) {
 	if len(cmd) == 1 {
-
 		return debugGenServer.process.Call(gen.ProcessID{Name: genServerName, Node: gateNodeName}, etf.Atom(cmd[0]))
 	} else {
 		return debugGenServer.process.Call(gen.ProcessID{Name: genServerName, Node: gateNodeName}, cmd)
 	}
 }
 
-func ping(serverid, ip string) bool {
-	_, process := startDebugGen("debug_server@127.0.0.1")
-	genServerName = "cmdServer"
-	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
+func send(cmd ...string) error {
+	if len(cmd) == 1 {
+		return debugGenServer.process.Send(gen.ProcessID{Name: genServerName, Node: gateNodeName}, etf.Atom(cmd[0]))
+	} else {
+		return debugGenServer.process.Send(gen.ProcessID{Name: genServerName, Node: gateNodeName}, cmd)
+	}
+}
 
-	if err := process.Send(gen.ProcessID{Name: genServerName, Node: gateNodeName}, etf.Term("ping")); err != nil {
+func ping(serverid, ip string) bool {
+	startDebugGen()
+	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
+	if err := send("ping"); err != nil {
 		fmt.Println(err)
 		return false
 	}
@@ -38,17 +43,16 @@ func ping(serverid, ip string) bool {
 
 }
 
-func startDebugGen(nodeName string) (node.Node, gen.Process) {
+func startDebugGen() (node.Node, gen.Process) {
 	opts := node.Options{
 		ListenRangeBegin: uint16(gserver.ServerCfg.ListenRangeBegin),
 		ListenRangeEnd:   uint16(gserver.ServerCfg.ListenRangeEnd),
 		EPMDPort:         uint16(gserver.ServerCfg.EPMDPort),
 	}
-	node, _ := ergo.StartNode(nodeName, gserver.ServerCfg.Cookie, opts)
+	node, _ := ergo.StartNode("debug_server@127.0.0.1", gserver.ServerCfg.Cookie, opts)
 	debugGenServer = &DebugGenServer{}
 	// Spawn supervisor process
 	process, _ := node.Spawn("deubg_gen", gen.ProcessOptions{}, debugGenServer)
-
 	return node, process
 }
 

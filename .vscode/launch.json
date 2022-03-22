@@ -8,10 +8,12 @@
             "name": "server",
             "type": "go",
             "request": "launch",
-            "mode": "debug",
-            "program": "${workspaceRoot}",
-            "env": {},  
-            "args": ["start"]
+            "mode": "auto",            
+            "program": "${workspaceRoot}/main.go",
+            "env": {},              
+            "showLog": true
+
+            //"args": ["start"]
         }
     ]
  

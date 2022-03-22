@@ -19,26 +19,33 @@ var (
 func Start(cfg *commonstruct.ServerConfig, command chan string) {
 	serverCfg = cfg
 
-	gateNodeName := fmt.Sprintf("gatewayNode_%v@127.0.0.1", serverCfg.ServerID)
-	serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", serverCfg.ServerID)
-	dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", serverCfg.ServerID)
+	for _, v := range cfg.StartList {
+		switch v {
+		case "gateway":
+			gateNodeName := fmt.Sprintf("gatewayNode_%v@127.0.0.1", serverCfg.ServerID)
+			gateNode, _, gerr := StartGateSupNode(gateNodeName)
+			if gerr != nil {
+				panic(gerr)
+			}
+			nodesMap.Store(gateNode.NodeName(), gateNode)
+		case "server":
+			serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", serverCfg.ServerID)
+			serverNode, _, serr := StartGameServerSupNode(serverNodeName, command)
+			if serr != nil {
+				panic(serr)
+			}
+			nodesMap.Store(serverNode.NodeName(), serverNode)
+		case "db":
+			dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", serverCfg.ServerID)
+			dbNode, _, derr := StartDataBaseSupSupNode(dbNodeName)
+			if derr != nil {
+				panic(derr)
+			}
+			nodesMap.Store(dbNode.NodeName(), dbNode)
+		}
 
-	serverNode, _, serr := StartGameServerSupNode(serverNodeName, command)
-	if serr != nil {
-		panic(serr)
-	}
-	gateNode, _, gerr := StartGateSupNode(gateNodeName)
-	if gerr != nil {
-		panic(gerr)
-	}
-	dbNode, _, derr := StartDataBaseSupSupNode(dbNodeName)
-	if derr != nil {
-		panic(derr)
 	}
 
-	nodesMap.Store(serverNode.NodeName(), serverNode)
-	nodesMap.Store(gateNode.NodeName(), gateNode)
-	nodesMap.Store(dbNode.NodeName(), dbNode)
 }
 
 func GetNode(nodename string) node.Node {

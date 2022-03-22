@@ -1,13 +1,17 @@
 package db
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	red "github.com/gomodule/redigo/redis"
 	log "github.com/sirupsen/logrus"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 //Redis redis
 type Redis struct {
@@ -107,17 +111,32 @@ func SetStruct(key string, v interface{}) (interface{}, error) {
 }
 
 //GetStruct get
-func GetStruct(key string, obj interface{}) error {
+// func GetStruct(key string, obj interface{}) error {
+// 	conn := redis.pool.Get()
+// 	defer conn.Close()
+// 	objStr, err := red.String(conn.Do("GET", key))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	b := []byte(objStr)
+// 	err = json.Unmarshal(b, obj)
+// 	return err
+// }
+
+//GetStruct get
+func GetStruct[T any](key string) (*T, error) {
 	conn := redis.pool.Get()
 	defer conn.Close()
 	objStr, err := red.String(conn.Do("GET", key))
+
+	obj := new(T)
 	if err != nil {
-		return err
+		return obj, err
 	}
 	b := []byte(objStr)
 
 	err = json.Unmarshal(b, obj)
-	return err
+	return obj, err
 }
 
 //HMSET HMSET redsi

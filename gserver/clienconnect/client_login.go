@@ -1,23 +1,14 @@
 package clienconnect
 
-import "fmt"
+import (
+	"server/msgproto/account"
 
-// import (
-// 	"math/rand"
-// 	"server/db"
-// 	"server/gserver/cfg"
-// 	"server/gserver/commonstruct"
-// 	"server/gserver/process"
-// 	"server/msgproto/account"
-// 	"time"
-func init() {
-	fmt.Print("client init2 -----------------------------------------")
+	log "github.com/sirupsen/logrus"
+)
+
+func msgCreateRole(msg *account.C2S_CreateRole) {
+	log.Info("create role ", msg.RoleName)
 }
-
-// 	log "github.com/sirupsen/logrus"
-// 	"go.mongodb.org/mongo-driver/bson"
-// 	"go.mongodb.org/mongo-driver/bson/primitive"
-// )
 
 // //module 用户登陆模块
 // func (c *Client) loginModule(method int32, buf []byte) {

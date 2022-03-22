@@ -50,4 +50,5 @@ var ServerCfg = commonstruct.ServerConfig{
 	ListenRangeEnd:   25151,
 	EPMDPort:         4369,
 	Cookie:           "123",
+	StartList:        []string{"db", "gateway", "server"},
 }

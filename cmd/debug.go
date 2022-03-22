@@ -81,21 +81,19 @@ func debug(serverid, ip string) {
 			}
 
 			switch cmd {
-			case "getroleinfo":
-				term, err := call(args...)
-				if err != nil {
-					fmt.Printf("err: %v \n", err)
-				} else {
-
-					fmt.Printf("term: %v \n", term)
-				}
-
 			case "quit":
 				cancelFunc()
 				return
 			case "EOF":
 				cancelFunc()
 				return
+			default:
+				term, err := call(args...)
+				if err != nil {
+					fmt.Printf("err: %v \n", err)
+				} else {
+					fmt.Printf("info: %v \n", term)
+				}
 			}
 		}
 	}()

@@ -1,12 +1,9 @@
 package genServer
 
 import (
-	"server/network"
-
 	"github.com/ergo-services/ergo/etf"
 	"github.com/ergo-services/ergo/gen"
 	log "github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 )
 
 //接收处理socket 发送过来的信息
@@ -15,8 +12,9 @@ import (
 
 type GateGenServer struct {
 	gen.Server
-	process  *gen.ServerProcess
-	sendChan chan []byte
+	process      *gen.ServerProcess
+	sendChan     chan []byte
+	clientHander GateGenHanderInterface
 }
 
 func (gateGS *GateGenServer) Unregister() {
@@ -31,6 +29,9 @@ func (gateGS *GateGenServer) Init(process *gen.ServerProcess, args ...etf.Term) 
 	log.Infof("Init (%v): args %v ", process.Name(), args)
 	gateGS.process = process
 	gateGS.sendChan = args[0].(chan []byte)
+	gateGS.clientHander = args[1].(GateGenHanderInterface)
+
+	gateGS.clientHander.InitHander(gateGS.sendChan)
 	return nil
 }
 
@@ -54,8 +55,7 @@ func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.
 		module := info[0].(int32)
 		method := info[1].(int32)
 		buf := info[2].([]byte)
-
-		log.Debug("socket info ", module, method, buf)
+		gateGS.clientHander.MsgHander(module, method, buf)
 		//gateGS.sendChan <- []byte("send msg test")
 	case []byte:
 		log.Debug("[]byte:", info)
@@ -82,35 +82,26 @@ func (gateGS *GateGenServer) Terminate(process *gen.ServerProcess, reason string
 	log.Infof("Terminate (%v): %v", gateGS.process.Name(), reason)
 }
 
-// //Send 发送消息
-func (gateGS *GateGenServer) Send(module int32, method int32, pb proto.Message) {
-	//log.Debugf("client send msg [%v] [%v] [%v]", module, method, pb)
-	data, err := proto.Marshal(pb)
-	if err != nil {
-		log.Errorf("proto encode error[%v] [%v][%v] [%v]", err.Error(), module, method, pb)
-		return
-	}
-	// msginfo := &common.NetworkMsg{}
-	// msginfo.Module = module
-	// msginfo.Method = method
-	// msginfo.MsgBytes = data
-	// msgdata, err := proto.Marshal(msginfo)
-	// if err != nil {
-	// 	log.Errorf("msg encode error[%s]\n", err.Error())
-	// }
-	// gateGS.sendChan <- msgdata
-
-	mldulebuf := network.IntToBytes(module, 2)
-	methodbuf := network.IntToBytes(method, 2)
-	gateGS.sendChan <- network.BytesCombine(mldulebuf, methodbuf, data)
-
-}
-
-//protobuf 解码
-// func decode(pb proto.Message, buf []byte) bool {
-// 	if e := proto.Unmarshal(buf, pb); e != nil {
-// 		log.Error(e)
-// 		return false
+// // //Send 发送消息
+// func (gateGS *GateGenServer) Send(module int32, method int32, pb proto.Message) {
+// 	//log.Debugf("client send msg [%v] [%v] [%v]", module, method, pb)
+// 	data, err := proto.Marshal(pb)
+// 	if err != nil {
+// 		log.Errorf("proto encode error[%v] [%v][%v] [%v]", err.Error(), module, method, pb)
+// 		return
 // 	}
-// 	return true
+// 	// msginfo := &common.NetworkMsg{}
+// 	// msginfo.Module = module
+// 	// msginfo.Method = method
+// 	// msginfo.MsgBytes = data
+// 	// msgdata, err := proto.Marshal(msginfo)
+// 	// if err != nil {
+// 	// 	log.Errorf("msg encode error[%s]\n", err.Error())
+// 	// }
+// 	// gateGS.sendChan <- msgdata
+
+// 	mldulebuf := tools.IntToBytes(module, 2)
+// 	methodbuf := tools.IntToBytes(method, 2)
+// 	gateGS.sendChan <- tools.BytesCombine(mldulebuf, methodbuf, data)
+
 // }

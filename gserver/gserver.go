@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"server/db"
 	"server/gserver/cfg"
+	"server/gserver/clienconnect"
 	"server/gserver/genServer"
 	"server/gserver/nodeManange"
 	"server/logger"
@@ -20,7 +21,6 @@ import (
 
 	//msg "server/proto"
 
-	"github.com/ergo-services/ergo/gen"
 	"github.com/facebookgo/pidfile"
 )
 
@@ -34,12 +34,13 @@ type gameServer struct {
 
 func (g *gameServer) Start() {
 	nodeManange.Start(&ServerCfg, g.command)
-	gateNode := nodeManange.GetNode(fmt.Sprintf("gatewayNode_%v@127.0.0.1", ServerCfg.ServerID))
-	if gateNode == nil {
-		panic("节点启动失败")
-	}
+
 	//启动网络
-	g.nw.Start(gateNode)
+	gateNode := nodeManange.GetNode(fmt.Sprintf("gatewayNode_%v@127.0.0.1", ServerCfg.ServerID))
+	if gateNode != nil {
+		g.nw.Start(gateNode)
+		//panic("节点启动失败")
+	}
 }
 
 func (g *gameServer) Close() {
@@ -57,10 +58,6 @@ func (g *gameServer) Close() {
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
-	if ServerRunState() {
-		log.Infof("[%v][%v] runing", ServerCfg.ServerName, ServerCfg.ServerID)
-	}
-
 	log.Infof("============================= Begin Start [%v][%v] ===============================", ServerCfg.ServerName, ServerCfg.ServerID)
 	if level, err := log.ParseLevel(ServerCfg.Loglevel); err == nil {
 		logger.Init(level, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
@@ -124,8 +121,8 @@ func StartGServer() {
 
 	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(
-			func() gen.ServerBehavior {
-				return &genServer.GateGenServer{}
+			func() genServer.GateGenHanderInterface {
+				return &clienconnect.Client{}
 			},
 			// &sync.Pool{
 			// New: func() interface{} {
@@ -189,10 +186,6 @@ func StartGServer() {
 //SendGameServerMsg game system msg
 func SendGameServerMsg(msg string) {
 	GameServerInfo.command <- msg
-}
-
-func ServerRunState() bool {
-	return false
 }
 
 //成功启动

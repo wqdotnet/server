@@ -56,3 +56,5 @@ ListenRangeBegin: 15151
 ListenRangeEnd:   25151
 EPMDPort:         4369
 Cookie: "123"
+#gateway db server
+StartList : ["gateway","db","server"]

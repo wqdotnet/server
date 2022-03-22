@@ -1,7 +1,6 @@
 package network
 
 import (
-	"bytes"
 	"context"
 	"encoding/binary"
 	"errors"
@@ -9,6 +8,8 @@ import (
 	"io"
 	"net"
 	"os"
+	"server/gserver/genServer"
+	"server/tools"
 	"sync/atomic"
 	"time"
 
@@ -53,7 +54,7 @@ type NetWorkx struct {
 	Port int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
 	//UserPool *sync.Pool
-	CreateGenServerObj func() gen.ServerBehavior
+	CreateGenServerObj func() genServer.GateGenHanderInterface
 
 	//启动成功后回调
 	StartHook func()
@@ -70,7 +71,7 @@ type NetWorkx struct {
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(createObj func() gen.ServerBehavior, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
+func NewNetWorkX(createObj func() genServer.GateGenHanderInterface, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
 	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
 
 	netWorkx := &NetWorkx{
@@ -114,7 +115,7 @@ func (n *NetWorkx) Start(gateNode node.Node) {
 
 func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
 	//genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
-	genserver := n.CreateGenServerObj()
+	clientHander := n.CreateGenServerObj()
 
 	uid, err := uuid.NewRandom()
 	if err != nil {
@@ -123,7 +124,7 @@ func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
 
 	sendchan := make(chan []byte, 1)
 
-	process, err := n.gateNode.Spawn(uid.String(), gen.ProcessOptions{}, genserver, sendchan)
+	process, err := n.gateNode.Spawn(uid.String(), gen.ProcessOptions{}, &genServer.GateGenServer{}, sendchan, clientHander)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -203,8 +204,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		for {
 			select {
 			case buf := <-sendchan:
-				le := IntToBytes(int32(len(buf)), n.Packet)
-				conn.Write(BytesCombine(le, buf))
+				le := tools.IntToBytes(int32(len(buf)), n.Packet)
+				conn.Write(tools.BytesCombine(le, buf))
 			case <-sendctx.Done():
 				//log.Debug("exit role sendGO")
 				return
@@ -299,28 +300,6 @@ func checkError(err error) {
 		log.Errorf("Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
-}
-
-//IntToBytes int 转换为[]byte
-func IntToBytes(i int32, packet int32) []byte {
-	var buf = make([]byte, 2)
-	if packet == 2 {
-		binary.BigEndian.PutUint16(buf, uint16(i))
-	} else {
-		binary.BigEndian.PutUint32(buf, uint32(i))
-	}
-	return buf
-}
-
-//BytesCombine 多个[]byte数组合并成一个[]byte
-func BytesCombine(pBytes ...[]byte) []byte {
-	len := len(pBytes)
-	s := make([][]byte, len)
-	for index := 0; index < len; index++ {
-		s[index] = pBytes[index]
-	}
-	sep := []byte("")
-	return bytes.Join(s, sep)
 }
 
 // UnpackToBlockFromReader -> unpack the first block from the reader.
