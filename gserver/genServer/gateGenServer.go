@@ -1,6 +1,8 @@
 package genServer
 
 import (
+	"runtime"
+
 	"github.com/ergo-services/ergo/etf"
 	"github.com/ergo-services/ergo/gen"
 	"github.com/sirupsen/logrus"
@@ -39,7 +41,8 @@ func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.
 	logrus.Infof("gateGen HandleCast (%v): %v", gateGS.process.Name(), message)
 	defer func() {
 		if err := recover(); err != nil {
-			logrus.Error(err)
+			pc, fn, line, _ := runtime.Caller(5)
+			logrus.Errorf("process:[%v] funcname:[%v] fn:[%v] line:[%v]", process.Name(), runtime.FuncForPC(pc).Name(), fn, line)
 		}
 	}()
 

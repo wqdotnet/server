@@ -44,6 +44,7 @@ func (g *gameServer) Start() {
 }
 
 func (g *gameServer) Close() {
+	g.nw.Close()
 	for _, node := range nodeManange.GetNodes() {
 		for _, process := range node.ProcessList() {
 			process.Exit("server stop")
@@ -52,7 +53,6 @@ func (g *gameServer) Close() {
 		node.Stop()
 		node.Wait()
 	}
-	g.nw.Close()
 }
 
 //StartGServer 启动game server

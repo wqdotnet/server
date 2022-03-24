@@ -39,7 +39,12 @@ func (c *Client) InitHander(sendChan chan []byte) {
 }
 
 func (c *Client) MsgHander(module, method int32, buf []byte) {
-	c.infofunc[method](buf)
+	if msgfunc := c.infofunc[method]; msgfunc != nil {
+		msgfunc(buf)
+	} else {
+		logrus.Warnln("未注册的消息", module, method)
+	}
+
 }
 
 // //SendToClient 发送消息至客户端
