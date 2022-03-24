@@ -21,7 +21,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"server/gserver"
+	"server/gserver/commonstruct"
 	"strconv"
 	"strings"
 	"syscall"
@@ -39,7 +39,7 @@ var debugCmd = &cobra.Command{
 		if len(args) == 2 {
 			debug(args[0], args[1])
 		} else {
-			debug(strconv.Itoa(int(gserver.ServerCfg.ServerID)), "127.0.0.1")
+			debug(strconv.Itoa(int(commonstruct.ServerCfg.ServerID)), "127.0.0.1")
 		}
 
 	},
@@ -50,11 +50,6 @@ func init() {
 }
 
 func debug(serverid, ip string) {
-	// for i, c := range rootCmd.Commands() {
-	// 	fmt.Printf("%v  %v \n", i, c.Name())
-	// }
-	// rootCmd.Println(rootCmd.UsageString())
-
 	if !ping(serverid, ip) {
 		return
 	}

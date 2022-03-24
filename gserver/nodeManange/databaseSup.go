@@ -1,6 +1,7 @@
 package nodeManange
 
 import (
+	"server/gserver/commonstruct"
 	"server/gserver/genServer"
 
 	"github.com/ergo-services/ergo"
@@ -50,12 +51,12 @@ func (ds *DataBaseSup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
 
 func StartDataBaseSupSupNode(nodeName string) (node.Node, gen.Process, error) {
 	opts := node.Options{
-		ListenRangeBegin: uint16(serverCfg.ListenRangeBegin),
-		ListenRangeEnd:   uint16(serverCfg.ListenRangeEnd),
-		EPMDPort:         uint16(serverCfg.EPMDPort),
+		ListenRangeBegin: uint16(commonstruct.ServerCfg.ListenRangeBegin),
+		ListenRangeEnd:   uint16(commonstruct.ServerCfg.ListenRangeEnd),
+		EPMDPort:         uint16(commonstruct.ServerCfg.EPMDPort),
 	}
 
-	node, err := ergo.StartNode(nodeName, serverCfg.Cookie, opts)
+	node, err := ergo.StartNode(nodeName, commonstruct.ServerCfg.Cookie, opts)
 	if err != nil {
 		return nil, nil, err
 	}

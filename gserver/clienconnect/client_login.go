@@ -6,8 +6,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func msgCreateRole(msg *account.C2S_CreateRole) {
-	logrus.Info("create role ", msg.RoleName)
+func (c *Client) accountLogin(msg *account.C2S_Login) {
+	logrus.Info("C2S_Login: ", msg.Account, msg.Password)
+
+	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
+		int32(account.MSG_ACCOUNT_S2C_Login),
+		&account.S2C_Login{
+			Retcode:  0,
+			RoleInfo: &account.P_RoleInfo{},
+		})
+}
+
+func (c *Client) accountCreateRole(msg *account.C2S_CreateRole) {
+	logrus.Info("C2S_CreateRole: ", msg.RoleName)
+
+	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
+		int32(account.MSG_ACCOUNT_S2C_CreateRole),
+		&account.S2C_CreateRole{
+			Retcode: 0,
+			Roleid:  1,
+		})
 }
 
 // //module 用户登陆模块
@@ -32,15 +50,6 @@ func msgCreateRole(msg *account.C2S_CreateRole) {
 // 		logrus.Info("loginModule null methodID:", method)
 // 	}
 // }
-
-// // func (c *Client) unmarshalExec(b []byte, m protoreflect.ProtoMessage, exec func(m protoreflect.ProtoMessage)) {
-// // 	e := proto.Unmarshal(b, m)
-// // 	if e != nil {
-// // 		logrus.Error(e)
-// // 		return
-// // 	}
-// // 	exec(m)
-// // }
 
 // //用户登陆
 // func (c *Client) userLogin(userlogin *account.C2S_Login) {

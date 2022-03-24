@@ -8,6 +8,7 @@ import (
 	"server/db"
 	"server/gserver/cfg"
 	"server/gserver/clienconnect"
+	"server/gserver/commonstruct"
 	"server/gserver/genServer"
 	"server/gserver/nodeManange"
 	"server/logger"
@@ -33,13 +34,12 @@ type gameServer struct {
 }
 
 func (g *gameServer) Start() {
-	nodeManange.Start(&ServerCfg, g.command)
+	nodeManange.Start(g.command)
 
 	//启动网络
-	gateNode := nodeManange.GetNode(fmt.Sprintf("gatewayNode_%v@127.0.0.1", ServerCfg.ServerID))
+	gateNode := nodeManange.GetNode(fmt.Sprintf("gatewayNode_%v@127.0.0.1", commonstruct.ServerCfg.ServerID))
 	if gateNode != nil {
 		g.nw.Start(gateNode)
-		//panic("节点启动失败")
 	}
 }
 
@@ -58,31 +58,31 @@ func (g *gameServer) Close() {
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
-	logrus.Infof("============================= Begin Start [%v][%v] ===============================", ServerCfg.ServerName, ServerCfg.ServerID)
-	if level, err := logrus.ParseLevel(ServerCfg.Loglevel); err == nil {
-		logger.Init(level, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
+	logrus.Infof("============================= Begin Start [%v][%v] ===============================", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID)
+	if level, err := logrus.ParseLevel(commonstruct.ServerCfg.Loglevel); err == nil {
+		logger.Init(level, commonstruct.ServerCfg.LogWrite, commonstruct.ServerCfg.LogName, commonstruct.ServerCfg.LogPath)
 	} else {
-		logger.Init(logrus.InfoLevel, ServerCfg.LogWrite, ServerCfg.LogName, ServerCfg.LogPath)
+		logger.Init(logrus.InfoLevel, commonstruct.ServerCfg.LogWrite, commonstruct.ServerCfg.LogName, commonstruct.ServerCfg.LogPath)
 	}
 
 	//set pid file
-	//file, _ := ioutil.TempFile("", fmt.Sprintf("pid_%v_%v_", ServerCfg.ServerName, ServerCfg.ServerID))
-	filename := fmt.Sprintf("/tmp/pid_%v_%v", ServerCfg.ServerName, ServerCfg.ServerID)
+	//file, _ := ioutil.TempFile("", fmt.Sprintf("pid_%v_%v_", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID))
+	filename := fmt.Sprintf("/tmp/pid_%v_%v", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID)
 	pidfile.SetPidfilePath(filename)
 	if i, _ := pidfile.Read(); i != 0 {
 		logrus.Warnf("服务已启动请检查或清除 进程id [%v] pidfile: [%v]  ", i, filename)
 		return
 	}
 
-	// if ServerCfg.Daemon {
+	// if commonstruct.ServerCfg.Daemon {
 	//https://github.com/takama/daemon
 	// }
 
-	cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
-	if ServerCfg.WatchConfig {
-		cfg.WatchConfig(ServerCfg.CfgPath, func(in fsnotify.Event) {
+	cfg.InitViperConfig(commonstruct.ServerCfg.CfgPath, commonstruct.ServerCfg.CfgType)
+	if commonstruct.ServerCfg.WatchConfig {
+		cfg.WatchConfig(commonstruct.ServerCfg.CfgPath, func(in fsnotify.Event) {
 			logrus.Debug("Config file changed: [%v]  ", in.Name)
-			cfg.InitViperConfig(ServerCfg.CfgPath, ServerCfg.CfgType)
+			cfg.InitViperConfig(commonstruct.ServerCfg.CfgPath, commonstruct.ServerCfg.CfgType)
 		})
 	}
 
@@ -94,28 +94,28 @@ func StartGServer() {
 	// })
 	//defer timedtasks.RemoveTasks("loop")
 
-	db.StartMongodb(ServerCfg.Mongodb, ServerCfg.MongoConnStr)
+	db.StartMongodb(commonstruct.ServerCfg.Mongodb, commonstruct.ServerCfg.MongoConnStr)
 	if ok, err := db.MongodbPing(); ok {
 		logrus.Info("mongodb conn success")
 	} else {
 		panic(err)
 	}
 
-	db.StartRedis(ServerCfg.RedisConnStr, ServerCfg.RedisDB)
+	db.StartRedis(commonstruct.ServerCfg.RedisConnStr, commonstruct.ServerCfg.RedisDB)
 	if ok, err := db.RedisConn(); ok {
 		logrus.Info("redis conn success")
 	} else {
 		panic(err)
 	}
 
-	if ServerCfg.OpenHTTP {
-		go web.Start(ServerCfg.HTTPPort)
+	if commonstruct.ServerCfg.OpenHTTP {
+		go web.Start(commonstruct.ServerCfg.HTTPPort)
 	}
 
-	if ServerCfg.OpenPyroscope {
+	if commonstruct.ServerCfg.OpenPyroscope {
 		profiler.Start(profiler.Config{
-			ApplicationName: fmt.Sprintf("%v_%v", ServerCfg.ServerName, ServerCfg.ServerID),
-			ServerAddress:   ServerCfg.PyroscopeHost,
+			ApplicationName: fmt.Sprintf("%v_%v", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID),
+			ServerAddress:   commonstruct.ServerCfg.PyroscopeHost,
 		})
 	}
 
@@ -128,12 +128,12 @@ func StartGServer() {
 			// New: func() interface{} {
 			// 	return &genServer.GateGenServer{}
 			// }},
-			ServerCfg.Port,
-			ServerCfg.Packet,
-			ServerCfg.Readtimeout,
-			ServerCfg.NetType,
-			ServerCfg.MsgTime,
-			ServerCfg.MsgNum,
+			commonstruct.ServerCfg.Port,
+			commonstruct.ServerCfg.Packet,
+			commonstruct.ServerCfg.Readtimeout,
+			commonstruct.ServerCfg.NetType,
+			commonstruct.ServerCfg.MsgTime,
+			commonstruct.ServerCfg.MsgNum,
 			func() { SendGameServerMsg("StartSuccess") },
 			func() { db.RedisExec("del", "ConnectNumber") },
 			func() { logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", 1)) },

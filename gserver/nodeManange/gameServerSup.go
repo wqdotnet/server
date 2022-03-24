@@ -2,6 +2,7 @@ package nodeManange
 
 import (
 	"fmt"
+	"server/gserver/commonstruct"
 	"server/gserver/genServer"
 	"server/tools"
 
@@ -32,10 +33,10 @@ func (ds *GameServerSup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
 				Name:  "cmdServer",
 				Child: &genServer.CmdGenServer{},
 				Args: []etf.Term{
-					tools.AbsPathify(serverCfg.CfgPath),
-					serverCfg.CfgType,
+					tools.AbsPathify(commonstruct.ServerCfg.CfgPath),
+					commonstruct.ServerCfg.CfgType,
 					ds.ServerCmdChan,
-					fmt.Sprintf("%v_%v", serverCfg.ServerName, serverCfg.ServerID),
+					fmt.Sprintf("%v_%v", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID),
 				},
 				// Restart: ergo.SupervisorChildRestartTransient,
 			},
@@ -66,11 +67,11 @@ func (ds *GameServerSup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
 
 func StartGameServerSupNode(nodeName string, cmd chan string) (node.Node, gen.Process, error) {
 	opts := node.Options{
-		ListenRangeBegin: uint16(serverCfg.ListenRangeBegin),
-		ListenRangeEnd:   uint16(serverCfg.ListenRangeEnd),
-		EPMDPort:         uint16(serverCfg.EPMDPort),
+		ListenRangeBegin: uint16(commonstruct.ServerCfg.ListenRangeBegin),
+		ListenRangeEnd:   uint16(commonstruct.ServerCfg.ListenRangeEnd),
+		EPMDPort:         uint16(commonstruct.ServerCfg.EPMDPort),
 	}
-	node, err := ergo.StartNode(nodeName, serverCfg.Cookie, opts)
+	node, err := ergo.StartNode(nodeName, commonstruct.ServerCfg.Cookie, opts)
 	if err != nil {
 		return nil, nil, err
 	}

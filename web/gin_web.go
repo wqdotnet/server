@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Start gin web interface
 func Start(Port int32) {
-	logrus.Info("Start [Web Http]")
+	log.Info("Start [Web Http]")
 	//禁用控制台颜色，在将日志写入文件时不需要控制台颜色
 	//gin.DisableConsoleColor()
 
@@ -80,6 +80,6 @@ func logger() gin.HandlerFunc {
 		reqURI := c.Request.RequestURI
 		statusCode := c.Writer.Status()
 		clientIP := c.Request.Host
-		logrus.Infof("| %3d | %13v | %15s | %s | %s |", statusCode, latencyTime, clientIP, reqMethod, reqURI)
+		log.Infof("| %3d | %13v | %15s | %s | %s |", statusCode, latencyTime, clientIP, reqMethod, reqURI)
 	}
 }

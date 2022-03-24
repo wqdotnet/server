@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"fmt"
-	"server/gserver"
+	"server/gserver/commonstruct"
 
 	"github.com/spf13/cobra"
 )
@@ -28,7 +28,7 @@ var versionCmd = &cobra.Command{
 	Short: "version number",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("version V%v", gserver.ServerCfg.Version)
+		fmt.Printf("version V%v", commonstruct.ServerCfg.Version)
 	},
 }
 

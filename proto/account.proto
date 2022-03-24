@@ -59,9 +59,8 @@ message c2s_Login {
 }
 
 message  s2c_Login {
-    bool success =1;
-    string msg = 2;
-    P_RoleInfo RoleInfo =3;
+    sint32	retcode	= 1;
+    P_RoleInfo RoleInfo =2;
 }
  
 // 创建角色
@@ -71,8 +70,7 @@ message c2s_CreateRole {
 }
 
 message  s2c_CreateRole {
-    bool success =1;
-    string msg = 2;
-    int32 roleid =3;
+    sint32	retcode	= 1;
+    int32 roleid =2;
 }
 

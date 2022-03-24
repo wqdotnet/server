@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"fmt"
-	"server/gserver"
+	"server/gserver/commonstruct"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -29,23 +29,24 @@ var upcfgCmd = &cobra.Command{
 	Short: "重新加载配置",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		var pong bool
-
+		var serverid, ip string
 		if len(args) == 2 {
-			pong = ping(args[0], args[1])
+			serverid = args[0]
+			ip = args[1]
 		} else {
-			pong = ping(strconv.Itoa(int(gserver.ServerCfg.ServerID)), "127.0.0.1")
+			serverid = strconv.Itoa(int(commonstruct.ServerCfg.ServerID))
+			ip = "127.0.0.1"
 		}
 
-		if pong {
-			if info, err := call("ReloadCfg"); err == nil {
-				fmt.Printf("[%v] ReloadCfg  \n", info)
-			} else {
-				fmt.Print("err:", err)
-			}
+		startDebugGen(serverid, ip)
+
+		if info, err := call("ReloadCfg"); err == nil {
+			fmt.Printf("[%v] ReloadCfg  \n", info)
 		} else {
-			fmt.Printf(" not running \n")
+			fmt.Println("not running ")
+			fmt.Println("err:", err)
 		}
+
 	},
 }
 

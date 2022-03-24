@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"server/gserver"
+	"server/gserver/commonstruct"
 
 	"github.com/ergo-services/ergo"
 	"github.com/ergo-services/ergo/etf"
@@ -33,9 +33,8 @@ func send(cmd ...string) error {
 }
 
 func ping(serverid, ip string) bool {
-	startDebugGen()
-	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
-	if err := send("ping"); err != nil {
+	startDebugGen(serverid, ip)
+	if _, err := call("ping"); err != nil {
 		fmt.Println(err)
 		return false
 	}
@@ -43,16 +42,19 @@ func ping(serverid, ip string) bool {
 
 }
 
-func startDebugGen() (node.Node, gen.Process) {
+func startDebugGen(serverid, ip string) (node.Node, gen.Process) {
+	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
+
 	opts := node.Options{
-		ListenRangeBegin: uint16(gserver.ServerCfg.ListenRangeBegin),
-		ListenRangeEnd:   uint16(gserver.ServerCfg.ListenRangeEnd),
-		EPMDPort:         uint16(gserver.ServerCfg.EPMDPort),
+		ListenRangeBegin: uint16(commonstruct.ServerCfg.ListenRangeBegin),
+		ListenRangeEnd:   uint16(commonstruct.ServerCfg.ListenRangeEnd),
+		EPMDPort:         uint16(commonstruct.ServerCfg.EPMDPort),
 	}
-	node, _ := ergo.StartNode("debug_server@127.0.0.1", gserver.ServerCfg.Cookie, opts)
+	node, _ := ergo.StartNode("debug_server@127.0.0.1", commonstruct.ServerCfg.Cookie, opts)
 	debugGenServer = &DebugGenServer{}
 	// Spawn supervisor process
 	process, _ := node.Spawn("deubg_gen", gen.ProcessOptions{}, debugGenServer)
+
 	return node, process
 }
 

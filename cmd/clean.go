@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"server/db"
-	"server/gserver"
+	"server/gserver/commonstruct"
 
 	"github.com/spf13/cobra"
 )
@@ -33,11 +33,11 @@ func init() {
 }
 
 func clean() {
-	db.StartMongodb(gserver.ServerCfg.Mongodb, gserver.ServerCfg.MongoConnStr)
+	db.StartMongodb(commonstruct.ServerCfg.Mongodb, commonstruct.ServerCfg.MongoConnStr)
 	_, database := db.GetDatabase()
 	database.Drop(context.Background())
 
-	db.StartRedis(gserver.ServerCfg.RedisConnStr, gserver.ServerCfg.RedisDB)
+	db.StartRedis(commonstruct.ServerCfg.RedisConnStr, commonstruct.ServerCfg.RedisDB)
 	//db.RedisExec("del", "ConnectNumber")
 	db.RedisExec("FLUSHDB", "")
 }

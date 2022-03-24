@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"server/gserver"
+	"server/gserver/commonstruct"
 	"server/tools"
 	"strconv"
 	"time"
@@ -31,8 +31,8 @@ var protobufCmd = &cobra.Command{
 
 		isclientpb := len(args) == 2
 
-		pbpath := gserver.ServerCfg.ProtoPath
-		outpath := gserver.ServerCfg.GoOut
+		pbpath := commonstruct.ServerCfg.ProtoPath
+		outpath := commonstruct.ServerCfg.GoOut
 		timeformat := tools.DateTimeFormat
 
 		if !PathExists(pbpath) || !PathExists(outpath) {

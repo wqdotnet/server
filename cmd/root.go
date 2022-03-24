@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"server/gserver"
+	"server/gserver/commonstruct"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -76,7 +76,7 @@ func initConfig() {
 	//viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		viper.Unmarshal(&gserver.ServerCfg)
+		viper.Unmarshal(&commonstruct.ServerCfg)
 		logrus.Info("Using config file:", viper.ConfigFileUsed())
 	}
 }

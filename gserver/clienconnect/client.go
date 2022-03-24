@@ -1,6 +1,7 @@
 package clienconnect
 
 import (
+	"server/msgproto/account"
 	"server/tools"
 
 	"github.com/sirupsen/logrus"
@@ -33,15 +34,16 @@ func (c *Client) InitHander(sendChan chan []byte) {
 	c.infofunc = make(map[int32]func(buf []byte))
 
 	//消息注册
-	c.infofunc[101] = createRegisterFunc(msgCreateRole)
+	c.infofunc[int32(account.MSG_ACCOUNT_C2S_Login)] = createRegisterFunc(c.accountLogin)
+	c.infofunc[int32(account.MSG_ACCOUNT_C2S_CreateRole)] = createRegisterFunc(c.accountCreateRole)
 }
 
 func (c *Client) MsgHander(module, method int32, buf []byte) {
 	c.infofunc[method](buf)
 }
 
-// //Send 发送消息
-func (c *Client) Send(module int32, method int32, pb proto.Message) {
+// //SendToClient 发送消息至客户端
+func (c *Client) SendToClient(module int32, method int32, pb proto.Message) {
 	//logrus.Debugf("client send msg [%v] [%v] [%v]", module, method, pb)
 	data, err := proto.Marshal(pb)
 	if err != nil {
