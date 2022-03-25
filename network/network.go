@@ -235,6 +235,11 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		}
 		//readchan <- buf
 
+		if len(buf) < int(n.Packet+4) {
+			logrus.Debug("buf len:", len(buf), n.Packet+4, len(buf[n.Packet:]))
+			return
+		}
+
 		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
 		//process.Send(process.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
