@@ -29,6 +29,10 @@ func exectest(cmd *cobra.Command, args []string) {
 	buf, _ := proto.Marshal(info)
 
 	infofunc[101](buf)
+
+	tmp := map[int]protoreflect.ProtoMessage{}
+	tmp[101] = info
+
 }
 
 func msghand(msg *account.C2S_CreateRole) {

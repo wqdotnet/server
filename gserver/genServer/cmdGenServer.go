@@ -55,12 +55,12 @@ func (dgs *CmdGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerF
 	switch message {
 	case etf.Atom("ping"):
 		reply = etf.Atom(dgs.ServerNmae)
-	case etf.Atom("ReloadCfg"):
+	case etf.Atom("reloadCfg"):
 		cfg.InitViperConfig(dgs.CfgPath, dgs.CfgType)
 		reply = etf.Atom("ReloadCfg ok")
 	case etf.Atom("shutdown"):
 		dgs.ServerCmdChan <- "shutdown"
-		reply = etf.Atom(dgs.ServerNmae)
+		reply = etf.Atom(dgs.ServerNmae + "  shutdown")
 	case etf.Atom("state"):
 		i, _ := pidfile.Read()
 		reply = etf.Atom(fmt.Sprintf(" [%v] pid:[%v]", dgs.ServerNmae, i))

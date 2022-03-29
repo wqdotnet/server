@@ -32,13 +32,14 @@ func send(cmd ...string) error {
 	}
 }
 
-func ping(serverid, ip string) bool {
+func ping(serverid, ip string) (bool, string) {
 	startDebugGen(serverid, ip)
-	if _, err := call("ping"); err != nil {
+	serverName, err := call("ping")
+	if err != nil {
 		fmt.Println(err)
-		return false
+		return false, ""
 	}
-	return true
+	return true, fmt.Sprint(serverName)
 
 }
 

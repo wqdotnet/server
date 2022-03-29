@@ -16,17 +16,20 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
-	"fmt"
+	"log"
 	"os"
-	"os/signal"
-	"runtime"
+	"path/filepath"
 	"server/gserver/commonstruct"
 	"strconv"
 	"strings"
-	"syscall"
 
+	"github.com/peterh/liner"
 	"github.com/spf13/cobra"
+)
+
+var (
+	history_fn = filepath.Join(os.TempDir(), ".liner_example_history")
+	names      = []string{"ping", "reloadCfg", "state", "shutdown"}
 )
 
 // debugCmd represents the debug command
@@ -35,7 +38,6 @@ var debugCmd = &cobra.Command{
 	Short: "控制台",
 	Long:  `gen sever ping GameServer `,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		if len(args) == 2 {
 			debug(args[0], args[1])
 		} else {
@@ -50,74 +52,57 @@ func init() {
 }
 
 func debug(serverid, ip string) {
-	if !ping(serverid, ip) {
+	ok, servername := ping(serverid, ip)
+	if !ok {
 		return
 	}
 
-	//退出消息监控
-	var exitChan = make(chan os.Signal)
-	if runtime.GOOS == "linux" {
-		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
-	} else {
-		signal.Notify(exitChan, os.Interrupt)
-	}
+	line := liner.NewLiner()
+	defer line.Close()
 
-	rootContext := context.Background()
-	ctx, cancelFunc := context.WithCancel(rootContext)
+	line.SetCtrlCAborts(true)
 
-	go func() {
-		for {
-			print("-> ")
-			cmd := "" //getInput()
-			fmt.Scanln(&cmd)
-			args := strings.Split(cmd, " ")
-			if len(args) > 0 {
-				cmd = args[0]
-			}
-
-			switch cmd {
-			case "quit":
-				cancelFunc()
-				return
-			case "EOF":
-				cancelFunc()
-				return
-			default:
-				term, err := call(args...)
-				if err != nil {
-					fmt.Printf("err: %v \n", err)
-				} else {
-					fmt.Printf("info: %v \n", term)
-				}
+	line.SetCompleter(func(line string) (c []string) {
+		for _, n := range names {
+			if strings.HasPrefix(n, strings.ToLower(line)) {
+				c = append(c, n)
 			}
 		}
-	}()
+		return
+	})
+
+	if f, err := os.Open(history_fn); err == nil {
+		line.ReadHistory(f)
+		f.Close()
+	}
 
 	for {
-		select {
-		case s := <-exitChan:
-			if s.String() == "quit" || s.String() == "terminated" || s.String() == "interrupt" {
-				fmt.Println()
+		if name, err := line.Prompt("[" + servername + "] -> "); err == nil {
+			term, err := call(strings.Split(name, " ")...)
+
+			if err != nil {
+				log.Print("err: ", name)
+			} else {
+				log.Printf("info: %v \n", term)
+				line.AppendHistory(name)
+			}
+
+			if name == "shutdown" && err == nil {
 				return
 			}
-		case <-ctx.Done():
-			fmt.Println()
+
+		} else if err == liner.ErrPromptAborted {
+			if f, err := os.Create(history_fn); err != nil {
+				log.Print("Error writing history file: ", err)
+			} else {
+				line.WriteHistory(f)
+				f.Close()
+			}
+			log.Print("Aborted")
 			return
+		} else {
+			log.Print("Error reading line: ", err)
 		}
 	}
 
 }
-
-// func getInput() string {
-// 	//使用os.Stdin开启输入流
-// 	//函数原型 func NewReader(rd io.Reader) *Reader
-// 	//NewReader创建一个具有默认大小缓冲、从r读取的*Reader 结构见官方文档
-// 	in := bufio.NewReader(os.Stdin)
-// 	//in.ReadLine函数具有三个返回值 []byte bool error
-// 	//分别为读取到的信息 是否数据太长导致缓冲区溢出 是否读取失败
-// 	str, _, err := in.ReadLine()
-// 	if err != nil {
-// 		return err.Error()
-// 	}
-// 	return string(str)
-// }

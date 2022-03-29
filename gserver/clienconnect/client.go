@@ -36,6 +36,7 @@ func (c *Client) InitHander(sendChan chan []byte) {
 	//消息注册
 	c.infofunc[int32(account.MSG_ACCOUNT_C2S_Login)] = createRegisterFunc(c.accountLogin)
 	c.infofunc[int32(account.MSG_ACCOUNT_C2S_CreateRole)] = createRegisterFunc(c.accountCreateRole)
+
 }
 
 func (c *Client) MsgHander(module, method int32, buf []byte) {
@@ -44,7 +45,6 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 	} else {
 		logrus.Warnln("未注册的消息", module, method)
 	}
-
 }
 
 // //SendToClient 发送消息至客户端
