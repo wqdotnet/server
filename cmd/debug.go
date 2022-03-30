@@ -36,7 +36,6 @@ var debugCmd = &cobra.Command{
 		} else {
 			debug(strconv.Itoa(int(commonstruct.ServerCfg.ServerID)), "127.0.0.1")
 		}
-
 	},
 }
 
@@ -51,9 +50,12 @@ func debug(serverid, ip string) {
 	}
 
 	for {
-		command := prompt.Input("["+servername+"] > ", completer)
+		command := strings.TrimSpace(prompt.Input("["+servername+"] > ", completer))
 		if command == "quit" {
 			return
+		}
+		if command == "" {
+			break
 		}
 		term, err := call(strings.Split(command, " ")...)
 		log.Printf("info: %v [%v]\n", term, command)

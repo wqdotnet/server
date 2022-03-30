@@ -150,8 +150,8 @@ func StartGServer() {
 	var exitChan = make(chan os.Signal)
 
 	if runtime.GOOS == "linux" {
-		signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
-		//signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
+		//signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
+		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
 	} else {
 		signal.Notify(exitChan, os.Interrupt)
 	}
