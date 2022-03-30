@@ -1,11 +1,6 @@
 ServerName: "server"
 ServerID:   1
 #Version: "1.0.1"
-  
-#守护进程  
-Daemon: false
-RestartNum: 2
-
 
 ##web htpp port
 OpenHTTP: false

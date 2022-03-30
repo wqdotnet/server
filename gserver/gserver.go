@@ -58,7 +58,7 @@ func (g *gameServer) Close() {
 //StartGServer 启动game server
 //go run main.go start --config=E:/worke/server/cfg.yaml
 func StartGServer() {
-	logrus.Infof("============================= Begin Start [%v][%v] ===============================", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID)
+	logrus.Infof("============================= Begin Start [%v][%v]  version:[%v] ===============================", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID, commonstruct.ServerCfg.Version)
 	if level, err := logrus.ParseLevel(commonstruct.ServerCfg.Loglevel); err == nil {
 		logger.Init(level, commonstruct.ServerCfg.LogWrite, commonstruct.ServerCfg.LogName, commonstruct.ServerCfg.LogPath)
 	} else {
@@ -150,8 +150,8 @@ func StartGServer() {
 	var exitChan = make(chan os.Signal)
 
 	if runtime.GOOS == "linux" {
-		//signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
-		signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
+		signal.Notify(exitChan, os.Interrupt, os.Kill, syscall.SIGTERM)
+		//signal.Notify(exitChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGTSTP)
 	} else {
 		signal.Notify(exitChan, os.Interrupt)
 	}

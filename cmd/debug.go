@@ -17,19 +17,12 @@ package cmd
 
 import (
 	"log"
-	"os"
-	"path/filepath"
 	"server/gserver/commonstruct"
 	"strconv"
 	"strings"
 
-	"github.com/peterh/liner"
+	"github.com/c-bata/go-prompt"
 	"github.com/spf13/cobra"
-)
-
-var (
-	history_fn = filepath.Join(os.TempDir(), ".liner_example_history")
-	names      = []string{"ping", "reloadCfg", "state", "shutdown"}
 )
 
 // debugCmd represents the debug command
@@ -57,52 +50,28 @@ func debug(serverid, ip string) {
 		return
 	}
 
-	line := liner.NewLiner()
-	defer line.Close()
-
-	line.SetCtrlCAborts(true)
-
-	line.SetCompleter(func(line string) (c []string) {
-		for _, n := range names {
-			if strings.HasPrefix(n, strings.ToLower(line)) {
-				c = append(c, n)
-			}
-		}
-		return
-	})
-
-	if f, err := os.Open(history_fn); err == nil {
-		line.ReadHistory(f)
-		f.Close()
-	}
-
 	for {
-		if name, err := line.Prompt("[" + servername + "] -> "); err == nil {
-			term, err := call(strings.Split(name, " ")...)
-
-			if err != nil {
-				log.Print("err: ", name)
-			} else {
-				log.Printf("info: %v \n", term)
-				line.AppendHistory(name)
-			}
-
-			if name == "shutdown" && err == nil {
-				return
-			}
-
-		} else if err == liner.ErrPromptAborted {
-			if f, err := os.Create(history_fn); err != nil {
-				log.Print("Error writing history file: ", err)
-			} else {
-				line.WriteHistory(f)
-				f.Close()
-			}
-			log.Print("Aborted")
+		command := prompt.Input("["+servername+"] > ", completer)
+		if command == "quit" {
 			return
-		} else {
-			log.Print("Error reading line: ", err)
+		}
+		term, err := call(strings.Split(command, " ")...)
+		log.Printf("info: %v [%v]\n", term, command)
+
+		if command == "shutdown" && err == nil {
+			return
 		}
 	}
 
+}
+
+//commands   = []string{"ping", "reloadCfg", "state", "shutdown"}
+func completer(d prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "quit", Description: "退出连接模式"},
+		{Text: "state", Description: "查看服务器状态"},
+		{Text: "reloadCfg", Description: "重新加载配置文件"},
+		{Text: "shutdown", Description: "关闭服务器!!!"},
+	}
+	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
 }

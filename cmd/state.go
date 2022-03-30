@@ -43,7 +43,7 @@ var stateCmd = &cobra.Command{
 		if info, err := call("state"); err == nil {
 			fmt.Printf(" %v \n", info)
 		} else {
-			fmt.Println(" not running ")
+			fmt.Println(err.Error())
 		}
 	},
 }
