@@ -3,7 +3,7 @@ ServerID:   1
 #Version: "1.0.1"
 
 ##web htpp port
-OpenHTTP: false
+OpenHTTP: true
 HTTPPort: 8080
 OpenWS: true
 

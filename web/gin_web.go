@@ -32,31 +32,27 @@ func Start(Port int32) {
 	router := gin.New()
 	router.Use(logger(), gin.Recovery())
 
-	router.GET("/ping", func(context *gin.Context) {
-		context.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
 	router.GET("/refreshCfg", refreshCfg)
 
 	router.GET("/map", func(context *gin.Context) {
-		//tools.HandleImage(c.Writer, c.Request)
 		context.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
 	if commonstruct.ServerCfg.OpenWS {
-		hub := newHub()
-		go hub.run()
+		log.Info("Start [Web Socket]")
+		go WSHub.run()
+
+		//ws 测试
+		router.GET("/", func(context *gin.Context) {
+			context.File("web/wsChat.html")
+		})
 
 		router.GET("/ws", func(context *gin.Context) {
-			WsClient(hub, context)
+			WsClient(WSHub, context)
 		})
 	}
-
-	//http.ResponseWriter, reqA *http.Request
 
 	// automatically add routers for net/http/pprof
 	// e.g. /debug/pprof, /debug/pprof/heap, etc.
