@@ -8,23 +8,23 @@ package web
 // clients.
 type Hub struct {
 	// Registered clients.
-	clients map[*Client]bool
+	clients map[*wsClient]bool
 
 	// Inbound messages from the clients.
 	broadcast chan []byte
 
 	// Register requests from the clients.
-	register chan *Client
+	register chan *wsClient
 
 	// Unregister requests from clients.
-	unregister chan *Client
+	unregister chan *wsClient
 }
 
 var WSHub = &Hub{
 	broadcast:  make(chan []byte),
-	register:   make(chan *Client),
-	unregister: make(chan *Client),
-	clients:    make(map[*Client]bool),
+	register:   make(chan *wsClient),
+	unregister: make(chan *wsClient),
+	clients:    make(map[*wsClient]bool),
 }
 
 // func newHub() *Hub {

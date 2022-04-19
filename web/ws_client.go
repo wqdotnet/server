@@ -6,12 +6,16 @@ package web
 
 import (
 	"bytes"
-	"log"
+	"encoding/binary"
 	"net/http"
+	"server/network"
 	"time"
 
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -34,7 +38,7 @@ var (
 )
 
 // 客户端连接
-func WsClient(hub *Hub, context *gin.Context) {
+func WsClient(hub *Hub, context *gin.Context, nw *network.NetWorkx) {
 	upGrande := websocket.Upgrader{
 		//设置允许跨域
 		CheckOrigin: func(r *http.Request) bool {
@@ -54,17 +58,19 @@ func WsClient(hub *Hub, context *gin.Context) {
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
-	client.hub.register <- client
+	process, sendchan, err := nw.CreateProcess()
+
+	wsclient := &wsClient{hub: hub, conn: conn, send: sendchan}
+	wsclient.hub.register <- wsclient
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
-	go client.writePump()
-	go client.readPump()
+	go wsclient.writePump()
+	go wsclient.readPump(process)
 }
 
-// Client is a middleman between the websocket connection and the hub.
-type Client struct {
+// wsClient is a middleman between the websocket connection and the hub.
+type wsClient struct {
 	hub *Hub
 	// The websocket connection.
 	conn *websocket.Conn
@@ -77,7 +83,7 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *wsClient) readPump(process gen.Process) {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -86,15 +92,27 @@ func (c *Client) readPump() {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		_, message, err := c.conn.ReadMessage()
+		_, messagebuf, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				logrus.Errorf("socket closed  error: %v", err.Error())
+			} else {
+				logrus.Debugf("socket closed: [%v]", err.Error())
 			}
-			break
+			return
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- message
+		messagebuf = bytes.TrimSpace(bytes.Replace(messagebuf, newline, space, -1))
+
+		if len(messagebuf) < int(4) {
+			logrus.Debug("buf len:", len(messagebuf))
+			return
+		}
+
+		module := int32(binary.BigEndian.Uint16(messagebuf[:2]))
+		method := int32(binary.BigEndian.Uint16(messagebuf[2:4]))
+		process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Tuple{module, method, messagebuf[4:]}}))
+
+		//c.hub.broadcast <- messagebuf
 	}
 }
 
@@ -103,7 +121,7 @@ func (c *Client) readPump() {
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
-func (c *Client) writePump() {
+func (c *wsClient) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()

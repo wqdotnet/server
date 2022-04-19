@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"server/gserver/commonstruct"
+	"server/network"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 )
 
 // Start gin web interface
-func Start(Port int32) {
+func Start(Port int32, nw *network.NetWorkx) {
 	log.Info("Start [Web Http]")
 	//禁用控制台颜色，在将日志写入文件时不需要控制台颜色
 	//gin.DisableConsoleColor()
@@ -34,7 +35,7 @@ func Start(Port int32) {
 
 	router.GET("/refreshCfg", refreshCfg)
 
-	router.GET("/map", func(context *gin.Context) {
+	router.GET("/ping", func(context *gin.Context) {
 		context.JSON(200, gin.H{
 			"message": "pong",
 		})
@@ -50,7 +51,7 @@ func Start(Port int32) {
 		})
 
 		router.GET("/ws", func(context *gin.Context) {
-			WsClient(WSHub, context)
+			WsClient(WSHub, context, nw)
 		})
 	}
 

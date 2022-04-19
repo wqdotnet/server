@@ -108,17 +108,6 @@ func StartGServer() {
 		panic(err)
 	}
 
-	if commonstruct.ServerCfg.OpenHTTP {
-		go web.Start(commonstruct.ServerCfg.HTTPPort)
-	}
-
-	if commonstruct.ServerCfg.OpenPyroscope {
-		profiler.Start(profiler.Config{
-			ApplicationName: fmt.Sprintf("%v_%v", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID),
-			ServerAddress:   commonstruct.ServerCfg.PyroscopeHost,
-		})
-	}
-
 	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(
 			func() genServer.GateGenHanderInterface {
@@ -153,6 +142,17 @@ func StartGServer() {
 	GameServerInfo.Start()
 	defer ClonseServer()
 	defer GameServerInfo.Close()
+
+	if commonstruct.ServerCfg.OpenHTTP {
+		go web.Start(commonstruct.ServerCfg.HTTPPort, GameServerInfo.nw)
+	}
+
+	if commonstruct.ServerCfg.OpenPyroscope {
+		profiler.Start(profiler.Config{
+			ApplicationName: fmt.Sprintf("%v_%v", commonstruct.ServerCfg.ServerName, commonstruct.ServerCfg.ServerID),
+			ServerAddress:   commonstruct.ServerCfg.PyroscopeHost,
+		})
+	}
 
 	//退出消息监控
 	var exitChan = make(chan os.Signal)

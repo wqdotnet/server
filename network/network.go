@@ -122,7 +122,7 @@ func (n *NetWorkx) Start(gateNode node.Node) {
 
 }
 
-func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
+func (n *NetWorkx) CreateProcess() (gen.Process, chan []byte, error) {
 	//genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
 	clientHander := n.CreateGenServerObj()
 
@@ -143,7 +143,7 @@ func (n *NetWorkx) createProcess() (gen.Process, chan []byte, error) {
 
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
-	process, sendchan, err := n.createProcess()
+	process, sendchan, err := n.CreateProcess()
 	if err != nil {
 		logrus.Error("createProcess err: [%v]", err)
 		return
