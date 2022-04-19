@@ -95,9 +95,9 @@ func (c *wsClient) readPump(process gen.Process) {
 		_, messagebuf, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				logrus.Errorf("socket closed  error: %v", err.Error())
+				logrus.Errorf("WebSocket closed  error: %v", err.Error())
 			} else {
-				logrus.Debugf("socket closed: [%v]", err.Error())
+				logrus.Debugf("WebSocket closed: [%v]", err.Error())
 			}
 			return
 		}
