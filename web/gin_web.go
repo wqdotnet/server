@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"server/gserver/commonstruct"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,21 +32,30 @@ func Start(Port int32) {
 	router := gin.New()
 	router.Use(logger(), gin.Recovery())
 
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+	router.GET("/ping", func(context *gin.Context) {
+		context.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
 	router.GET("/refreshCfg", refreshCfg)
 
-	router.GET("/map", func(c *gin.Context) {
-
+	router.GET("/map", func(context *gin.Context) {
 		//tools.HandleImage(c.Writer, c.Request)
-		c.JSON(200, gin.H{
+		context.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
+
+	if commonstruct.ServerCfg.OpenWS {
+		hub := newHub()
+		go hub.run()
+
+		router.GET("/ws", func(context *gin.Context) {
+			WsClient(hub, context)
+		})
+	}
+
 	//http.ResponseWriter, reqA *http.Request
 
 	// automatically add routers for net/http/pprof

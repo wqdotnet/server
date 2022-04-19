@@ -40,8 +40,8 @@ var protobufCmd = &cobra.Command{
 			return
 		}
 
-		//输出地址
-		execstr := ""
+		//输出地址 protoc  --go_out=.  proto/*.proto
+		execstr := "protoc  --go_out=.  proto/*.proto"
 		if isclientpb {
 			execstr = "protoc -o %s/%s.pb  --proto_path=%s   --go_out=../ %s"
 		} else {
@@ -66,7 +66,7 @@ var protobufCmd = &cobra.Command{
 
 					_, errout, err := Shellout(execstrpro)
 					if err != nil {
-						logrus.Errorf("protoc [%s] ==>: %v errout:%v", filename, err, errout)
+						logrus.Errorf("protoc [%s] ==>: %v errout:%v  [%v]", filename, err, errout, execstrpro)
 					} else {
 						logrus.Infof("protoc [%s] ==> success", filename)
 					}

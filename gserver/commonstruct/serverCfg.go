@@ -11,14 +11,16 @@ type ServerConfig struct {
 
 	OpenHTTP bool
 	HTTPPort int32
+	OpenWS   bool
 
 	OpenPyroscope bool
 	PyroscopeHost string
 
-	NetType     string
-	Port        int32
-	Packet      int32
-	Readtimeout int32 //读超时时间
+	NetType       string
+	Port          int32
+	Packet        int32
+	Readtimeout   int32 //读超时时间
+	MaxConnectNum int32 //最大连接数
 
 	MsgTime int32
 	MsgNum  int32
@@ -61,15 +63,17 @@ var ServerCfg = ServerConfig{
 	// http
 	OpenHTTP: false,
 	HTTPPort: 8080,
+	OpenWS:   true,
 
 	OpenPyroscope: false,
 	PyroscopeHost: "http://localhost:4040",
 
 	// #network : tcp/udp
-	NetType:     "tcp",
-	Port:        3344,
-	Packet:      2,
-	Readtimeout: 0,
+	NetType:       "tcp",
+	Port:          3344,
+	Packet:        2,
+	Readtimeout:   0,
+	MaxConnectNum: 2000,
 
 	MsgTime: 300,
 	MsgNum:  500,

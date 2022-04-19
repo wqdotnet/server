@@ -1,7 +1,7 @@
 package messageroute
 
 import (
-	"server/msgproto/account"
+	"server/proto/account"
 
 	"google.golang.org/protobuf/proto"
 )

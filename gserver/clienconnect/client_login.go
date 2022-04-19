@@ -1,7 +1,8 @@
 package clienconnect
 
 import (
-	"server/msgproto/account"
+	"server/proto/account"
+	role "server/proto/role"
 
 	"github.com/sirupsen/logrus"
 )
@@ -13,7 +14,7 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 		int32(account.MSG_ACCOUNT_S2C_Login),
 		&account.S2C_Login{
 			Retcode:  0,
-			RoleInfo: &account.P_RoleInfo{},
+			RoleInfo: &role.Pb_RoleInfo{},
 		})
 }
 

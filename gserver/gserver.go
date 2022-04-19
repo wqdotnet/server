@@ -132,13 +132,21 @@ func StartGServer() {
 			commonstruct.ServerCfg.Packet,
 			commonstruct.ServerCfg.Readtimeout,
 			commonstruct.ServerCfg.NetType,
+			commonstruct.ServerCfg.MaxConnectNum,
 			commonstruct.ServerCfg.MsgTime,
 			commonstruct.ServerCfg.MsgNum,
 			func() { SendGameServerMsg("StartSuccess") },
-			func() { db.RedisExec("del", "ConnectNumber") },
-			func() { logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", 1)) },
-			func() { logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", -1)) },
+			func() {
+				//db.RedisExec("del", "ConnectNumber")
+			},
+			func() {
+				//logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", 1))
+			},
+			func() {
+				//logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", -1))
+			},
 		),
+
 		command: make(chan string),
 	}
 

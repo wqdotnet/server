@@ -1,7 +1,7 @@
 package clienconnect
 
 import (
-	"server/msgproto/account"
+	"server/proto/account"
 	"server/tools"
 
 	"github.com/sirupsen/logrus"

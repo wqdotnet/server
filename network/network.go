@@ -66,12 +66,15 @@ type NetWorkx struct {
 	//socket 关闭回调
 	closeHook func()
 
-	ConnectCount int64
-	gateNode     node.Node
+	ConnectCount  int32 //连接数
+	MaxConnectNum int32 //最大连接数
+	OpenConn      bool  //是否开启连接
+
+	gateNode node.Node
 }
 
 //NewNetWorkX    instance
-func NewNetWorkX(createObj func() genServer.GateGenHanderInterface, port, packet, readtimeout int32, nettype string, msgtime, msgnum int32,
+func NewNetWorkX(createObj func() genServer.GateGenHanderInterface, port, packet, readtimeout int32, nettype string, maxConnectNum, msgtime, msgnum int32,
 	startHook, closeHook, connectHook, closedConnectHook func()) *NetWorkx {
 
 	netWorkx := &NetWorkx{
@@ -88,8 +91,11 @@ func NewNetWorkX(createObj func() genServer.GateGenHanderInterface, port, packet
 		closeHook:          closeHook,
 		connectHook:        connectHook,
 		closedConnectHook:  closedConnectHook,
+		MaxConnectNum:      maxConnectNum,
+		OpenConn:           true,
 	}
-	atomic.StoreInt64(&netWorkx.ConnectCount, 0)
+	atomic.StoreInt32(&netWorkx.ConnectCount, 0)
+
 	return netWorkx
 }
 
@@ -103,6 +109,9 @@ func (n *NetWorkx) Start(gateNode node.Node) {
 	case "tcp":
 		logrus.Info("NetWorkx [tcp] port:", n.Port)
 		n.src = &TCPNetwork{}
+	case "ws":
+		logrus.Info("NetWorkx [webSocket] port:", n.Port)
+
 	default:
 		logrus.Info("NetWorkx default [tcp] port:", n.Port)
 		n.src = new(TCPNetwork)
@@ -141,8 +150,8 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	}
 
 	n.onConnect()
-	atomic.AddInt64(&n.ConnectCount, 1)
-	defer atomic.AddInt64(&n.ConnectCount, -1)
+	atomic.AddInt32(&n.ConnectCount, 1)
+	defer atomic.AddInt32(&n.ConnectCount, -1)
 
 	//defer n.UserPool.Put(p)
 	defer n.onClosedConnect()

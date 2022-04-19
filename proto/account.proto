@@ -1,7 +1,7 @@
 syntax = "proto3";
 package account;
-option go_package = "server/msgproto/account";
-
+option go_package = "proto/account";
+import "proto/role.proto";
 
 
 //消息号
@@ -33,22 +33,7 @@ enum MSG_ACCOUNT {
 //     string registrationTime =5; //注册时间
 // }
  
-
-//用户游戏信息
-message P_RoleInfo {
-    int32 roleID = 1;
-    string roleName =2;    
-    int64 exp = 3;
-    int32 level =4;
-    int32 country =5; //所属国家
-    map<int32, int32>  TesourcesList = 6;//玩家资源列表
-    RoleSettings Settings =7;  //游戏内设置
-}
-
-//游戏设置
-message RoleSettings {
-    bool AutoSelectTactics = 1;//自动选择战术
-}
+ 
 
 
 
@@ -60,7 +45,7 @@ message c2s_Login {
 
 message  s2c_Login {
     sint32	retcode	= 1;
-    P_RoleInfo RoleInfo =2;
+    role.Pb_RoleInfo RoleInfo =2;
 }
  
 // 创建角色

@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"net"
+	"sync/atomic"
 
 	"github.com/sirupsen/logrus"
 )
@@ -44,6 +45,14 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 			break
 		}
 		logrus.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
+
+		num := atomic.LoadInt32(&nw.ConnectCount)
+		if !nw.OpenConn || num >= nw.MaxConnectNum {
+			logrus.Warnf("sockert connect max count:[%v]", nw.MaxConnectNum)
+			conn.Close()
+			continue
+		}
+
 		go nw.HandleClient(conn)
 	}
 	listener.Close()

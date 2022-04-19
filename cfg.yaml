@@ -5,6 +5,7 @@ ServerID:   1
 ##web htpp port
 OpenHTTP: false
 HTTPPort: 8080
+OpenWS: true
 
 #pyroscope
 OpenPyroscope: false
@@ -15,7 +16,7 @@ NetType: tcp
 Port: 3344
 Packet : 2
 Readtimeout: 60  #超时(秒)
-
+MaxConnectNum: 3
 
 # MsgTime 多少秒后  
 # MsgNum 多少条消息后
@@ -24,7 +25,7 @@ MsgNum : 500
 
 #protobuf path
 ProtoPath: "./proto"
-GoOut: "./msgproto"
+GoOut: "./proto"
 
 #mongodb
 MongoConnStr: "mongodb://localhost:27017"

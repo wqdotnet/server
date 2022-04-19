@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"server/msgproto/account"
+	"server/proto/account"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"

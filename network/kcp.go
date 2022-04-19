@@ -3,6 +3,7 @@ package network
 import (
 	"crypto/sha1"
 	"fmt"
+	"sync/atomic"
 
 	"github.com/sirupsen/logrus"
 	"github.com/xtaci/kcp-go"
@@ -25,11 +26,20 @@ func (c *KCPNetwork) Start(nw *NetWorkx) {
 		}
 
 		for {
-			s, err := listener.AcceptKCP()
+			conn, err := listener.AcceptKCP()
 			if err != nil {
 				logrus.Fatal(err)
 			}
-			go nw.HandleClient(s)
+			logrus.Infof("kcp connect RemoteAddr:[%v]", conn.RemoteAddr().String())
+
+			num := atomic.LoadInt32(&nw.ConnectCount)
+			if !nw.OpenConn || num >= nw.MaxConnectNum {
+				logrus.Warnf("kcp connect max count:[%v]", nw.MaxConnectNum)
+				conn.Close()
+				continue
+			}
+
+			go nw.HandleClient(conn)
 		}
 
 	} else {
