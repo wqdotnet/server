@@ -91,6 +91,9 @@ func (c *wsClient) readPump(process gen.Process) {
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+
+	defer process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Atom("SocketStop")}))
+
 	for {
 		_, messagebuf, err := c.conn.ReadMessage()
 		if err != nil {

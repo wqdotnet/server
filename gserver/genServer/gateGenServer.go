@@ -2,6 +2,7 @@ package genServer
 
 import (
 	"runtime"
+	"time"
 
 	"github.com/ergo-services/ergo/etf"
 	"github.com/ergo-services/ergo/gen"
@@ -32,8 +33,9 @@ func (gateGS *GateGenServer) Init(process *gen.ServerProcess, args ...etf.Term) 
 	gateGS.process = process
 	gateGS.sendChan = args[0].(chan []byte)
 	gateGS.clientHander = args[1].(GateGenHanderInterface)
-
 	gateGS.clientHander.InitHander(gateGS.sendChan)
+
+	process.SendAfter(process.Self(), etf.Atom("loop"), time.Second)
 	return nil
 }
 
@@ -75,7 +77,18 @@ func (gateGS *GateGenServer) HandleCall(process *gen.ServerProcess, from gen.Ser
 }
 
 func (gateGS *GateGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	logrus.Infof("HandleInfo (%v): %v", gateGS.process.Name(), message)
+	switch info := message.(type) {
+	case etf.Atom:
+		switch info {
+		case "loop":
+			process.SendAfter(process.Self(), etf.Atom("loop"), gateGS.clientHander.LoopHander())
+		default:
+			logrus.Infof("HandleInfo (%v): %v %v", gateGS.process.Name(), process.Name(), message)
+		}
+	default:
+		logrus.Infof("HandleInfo (%v): %v %v", gateGS.process.Name(), process.Name(), message)
+	}
+
 	return gen.ServerStatusOK
 }
 

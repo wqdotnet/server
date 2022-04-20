@@ -3,6 +3,7 @@ package clienconnect
 import (
 	"server/proto/account"
 	"server/tools"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -46,6 +47,11 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 	} else {
 		logrus.Warnln("未注册的消息", module, method)
 	}
+}
+
+func (c *Client) LoopHander() time.Duration {
+	logrus.Debug("client loop hander")
+	return time.Second
 }
 
 // //SendToClient 发送消息至客户端
