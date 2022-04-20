@@ -2,7 +2,7 @@ package clienconnect
 
 import (
 	"server/proto/account"
-	role "server/proto/role"
+	pbrole "server/proto/role"
 
 	"github.com/sirupsen/logrus"
 )
@@ -11,10 +11,21 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 	logrus.Info("C2S_Login: ", msg.Account, msg.Password)
 
 	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
-		int32(account.MSG_ACCOUNT_S2C_Login),
+		int32(account.MSG_ACCOUNT_Login),
+
 		&account.S2C_Login{
 			Retcode:  0,
-			RoleInfo: &role.Pb_RoleInfo{},
+			RoleInfo: &pbrole.Pb_RoleInfo{},
+		})
+}
+
+func (c *Client) registerAccount(msg *account.C2S_Register) {
+	logrus.Info("C2S_Register: ", msg.Account, msg.Password)
+
+	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
+		int32(account.MSG_ACCOUNT_Register),
+		&account.S2C_Register{
+			Retcode: 0,
 		})
 }
 
@@ -22,10 +33,10 @@ func (c *Client) accountCreateRole(msg *account.C2S_CreateRole) {
 	logrus.Info("C2S_CreateRole: ", msg.RoleName)
 
 	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
-		int32(account.MSG_ACCOUNT_S2C_CreateRole),
+		int32(account.MSG_ACCOUNT_CreateRole),
 		&account.S2C_CreateRole{
-			Retcode: 0,
-			Roleid:  1,
+			Retcode:  0,
+			RoleInfo: &pbrole.Pb_RoleInfo{},
 		})
 }
 

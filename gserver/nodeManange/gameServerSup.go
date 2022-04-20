@@ -67,9 +67,8 @@ func (ds *GameServerSup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
 
 func StartGameServerSupNode(nodeName string, cmd chan string) (node.Node, gen.Process, error) {
 	opts := node.Options{
-		ListenRangeBegin: uint16(commonstruct.ServerCfg.ListenRangeBegin),
-		ListenRangeEnd:   uint16(commonstruct.ServerCfg.ListenRangeEnd),
-		EPMDPort:         uint16(commonstruct.ServerCfg.EPMDPort),
+		ListenBegin: uint16(commonstruct.ServerCfg.ListenBegin),
+		ListenEnd:   uint16(commonstruct.ServerCfg.ListenEnd),
 	}
 	node, err := ergo.StartNode(nodeName, commonstruct.ServerCfg.Cookie, opts)
 	if err != nil {

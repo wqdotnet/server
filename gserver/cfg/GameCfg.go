@@ -24,6 +24,6 @@ type cfgCollection struct {
 
 	//错误提示码
 	ErrorCode struct {
-		CfgList []ErrorCodeCfg
+		CfgList []*ErrorCodeCfg
 	}
 }

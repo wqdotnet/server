@@ -34,8 +34,9 @@ func (c *Client) InitHander(sendChan chan []byte) {
 	c.infofunc = make(map[int32]func(buf []byte))
 
 	//消息注册
-	c.infofunc[int32(account.MSG_ACCOUNT_C2S_Login)] = createRegisterFunc(c.accountLogin)
-	c.infofunc[int32(account.MSG_ACCOUNT_C2S_CreateRole)] = createRegisterFunc(c.accountCreateRole)
+	c.infofunc[int32(account.MSG_ACCOUNT_Login)] = createRegisterFunc(c.accountLogin)
+	c.infofunc[int32(account.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
+	c.infofunc[int32(account.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
 
 }
 

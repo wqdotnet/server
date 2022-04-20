@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/c-bata/go-prompt v0.2.6
-	github.com/ergo-services/ergo v1.999.202
+	github.com/ergo-services/ergo v1.999.210
 	github.com/facebookgo/atomicfile v0.0.0-20151019160806-2de1f203e7d5
 	github.com/facebookgo/pidfile v0.0.0-20150612191647-f242e2999868
 	github.com/fsnotify/fsnotify v1.5.1
@@ -16,7 +16,7 @@ require (
 	github.com/jolestar/go-commons-pool/v2 v2.1.1
 	github.com/json-iterator/go v1.1.12
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
-	github.com/pyroscope-io/pyroscope v0.15.0
+	github.com/pyroscope-io/pyroscope v0.15.1
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.8.1

@@ -47,9 +47,8 @@ func startDebugGen(serverid, ip string) (node.Node, gen.Process) {
 	gateNodeName = fmt.Sprintf("serverNode_%v@%v", serverid, ip)
 
 	opts := node.Options{
-		ListenRangeBegin: uint16(commonstruct.ServerCfg.ListenRangeBegin),
-		ListenRangeEnd:   uint16(commonstruct.ServerCfg.ListenRangeEnd),
-		EPMDPort:         uint16(commonstruct.ServerCfg.EPMDPort),
+		ListenBegin: uint16(commonstruct.ServerCfg.ListenBegin),
+		ListenEnd:   uint16(commonstruct.ServerCfg.ListenEnd),
 	}
 	node, _ := ergo.StartNode("debug_server@127.0.0.1", commonstruct.ServerCfg.Cookie, opts)
 	debugGenServer = &DebugGenServer{}

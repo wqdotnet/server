@@ -23,21 +23,21 @@ func Start(command chan string) {
 			if gerr != nil {
 				panic(gerr)
 			}
-			nodesMap.Store(gateNode.NodeName(), gateNode)
+			nodesMap.Store(gateNode.Name(), gateNode)
 		case "server":
 			serverNodeName := fmt.Sprintf("serverNode_%v@127.0.0.1", commonstruct.ServerCfg.ServerID)
 			serverNode, _, serr := StartGameServerSupNode(serverNodeName, command)
 			if serr != nil {
 				panic(serr)
 			}
-			nodesMap.Store(serverNode.NodeName(), serverNode)
+			nodesMap.Store(serverNode.Name(), serverNode)
 		case "db":
 			dbNodeName := fmt.Sprintf("dbNode_%v@127.0.0.1", commonstruct.ServerCfg.ServerID)
 			dbNode, _, derr := StartDataBaseSupSupNode(dbNodeName)
 			if derr != nil {
 				panic(derr)
 			}
-			nodesMap.Store(dbNode.NodeName(), dbNode)
+			nodesMap.Store(dbNode.Name(), dbNode)
 		}
 
 	}

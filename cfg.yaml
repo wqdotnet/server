@@ -48,9 +48,8 @@ LogPath:  "./log"
 LogName: "log"
 
 #OTP
-ListenRangeBegin: 15151
-ListenRangeEnd:   25151
-EPMDPort:         4369
+ListenBegin: 15151
+ListenEnd:   25151
 Cookie: "123"
 #gateway db server
 StartList : ["gateway","db","server"]

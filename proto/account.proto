@@ -10,28 +10,22 @@ enum MSG_ACCOUNT {
     
     //账号模块
     Module  = 1000;
-    //method
-    C2S_Login = 1001;//用户登陆
-    S2C_Login = 1002;
-
-    C2S_CreateRole= 1003;//创建角色
-    S2C_CreateRole= 1004;
     
-    C2S_UpdateRoleName= 1005;//修改角色名
-    S2C_UpdateRoleName= 1006;
-
-    S2C_RoleAddExp =1010; //角色获取经验
+    //method
+    Login = 1001;//用户登陆
+    Register= 1002;//注册账号
+    CreateRole= 1003;//创建角色     
 }
 
 
-// //用户账号信息
-// message P_Account {
-//     string account=1;
-//     string password =2;
-//     string equipment =3; //设备信息
-//     string registrationSource =4; //注册来源
-//     string registrationTime =5; //注册时间
-// }
+//用户账号信息
+message P_Account {
+    string account=1;
+    string password =2;
+    string equipment =3; //设备信息
+    string registrationSource =4; //注册来源
+    string registrationTime =5; //注册时间
+}
  
  
 
@@ -46,16 +40,34 @@ message c2s_Login {
 message  s2c_Login {
     sint32	retcode	= 1;
     role.Pb_RoleInfo RoleInfo =2;
+    map<uint32,string> Settings =3;  //游戏内设置
+
+    map<uint32, string> ItemList = 7;//背包物品列表
+    //宗门
+    //好友
+    //任务
+}
+
+message c2s_Register {
+    string account  =1;
+    string password =2;
+    string CDK = 3;//注册码
+    string Source =4;//注册来源
+    string Equipment =5;//设备信息
+}
+
+message s2c_Register {
+    sint32	retcode	= 1; 
 }
  
 // 创建角色
 message c2s_CreateRole {
     string RoleName =1;
-    int32 country =2;
+    int32 sex =2;
 }
 
 message  s2c_CreateRole {
     sint32	retcode	= 1;
-    int32 roleid =2;
+    role.Pb_RoleInfo RoleInfo =2;
 }
 

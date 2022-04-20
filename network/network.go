@@ -109,9 +109,6 @@ func (n *NetWorkx) Start(gateNode node.Node) {
 	case "tcp":
 		logrus.Info("NetWorkx [tcp] port:", n.Port)
 		n.src = &TCPNetwork{}
-	case "ws":
-		logrus.Info("NetWorkx [webSocket] port:", n.Port)
-
 	default:
 		logrus.Info("NetWorkx default [tcp] port:", n.Port)
 		n.src = new(TCPNetwork)
@@ -269,7 +266,6 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 			msgNum = 0
 		}
 	}
-	//}(conn, sendcancelFunc)
 
 	// for {
 	// 	select {

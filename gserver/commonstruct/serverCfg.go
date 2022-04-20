@@ -43,10 +43,9 @@ type ServerConfig struct {
 	LogPath  string
 	LogName  string
 
-	ListenRangeBegin int
-	ListenRangeEnd   int
-	EPMDPort         int
-	Cookie           string
+	ListenBegin int
+	ListenEnd   int
+	Cookie      string
 
 	StartList []string
 }
@@ -97,9 +96,8 @@ var ServerCfg = ServerConfig{
 	LogName:  "log",
 	LogWrite: false,
 
-	ListenRangeBegin: 15151,
-	ListenRangeEnd:   25151,
-	EPMDPort:         4369,
-	Cookie:           "123",
-	StartList:        []string{"db", "gateway", "server"},
+	ListenBegin: 15151,
+	ListenEnd:   25151,
+	Cookie:      "123",
+	StartList:   []string{"db", "gateway", "server"},
 }
