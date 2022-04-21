@@ -4,6 +4,9 @@ import (
 
 	// "github.com/google/wire"
 
+	"encoding/json"
+	"io/ioutil"
+	"os"
 	"reflect"
 	"sync"
 
@@ -21,12 +24,12 @@ func InitViperConfig(cfgPath string, cfgType string) *viper.Viper {
 	v.SetConfigType(cfgType)
 
 	cfg := &cfgCollection{}
-	reflectField(cfg, v)
+	reflectField(cfg, cfgPath, cfgType, v)
 	saveCfg(cfg)
 	return v
 }
 
-func reflectField(structName interface{}, v *viper.Viper) {
+func reflectField(structName interface{}, cfgPath, cfgType string, v *viper.Viper) {
 	t := reflect.ValueOf(structName)
 
 	if t.Kind() == reflect.Ptr {
@@ -47,12 +50,33 @@ func reflectField(structName interface{}, v *viper.Viper) {
 		v.SetConfigName(fieldname)
 
 		if err := v.ReadInConfig(); err != nil {
-			logrus.Fatalf("read: %v [%v][%v]", err, typename, fieldname)
+			//viper 库无法加载 "[{}]" 格式json
+			if cfgType == "json" {
+				jsonFile, e1 := os.Open(cfgPath + "/" + fieldname + "." + cfgType)
+				defer jsonFile.Close()
+				if e1 != nil {
+					logrus.Fatalf("fiel: [%v] err:[%v]", jsonFile, e1)
+				}
+				jsda, err := ioutil.ReadAll(jsonFile)
+				if err != nil {
+					logrus.Fatalf("ReadAll: [%v] [%v][%v]", err, typename, field)
+				}
+
+				newdata := reflect.New(reflect.TypeOf(field)).Interface()
+				if err := json.Unmarshal(jsda, newdata); err != nil {
+					logrus.Fatalf("unmarshal: [%v] [%v][%v]", err, typename, field)
+				}
+
+				t.FieldByName(fieldname).Set(reflect.ValueOf(newdata).Elem())
+				break
+			}
+			logrus.Fatalf("err:  [%v]   ", err)
 		}
 
 		if err := v.UnmarshalExact(&field); err != nil {
-			logrus.Fatal("err:", err)
+			logrus.Fatalf("err:  [%v]   [%v] ", err, field)
 		}
+
 		t.FieldByName(fieldname).Set(reflect.ValueOf(field))
 	}
 }
