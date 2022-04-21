@@ -1,22 +1,32 @@
 package cfg
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
-
-	"github.com/sirupsen/logrus"
-	"go.uber.org/atomic"
 )
 
 func init() {
-	InitViperConfig("../../config", "json")
+	//InitViperConfig("../../config", "json")
 
-	var atom atomic.Bool
-	atom.Load()
-	atom.Store(false)
+	jsonFile, e1 := os.Open("../../config/ExpXiufaInfo.json")
+	defer jsonFile.Close()
+	if e1 != nil {
+		fmt.Println(jsonFile, e1)
+	}
+
+	jsda, err := ioutil.ReadAll(jsonFile)
+
+	da := []*ExpXiufaInfo{}
+	json.Unmarshal(jsda, &da)
+
+	fmt.Println(da[0], err)
 
 	//viper.AddConfigPath("./config")
 	//viper.SetConfigName("mapinfo")
-	logrus.Info("err:", GetGameCfg().ErrorCode.CfgList)
+	//logrus.Info("err:", GetGameCfg().ErrorCode.CfgList)
 	// logrus.Info("MapInfo :", len(GameCfg.MapInfo.Areas))
 	// logrus.Infof("troops:%v", len(GameCfg.Troops.CfgList))
 	// logrus.Infof("ErrorCode:%v", len(GameCfg.ErrorCode.CfgList))
