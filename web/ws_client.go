@@ -58,7 +58,8 @@ func WsClient(hub *Hub, context *gin.Context, nw *network.NetWorkx) {
 		return
 	}
 
-	process, sendchan, err := nw.CreateProcess()
+	process, clientHander, sendchan, err := nw.CreateProcess()
+	defer nw.UserPool.Put(clientHander)
 
 	wsclient := &wsClient{hub: hub, conn: conn, send: sendchan}
 	wsclient.hub.register <- wsclient
@@ -66,7 +67,7 @@ func WsClient(hub *Hub, context *gin.Context, nw *network.NetWorkx) {
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go wsclient.writePump()
-	go wsclient.readPump(process)
+	wsclient.readPump(process)
 }
 
 // wsClient is a middleman between the websocket connection and the hub.

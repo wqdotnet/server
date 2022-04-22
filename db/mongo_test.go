@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	//"github.com/go-playground/assert/v2"
@@ -12,7 +13,9 @@ import (
 )
 
 func TestConnectPool(t *testing.T) {
-	StartMongodb("gamedemo", "mongodb://localhost:27017")
+	StartMongodb("gamedemo", "mongodb://admin:123456@localhost:27017")
+	b, e := MongodbPing()
+	fmt.Println(b, e)
 }
 
 func TestInsertOne(t *testing.T) {

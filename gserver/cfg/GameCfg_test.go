@@ -9,17 +9,8 @@ import (
 func init() {
 	InitViperConfig("../../config", "json")
 
-	//viper.AddConfigPath("./config")
-	//viper.SetConfigName("mapinfo")
-	logrus.Info("err:", GetGameCfg().ErrorCode.CfgList)
-	logrus.Info("MapInfo :", len(GetGameCfg().ExpXiufaInfo))
-	// logrus.Infof("troops:%v", len(GameCfg.Troops.CfgList))
-	// logrus.Infof("ErrorCode:%v", len(GameCfg.ErrorCode.CfgList))
-	// logrus.Infof("role exp:%v", len(GameCfg.RoleExp.ExpList))
-	// logrus.Infof("global: %v", GetGlobalInt("expRole"))
-	// logrus.Infof("skill :%v", len(GameCfg.Skill.SkillList))
-	// logrus.Infof("SkillLandform :%v", len(GameCfg.Skill.SkillLandform))
-	// logrus.Infof("SkillBuff :%v", len(GameCfg.Skill.BuffList))
+	logrus.Info("ErrorCode:", GetGameCfg().ErrorCode.CfgList)
+	logrus.Info("ExpXiufaInfo len :", len(GetGameCfg().ExpXiufaInfo))
 }
 
 func TestMapCfg(t *testing.T) {

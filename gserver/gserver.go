@@ -37,7 +37,7 @@ func (g *gameServer) Start() {
 	nodeManange.Start(g.command)
 
 	//启动网络
-	gateNode := nodeManange.GetNode(fmt.Sprintf("gatewayNode_%v@127.0.0.1", commonstruct.ServerCfg.ServerID))
+	gateNode := nodeManange.GetNode(nodeManange.GateNode)
 	if gateNode != nil {
 		g.nw.Start(gateNode)
 	}
@@ -111,12 +111,8 @@ func StartGServer() {
 	GameServerInfo = &gameServer{
 		nw: network.NewNetWorkX(
 			func() genServer.GateGenHanderInterface {
-				return &clienconnect.Client{}
+				return clienconnect.NewClient()
 			},
-			// &sync.Pool{
-			// New: func() interface{} {
-			// 	return &genServer.GateGenServer{}
-			// }},
 			commonstruct.ServerCfg.Port,
 			commonstruct.ServerCfg.Packet,
 			commonstruct.ServerCfg.Readtimeout,

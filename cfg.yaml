@@ -28,7 +28,7 @@ ProtoPath: "./proto"
 GoOut: "./proto"
 
 #mongodb
-MongoConnStr: "mongodb://localhost:27017"
+MongoConnStr: "mongodb://admin:123456@localhost:27017"
 Mongodb: "gamedemo"
 
 #redis

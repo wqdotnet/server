@@ -19,7 +19,7 @@ func (ds *DataBaseSup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
 		Name: "DataBaseSup",
 		Children: []gen.SupervisorChildSpec{
 			{
-				Name:  "dbServer",
+				Name:  string(DBGenServer), //"dbServer",
 				Child: &genServer.DbGenServer{},
 				//Args: []interface{}{},
 			},

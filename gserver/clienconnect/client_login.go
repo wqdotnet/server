@@ -1,22 +1,63 @@
 package clienconnect
 
 import (
+	"fmt"
+	"server/gserver/cfg"
+	"server/gserver/nodeManange"
 	"server/proto/account"
 	pbrole "server/proto/role"
 
+	"github.com/ergo-services/ergo/etf"
 	"github.com/sirupsen/logrus"
 )
 
 func (c *Client) accountLogin(msg *account.C2S_Login) {
 	logrus.Info("C2S_Login: ", msg.Account, msg.Password)
+	retmsg := &account.S2C_Login{
+		Retcode:  0,
+		RoleInfo: &pbrole.Pb_RoleInfo{},
+	}
+
+	ok, accountinfo := GetAccountinfo(msg.Account, msg.Password)
+	//未注册
+	if !ok {
+		retmsg.Retcode = cfg.GetErrorCodeNumber("")
+		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), retmsg)
+		return
+	}
+
+	//未创建账号
+	if accountinfo.RoleID == 0 {
+		retmsg.Retcode = cfg.GetErrorCodeNumber("")
+		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), retmsg)
+		return
+	}
+
+	//账号已登陆
+	rolePIDName := fmt.Sprintf("role_%v", accountinfo.RoleID)
+	node := nodeManange.GetNode(nodeManange.GateNode)
+	if registerProcess := node.ProcessByName(rolePIDName); registerProcess != nil {
+		node.UnregisterName(rolePIDName)
+		roleData, err := c.process.Call(registerProcess.Self(), etf.Atom("Extrusion line"))
+		if err != nil {
+			logrus.Errorf("重复登陆挤下线 未预料错误: [%v] [%v]", err, roleData)
+		}
+
+		//获取了角色数据  roleData
+		//retmsg.RoleInfo = roleData.RoleBaseInfo.ToPB()
+	} else {
+		info := GetRoleAllData(accountinfo.RoleID)
+		retmsg.RoleInfo = info.RoleBaseInfo.ToPB()
+	}
+
+	//绑定genserver name
+	if error := c.process.RegisterName(rolePIDName); error != nil {
+		logrus.Error("绑定genserver name 失败: ", error)
+	}
 
 	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
 		int32(account.MSG_ACCOUNT_Login),
-
-		&account.S2C_Login{
-			Retcode:  0,
-			RoleInfo: &pbrole.Pb_RoleInfo{},
-		})
+		retmsg)
 }
 
 func (c *Client) registerAccount(msg *account.C2S_Register) {
@@ -39,29 +80,6 @@ func (c *Client) accountCreateRole(msg *account.C2S_CreateRole) {
 			RoleInfo: &pbrole.Pb_RoleInfo{},
 		})
 }
-
-// //module 用户登陆模块
-// func (c *Client) loginModule(method int32, buf []byte) {
-// 	switch account.MSG_ACCOUNT(method) {
-// 	case account.MSG_ACCOUNT_C2S_Login:
-// 		userlogin := &account.C2S_Login{}
-// 		if decode(userlogin, buf) {
-// 			c.userLogin(userlogin)
-// 		}
-// 	case account.MSG_ACCOUNT_C2S_CreateRole:
-// 		createMsg := &account.C2S_CreateRole{}
-// 		if decode(createMsg, buf) {
-// 			c.createRole(createMsg)
-// 		}
-// 	case account.MSG_ACCOUNT_C2S_UpdateRoleName:
-// 		upName := &account.C2S_UpdateRoleName{}
-// 		if decode(upName, buf) {
-// 			c.updateRole(upName)
-// 		}
-// 	default:
-// 		logrus.Info("loginModule null methodID:", method)
-// 	}
-// }
 
 // //用户登陆
 // func (c *Client) userLogin(userlogin *account.C2S_Login) {

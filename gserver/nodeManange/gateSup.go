@@ -2,7 +2,6 @@ package nodeManange
 
 import (
 	"server/gserver/commonstruct"
-	"server/gserver/genServer"
 
 	"github.com/ergo-services/ergo"
 	"github.com/ergo-services/ergo/etf"
@@ -16,18 +15,18 @@ type GateWaySup struct {
 
 func (ds *GateWaySup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
 	return gen.SupervisorSpec{
-		Name: "GateWaySup",
+		Name:     "GateWaySup",
 		Children: []gen.SupervisorChildSpec{
-			{
-				Name:  "gateServer",
-				Child: &genServer.GateGenServer{},
-				//Args: []interface{}{},
-			},
+			// {
+			// 	Name:  "gateServer",
+			// 	Child: &genServer.GateGenServer{},
+			// 	//Args: []interface{}{},
+			// },
 		},
 		Strategy: gen.SupervisorStrategy{
-			//Type: ergo.SupervisorStrategyOneForAll,
-			// Type:      ergo.SupervisorStrategyRestForOne,
-			//Type: ergo.SupervisorStrategyOneForOne,
+			//Type: gen.SupervisorStrategyOneForAll,
+			//Type: gen.SupervisorStrategyRestForOne,
+			//Type: gen.SupervisorStrategyOneForOne,
 			Type: gen.SupervisorStrategySimpleOneForOne,
 
 			//重启策略

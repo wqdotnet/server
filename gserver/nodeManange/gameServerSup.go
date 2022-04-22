@@ -25,12 +25,12 @@ func (ds *GameServerSup) Init(args ...etf.Term) (gen.SupervisorSpec, error) {
 		Name: "GameServerSup",
 		Children: []gen.SupervisorChildSpec{
 			{
-				Name:  "gameServer",
+				Name:  string(GameGenServer), // "gameServer",
 				Child: &genServer.GameGenServer{},
 				//Args: []interface{}{},
 			},
 			{
-				Name:  "cmdServer",
+				Name:  string(CMDGenServer), //"cmdServer",
 				Child: &genServer.CmdGenServer{},
 				Args: []etf.Term{
 					tools.AbsPathify(commonstruct.ServerCfg.CfgPath),

@@ -21,8 +21,9 @@ type RoleBaseInfo struct {
 
 	EquipList map[int32]*ItemInfo //道具
 
-	OfflineTimestamp int64 //离线时间戳
-	Online           bool  //是否在线
+	OfflineTimestamp int64  //离线时间戳
+	Online           bool   //是否在线
+	State            uint32 //状态
 
 	//好友
 	//宗门

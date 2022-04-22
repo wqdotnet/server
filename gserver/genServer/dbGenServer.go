@@ -10,24 +10,22 @@ import (
 
 type DbGenServer struct {
 	gen.Server
-	process *gen.ServerProcess
 }
 
 func (dgs *DbGenServer) Init(process *gen.ServerProcess, args ...etf.Term) error {
 	logrus.Infof("Init (%v): args %v ", process.Name(), args)
 
-	dgs.process = process
 	return nil
 }
 
 func (dgs *DbGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	logrus.Infof("HandleCast (%v): %v", dgs.process.Name(), message)
+	logrus.Infof("HandleCast (%v): %v", process.Name(), message)
 
 	return gen.ServerStatusOK
 }
 
 func (dgs *DbGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
-	logrus.Infof("HandleCall (%v): %v, From: %v", dgs.process.Name(), message, from)
+	logrus.Infof("HandleCall (%v): %v, From: %v", process.Name(), message, from)
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
 
@@ -35,12 +33,12 @@ func (dgs *DbGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFr
 }
 
 func (dgs *DbGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	logrus.Infof("HandleInfo (%v): %v", dgs.process.Name(), message)
+	logrus.Infof("HandleInfo (%v): %v", process.Name(), message)
 
 	return gen.ServerStatusOK
 }
 
 func (dgs *DbGenServer) Terminate(process *gen.ServerProcess, reason string) {
 
-	logrus.Infof("Terminate (%v): %v", dgs.process.Name(), reason)
+	logrus.Infof("Terminate (%v): %v", process.Name(), reason)
 }

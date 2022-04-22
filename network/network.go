@@ -10,6 +10,7 @@ import (
 	"os"
 	"server/gserver/genServer"
 	"server/tools"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -53,8 +54,8 @@ type NetWorkx struct {
 	//监听端口.
 	Port int32
 	//用户对象池  //nw.UserPool.Get().(*client).OnConnect()
-	//UserPool *sync.Pool
-	CreateGenServerObj func() genServer.GateGenHanderInterface
+	UserPool sync.Pool
+	//CreateGenServerObj func() genServer.GateGenHanderInterface
 
 	//启动成功后回调
 	StartHook func()
@@ -81,18 +82,20 @@ func NewNetWorkX(createObj func() genServer.GateGenHanderInterface, port, packet
 		Packet:  packet,
 		NetType: nettype,
 		Port:    port,
-		//UserPool: pool,
-		//userlist:    make(map[string]ClientInterface),
-		CreateGenServerObj: createObj,
-		Readtimeout:        readtimeout,
-		MsgTime:            msgtime,
-		MsgNum:             msgnum,
-		StartHook:          startHook,
-		closeHook:          closeHook,
-		connectHook:        connectHook,
-		closedConnectHook:  closedConnectHook,
-		MaxConnectNum:      maxConnectNum,
-		OpenConn:           true,
+		UserPool: sync.Pool{
+			New: func() interface{} {
+				return createObj()
+			}},
+		//CreateGenServerObj: createObj,
+		Readtimeout:       readtimeout,
+		MsgTime:           msgtime,
+		MsgNum:            msgnum,
+		StartHook:         startHook,
+		closeHook:         closeHook,
+		connectHook:       connectHook,
+		closedConnectHook: closedConnectHook,
+		MaxConnectNum:     maxConnectNum,
+		OpenConn:          true,
 	}
 	atomic.StoreInt32(&netWorkx.ConnectCount, 0)
 
@@ -119,28 +122,31 @@ func (n *NetWorkx) Start(gateNode node.Node) {
 
 }
 
-func (n *NetWorkx) CreateProcess() (gen.Process, chan []byte, error) {
+func (n *NetWorkx) CreateProcess() (gen.Process, genServer.GateGenHanderInterface, chan []byte, error) {
 	//genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
-	clientHander := n.CreateGenServerObj()
+	//clientHander := n.CreateGenServerObj()
+
+	clientHander := n.UserPool.Get().(genServer.GateGenHanderInterface)
 
 	uid, err := uuid.NewRandom()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	sendchan := make(chan []byte, 1)
 
 	process, err := n.gateNode.Spawn(uid.String(), gen.ProcessOptions{}, &genServer.GateGenServer{}, sendchan, clientHander)
+
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return process, sendchan, nil
+	return process, clientHander, sendchan, nil
 }
 
 //HandleClient 消息处理
 func (n *NetWorkx) HandleClient(conn net.Conn) {
-	process, sendchan, err := n.CreateProcess()
+	process, clientHander, sendchan, err := n.CreateProcess()
 	if err != nil {
 		logrus.Error("createProcess err: [%v]", err)
 		return
@@ -150,7 +156,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 	atomic.AddInt32(&n.ConnectCount, 1)
 	defer atomic.AddInt32(&n.ConnectCount, -1)
 
-	//defer n.UserPool.Put(p)
+	defer n.UserPool.Put(clientHander)
 	defer n.onClosedConnect()
 	defer conn.Close()
 

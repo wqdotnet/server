@@ -15,32 +15,22 @@ import (
 
 type GateGenServer struct {
 	gen.Server
-	process      *gen.ServerProcess
 	sendChan     chan []byte
 	clientHander GateGenHanderInterface
 }
 
-func (gateGS *GateGenServer) Unregister() {
-	//gateGS.process.Node.Unregister(gateGS.process.Name())
-}
-
-func (gateGS *GateGenServer) Register(name string) {
-	//gateGS.process.Node.Register(name, gateGS.process.Self())
-}
-
 func (gateGS *GateGenServer) Init(process *gen.ServerProcess, args ...etf.Term) error {
 	logrus.Infof("Init (%v): args %v ", process.Name(), args)
-	gateGS.process = process
 	gateGS.sendChan = args[0].(chan []byte)
 	gateGS.clientHander = args[1].(GateGenHanderInterface)
-	gateGS.clientHander.InitHander(gateGS.sendChan)
+	gateGS.clientHander.InitHander(process, gateGS.sendChan)
 
 	process.SendAfter(process.Self(), etf.Atom("loop"), time.Second)
 	return nil
 }
 
 func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	logrus.Infof("gateGen HandleCast (%v): %v", gateGS.process.Name(), message)
+	logrus.Infof("gateGen HandleCast (%v): %v", process.Name(), message)
 	defer func() {
 		if err := recover(); err != nil {
 			pc, fn, line, _ := runtime.Caller(5)
@@ -69,10 +59,14 @@ func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.
 }
 
 func (gateGS *GateGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
-	logrus.Infof("HandleCall (%v): %v, From: %v", gateGS.process.Name(), message, from)
+	logrus.Infof("HandleCall (%v): %v, From: %v", process.Name(), message, from)
+
+	// switch info := message.(type) {
+	// case etf.Atom:
+	// }
+	gateGS.clientHander.HandleCall(message)
 
 	reply := etf.Term(etf.Tuple{etf.Atom("error"), etf.Atom("unknown_request")})
-
 	return reply, gen.ServerStatusOK
 }
 
@@ -82,20 +76,18 @@ func (gateGS *GateGenServer) HandleInfo(process *gen.ServerProcess, message etf.
 		switch info {
 		case "loop":
 			process.SendAfter(process.Self(), etf.Atom("loop"), gateGS.clientHander.LoopHander())
-		default:
-			logrus.Infof("HandleInfo (%v): %v %v", gateGS.process.Name(), process.Name(), message)
+			return gen.ServerStatusOK
 		}
-	default:
-		logrus.Infof("HandleInfo (%v): %v %v", gateGS.process.Name(), process.Name(), message)
 	}
 
+	gateGS.clientHander.HandleInfo(message)
 	return gen.ServerStatusOK
 }
 
 // Terminate called when process died
 func (gateGS *GateGenServer) Terminate(process *gen.ServerProcess, reason string) {
-	gateGS.Unregister()
-	logrus.Infof("Terminate (%v): %v", gateGS.process.Name(), reason)
+
+	logrus.Infof("Terminate (%v): %v", process.Name(), reason)
 }
 
 // // //Send 发送消息

@@ -1,17 +1,24 @@
 package clienconnect
 
 import (
+	"server/db"
+	"server/gserver/commonstruct"
 	"server/proto/account"
 	"server/tools"
 	"time"
 
+	"github.com/ergo-services/ergo/etf"
+	"github.com/ergo-services/ergo/gen"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 //Client 客户端连接
 type Client struct {
+	process  *gen.ServerProcess
 	sendChan chan []byte
 	infofunc map[int32]func(buf []byte)
 
@@ -30,15 +37,24 @@ const (
 	StatusSqueezeOut userStatus = 2
 )
 
-func (c *Client) InitHander(sendChan chan []byte) {
-	c.sendChan = sendChan
-	c.infofunc = make(map[int32]func(buf []byte))
+//===========GateGenHanderInterface 接口实现===============
+func NewClient() *Client {
+	client := &Client{}
+	client.initMsgRoute()
+	return client
+}
 
+func (c *Client) initMsgRoute() {
+	c.infofunc = make(map[int32]func(buf []byte))
 	//消息注册
 	c.infofunc[int32(account.MSG_ACCOUNT_Login)] = createRegisterFunc(c.accountLogin)
 	c.infofunc[int32(account.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
 	c.infofunc[int32(account.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
+}
 
+func (c *Client) InitHander(process *gen.ServerProcess, sendChan chan []byte) {
+	c.process = process
+	c.sendChan = sendChan
 }
 
 func (c *Client) MsgHander(module, method int32, buf []byte) {
@@ -50,9 +66,14 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 }
 
 func (c *Client) LoopHander() time.Duration {
-	logrus.Debug("client loop hander")
+
 	return time.Second
 }
+
+func (c *Client) HandleCall(message etf.Term) {}
+func (c *Client) HandleInfo(message etf.Term) {}
+
+//==========================
 
 // //SendToClient 发送消息至客户端
 func (c *Client) SendToClient(module int32, method int32, pb proto.Message) {
@@ -89,7 +110,6 @@ func createRegisterFunc[T any](execfunc func(*T)) func(buf []byte) {
 			execfunc(info)
 		}
 	}
-
 }
 
 //protobuf 解码
@@ -98,4 +118,23 @@ func decodeProto(info interface{}, buf []byte) error {
 		return proto.Unmarshal(buf, data)
 	}
 	return nil
+}
+
+//================db get data=============
+func GetAccountinfo(account, passwd string) (bool, *commonstruct.AccountInfo) {
+	filter := bson.D{
+		primitive.E{Key: "account", Value: account},
+		primitive.E{Key: "password", Value: passwd},
+	}
+	accountinfo := &commonstruct.AccountInfo{}
+	if err := db.FindOneBson(db.AccountTable, accountinfo, filter); err != nil {
+		return false, nil
+	}
+
+	return true, accountinfo
+}
+
+func GetRoleAllData(roleid int32) *commonstruct.RoleData {
+
+	return &commonstruct.RoleData{}
 }

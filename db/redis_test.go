@@ -60,7 +60,7 @@ func TestHMGET(t *testing.T) {
 	logrus.Info("RedisGetInt:", RedisGetInt("test11"))
 	RedisExec("del", "test11")
 
-	SetStruct("test", &Test{Name: "test", Age: 18})
+	RedisSetStruct("test", &Test{Name: "test", Age: 18})
 	info, e := GetStruct[Test]("test")
 	fmt.Println(e, info)
 

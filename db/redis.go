@@ -99,8 +99,8 @@ func RedisGetInt(tabname string) int {
 	return 0
 }
 
-//SetStruct save struct
-func SetStruct(key string, v interface{}) (interface{}, error) {
+//RedisSetStruct save struct
+func RedisSetStruct(key string, v interface{}) (interface{}, error) {
 	conn := redis.pool.Get()
 	defer conn.Close()
 	b, err := json.Marshal(v)

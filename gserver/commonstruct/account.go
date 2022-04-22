@@ -4,11 +4,10 @@ import (
 	"time"
 )
 
-//AccountInfoStruct 账号信息
-type AccountInfoStruct struct {
-	Account            string
-	AccountID          int32 //账号id
-	Password           string
+//AccountInfo 账号信息
+type AccountInfo struct {
+	Account            string //账号
+	Password           string //密码
 	Equipment          string //设备信息
 	RegistrationSource string //注册来源(平台)
 	RegistrationTime   time.Time
@@ -17,5 +16,4 @@ type AccountInfoStruct struct {
 	CDK                string
 	Settings           map[uint32]string //设置
 
-	DirtyData bool
 }
