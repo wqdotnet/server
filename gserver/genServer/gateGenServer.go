@@ -80,7 +80,11 @@ func (gateGS *GateGenServer) HandleInfo(process *gen.ServerProcess, message etf.
 	case etf.Atom:
 		switch info {
 		case "loop":
-			process.SendAfter(process.Self(), etf.Atom("loop"), gateGS.clientHander.LoopHander())
+			after := gateGS.clientHander.LoopHander()
+			if after < time.Millisecond {
+				after = time.Second
+			}
+			process.SendAfter(process.Self(), etf.Atom("loop"), after)
 			return gateGS.clientHander.GenServerStatus()
 		case "stop":
 			return gen.ServerStatusStop

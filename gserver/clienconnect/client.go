@@ -57,6 +57,12 @@ func (c *Client) InitHander(process *gen.ServerProcess, sendChan chan []byte) {
 }
 
 func (c *Client) MsgHander(module, method int32, buf []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Warn(err)
+		}
+	}()
+
 	if msgfunc := c.infofunc[method]; msgfunc != nil {
 		msgfunc(buf)
 	} else {
@@ -65,7 +71,12 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 }
 
 func (c *Client) LoopHander() time.Duration {
-	c.accountLogin(&account.C2S_Login{Account: "asdf", Password: "1234"})
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Warn(err)
+		}
+	}()
+
 	return time.Second
 }
 

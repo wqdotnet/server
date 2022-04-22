@@ -37,6 +37,9 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 	rolePIDName := fmt.Sprintf("role_%v", accountinfo.RoleID)
 	node := nodeManange.GetNode(nodeManange.GateNode)
 	if registerProcess := node.ProcessByName(rolePIDName); registerProcess != nil {
+
+		//if c.process.Self() == registerProcess.Self()
+
 		node.UnregisterName(rolePIDName)
 		roleData, err := c.process.Call(registerProcess.Self(), etf.Atom("Extrusionline"))
 		if err != nil {
