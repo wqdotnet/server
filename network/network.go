@@ -123,9 +123,6 @@ func (n *NetWorkx) Start(gateNode node.Node) {
 }
 
 func (n *NetWorkx) CreateProcess() (gen.Process, genServer.GateGenHanderInterface, chan []byte, error) {
-	//genserver := n.UserPool.Get().(ergo.GenServerBehaviour)
-	//clientHander := n.CreateGenServerObj()
-
 	clientHander := n.UserPool.Get().(genServer.GateGenHanderInterface)
 
 	uid, err := uuid.NewRandom()
@@ -255,7 +252,11 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		module := int32(binary.BigEndian.Uint16(buf[n.Packet : n.Packet+2]))
 		method := int32(binary.BigEndian.Uint16(buf[n.Packet+2 : n.Packet+4]))
 		//process.Send(process.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
-		process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Tuple{module, method, buf[n.Packet+4:]}}))
+		err := process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Tuple{module, method, buf[n.Packet+4:]}}))
+		if err != nil {
+			logrus.Warnf("send error:", err.Error())
+			return
+		}
 
 		//间隔时间大于 N 分钟后 或者 接收到500条消息后 给连接送条信息
 		now := time.Now().Unix()

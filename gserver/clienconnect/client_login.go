@@ -38,7 +38,7 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 	node := nodeManange.GetNode(nodeManange.GateNode)
 	if registerProcess := node.ProcessByName(rolePIDName); registerProcess != nil {
 		node.UnregisterName(rolePIDName)
-		roleData, err := c.process.Call(registerProcess.Self(), etf.Atom("Extrusion line"))
+		roleData, err := c.process.Call(registerProcess.Self(), etf.Atom("Extrusionline"))
 		if err != nil {
 			logrus.Errorf("重复登陆挤下线 未预料错误: [%v] [%v]", err, roleData)
 		}

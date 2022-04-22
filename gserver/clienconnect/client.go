@@ -18,12 +18,10 @@ import (
 
 //Client 客户端连接
 type Client struct {
-	process  *gen.ServerProcess
-	sendChan chan []byte
-	infofunc map[int32]func(buf []byte)
-
-	//用户 连接状态 [0:连接] [1:已登陆] [2:下线]
-	status userStatus
+	process         *gen.ServerProcess
+	sendChan        chan []byte
+	infofunc        map[int32]func(buf []byte)
+	genServerStatus gen.ServerStatus
 }
 
 type userStatus int32
@@ -50,6 +48,7 @@ func (c *Client) initMsgRoute() {
 	c.infofunc[int32(account.MSG_ACCOUNT_Login)] = createRegisterFunc(c.accountLogin)
 	c.infofunc[int32(account.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
 	c.infofunc[int32(account.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
+	c.genServerStatus = gen.ServerStatusOK
 }
 
 func (c *Client) InitHander(process *gen.ServerProcess, sendChan chan []byte) {
@@ -66,15 +65,22 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 }
 
 func (c *Client) LoopHander() time.Duration {
-
+	c.accountLogin(&account.C2S_Login{Account: "asdf", Password: "1234"})
 	return time.Second
 }
 
-func (c *Client) HandleCall(message etf.Term) {}
+func (c *Client) HandleCall(message etf.Term) {
+
+}
 func (c *Client) HandleInfo(message etf.Term) {}
 
-func (c *Client) Terminate() {
+func (c *Client) GenServerStatus() gen.ServerStatus {
+	return c.genServerStatus
+}
 
+func (c *Client) Terminate(reason string) {
+	c.process = nil
+	c.sendChan = nil
 }
 
 //==========================

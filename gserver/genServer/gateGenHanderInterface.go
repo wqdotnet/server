@@ -13,5 +13,6 @@ type GateGenHanderInterface interface {
 	MsgHander(module, method int32, buf []byte)
 	HandleCall(message etf.Term)
 	HandleInfo(message etf.Term)
-	Terminate()
+	Terminate(reason string)
+	GenServerStatus() gen.ServerStatus
 }

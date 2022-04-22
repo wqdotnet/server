@@ -79,11 +79,6 @@ type wsClient struct {
 	send chan []byte
 }
 
-// readPump pumps messages from the websocket connection to the hub.
-//
-// The application runs readPump in a per-connection goroutine. The application
-// ensures that there is at most one reader on a connection by executing all
-// reads from this goroutine.
 func (c *wsClient) readPump(process gen.Process) {
 	defer func() {
 		c.hub.unregister <- c
@@ -120,11 +115,6 @@ func (c *wsClient) readPump(process gen.Process) {
 	}
 }
 
-// writePump pumps messages from the hub to the websocket connection.
-//
-// A goroutine running writePump is started for each connection. The
-// application ensures that there is at most one writer to a connection by
-// executing all writes from this goroutine.
 func (c *wsClient) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -141,7 +131,7 @@ func (c *wsClient) writePump() {
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
+			w, err := c.conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {
 				return
 			}
