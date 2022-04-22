@@ -73,6 +73,10 @@ func (c *Client) LoopHander() time.Duration {
 func (c *Client) HandleCall(message etf.Term) {}
 func (c *Client) HandleInfo(message etf.Term) {}
 
+func (c *Client) Terminate() {
+
+}
+
 //==========================
 
 // //SendToClient 发送消息至客户端

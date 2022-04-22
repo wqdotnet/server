@@ -86,8 +86,8 @@ func (gateGS *GateGenServer) HandleInfo(process *gen.ServerProcess, message etf.
 
 // Terminate called when process died
 func (gateGS *GateGenServer) Terminate(process *gen.ServerProcess, reason string) {
-
 	logrus.Infof("Terminate (%v): %v", process.Name(), reason)
+	gateGS.clientHander.Terminate()
 }
 
 // // //Send 发送消息
