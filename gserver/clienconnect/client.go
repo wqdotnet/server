@@ -22,6 +22,8 @@ type Client struct {
 	sendChan        chan []byte
 	infofunc        map[int32]func(buf []byte)
 	genServerStatus gen.ServerStatus
+
+	connectState userStatus //连接状态
 }
 
 type userStatus int32
@@ -49,6 +51,7 @@ func (c *Client) initMsgRoute() {
 	c.infofunc[int32(account.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
 	c.infofunc[int32(account.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
 	c.genServerStatus = gen.ServerStatusOK
+
 }
 
 func (c *Client) InitHander(process *gen.ServerProcess, sendChan chan []byte) {
@@ -59,7 +62,7 @@ func (c *Client) InitHander(process *gen.ServerProcess, sendChan chan []byte) {
 func (c *Client) MsgHander(module, method int32, buf []byte) {
 	defer func() {
 		if err := recover(); err != nil {
-			logrus.Warn(err)
+			logrus.Error(err)
 		}
 	}()
 
@@ -73,7 +76,7 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 func (c *Client) LoopHander() time.Duration {
 	defer func() {
 		if err := recover(); err != nil {
-			logrus.Warn(err)
+			logrus.Error(err)
 		}
 	}()
 
@@ -92,6 +95,16 @@ func (c *Client) GenServerStatus() gen.ServerStatus {
 func (c *Client) Terminate(reason string) {
 	c.process = nil
 	c.sendChan = nil
+	switch reason {
+	case "Extrusionline": //挤下线
+		c.connectState = StatusSqueezeOut
+		// c.SendToClient(int32(account.MSG_ACCOUNT_Module),
+		// 	int32(account.MSG_ACCOUNT_Register),
+		// 	&account.S2C_Register{
+		// 		Retcode: 0,
+		// 	})
+	}
+
 }
 
 //==========================

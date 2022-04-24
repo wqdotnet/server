@@ -18,6 +18,12 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 		RoleInfo: &pbrole.Pb_RoleInfo{},
 	}
 
+	//已登陆
+	if c.connectState != StatusSockert {
+		retmsg.Retcode = cfg.GetErrorCodeNumber("")
+		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), retmsg)
+	}
+
 	ok, accountinfo := GetAccountinfo(msg.Account, msg.Password)
 	//未注册
 	if !ok {

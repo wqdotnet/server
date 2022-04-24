@@ -18,9 +18,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
+var (
 	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
+	writeWait = 30 * time.Second
 
 	// Time allowed to read the next pong message from the peer.
 	pongWait = 60 * time.Second
@@ -29,7 +29,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 1024
 )
 
 var (
@@ -64,6 +64,8 @@ func WsClient(hub *Hub, context *gin.Context, nw *network.NetWorkx) {
 	wsclient := &wsClient{hub: hub, conn: conn, send: sendchan}
 	wsclient.hub.register <- wsclient
 
+	pongWait = time.Second * time.Duration(nw.Readtimeout)
+
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go wsclient.writePump()
@@ -84,7 +86,7 @@ func (c *wsClient) readPump(process gen.Process) {
 		c.hub.unregister <- c
 		c.conn.Close()
 	}()
-	c.conn.SetReadLimit(maxMessageSize)
+	c.conn.SetReadLimit(int64(maxMessageSize))
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
