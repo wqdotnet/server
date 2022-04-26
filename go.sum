@@ -296,6 +296,8 @@ github.com/pyroscope-io/pyroscope v0.15.0 h1:FfZcyHFy5ST48g/Ivx+yWb7/JSSg3hVk51Q
 github.com/pyroscope-io/pyroscope v0.15.0/go.mod h1:Oc+fxWFupdD7xAiht7DjLAADMJmu+gFSrtwXtihy14w=
 github.com/pyroscope-io/pyroscope v0.15.1 h1:y16n6FfThVPjpjnkSUa1umjOoJ7BA9zihaO87lyxh24=
 github.com/pyroscope-io/pyroscope v0.15.1/go.mod h1:Oc+fxWFupdD7xAiht7DjLAADMJmu+gFSrtwXtihy14w=
+github.com/pyroscope-io/pyroscope v0.15.2 h1:t7nCXqNTx6i5WZ6MJVV/eKs0szOSSUBdIrGvMBmh2zc=
+github.com/pyroscope-io/pyroscope v0.15.2/go.mod h1:Sv0/kkYE6x3kXoPi1UZcF9BI4cFet4xWGk+rY7IasEk=
 github.com/richardlehane/mscfb v1.0.4 h1:WULscsljNPConisD5hR0+OyZjwK46Pfyr6mPu5ZawpM=
 github.com/richardlehane/mscfb v1.0.4/go.mod h1:YzVpcZg9czvAuhk9T+a3avCpcFPMUWm7gK3DypaEsUk=
 github.com/richardlehane/msoleps v1.0.1 h1:RfrALnSNXzmXLbGct/P2b4xkFz4e8Gmj/0Vj9M9xC1o=
@@ -483,6 +485,8 @@ golang.org/x/net v0.0.0-20220418201149-a630d4f3e7a2 h1:6mzvA99KwZxbOrxww4EvWVQUn
 golang.org/x/net v0.0.0-20220418201149-a630d4f3e7a2/go.mod h1:CfG3xpIq0wQ8r1q4Su4UZFWDARRcnwPjda9FqA0JpMk=
 golang.org/x/net v0.0.0-20220421235706-1d1ef9303861 h1:yssD99+7tqHWO5Gwh81phT+67hg+KttniBr6UnEXOY8=
 golang.org/x/net v0.0.0-20220421235706-1d1ef9303861/go.mod h1:CfG3xpIq0wQ8r1q4Su4UZFWDARRcnwPjda9FqA0JpMk=
+golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 h1:HVyaeDAYux4pnY+D/SiwmLOR36ewZ4iGQIIrtnuCjFA=
+golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4/go.mod h1:CfG3xpIq0wQ8r1q4Su4UZFWDARRcnwPjda9FqA0JpMk=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=

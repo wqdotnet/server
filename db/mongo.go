@@ -51,6 +51,7 @@ func MongodbPing() (bool, error) {
 
 //GetDatabase connectPool mongodb database
 func GetDatabase() (*mongo.Client, *mongo.Database) {
+
 	ctx := context.Background()
 	obj, err := clientPool.BorrowObject(ctx)
 	if err != nil {
@@ -79,7 +80,7 @@ func getCollection(collectionname string) (*mongo.Client, *mongo.Collection) {
 }
 
 //InsertOne 添加数据
-func InsertOne(tbname string, document interface{}) {
+func InsertOne(tbname string, document interface{}) error {
 	client, collection := getCollection(tbname)
 
 	_, err := collection.InsertOne(context.TODO(), document)
@@ -90,6 +91,7 @@ func InsertOne(tbname string, document interface{}) {
 
 	clientPool.ReturnObject(context.Background(), client)
 
+	return err
 }
 
 //FindOneBson 查询数据
@@ -99,6 +101,19 @@ func FindOneBson(tbname string, document interface{}, filter interface{}) error 
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)
 	return collection.FindOne(context.TODO(), filter).Decode(document)
+}
+
+//事务执行命令
+func SessionFunc(tbname string, execfun func(collection *mongo.Collection) error) error {
+	client, collection := getCollection(tbname)
+	defer clientPool.ReturnObject(context.Background(), client)
+	session, err := client.StartSession()
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+	defer session.EndSession(context.TODO())
+	return execfun(collection)
 }
 
 //FindBson 查找数据
@@ -169,11 +184,20 @@ func Delete(tbname string, field string, value interface{}) int64 {
 }
 
 //FindFieldMax 查询最大值
-func FindFieldMax(tbname string, fieldkey string, document interface{}) error {
+func FindFieldMax(tbname string, fieldkey string, document interface{}, filter interface{}) error {
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)
 
-	filter := bson.D{{}}
+	//filter := bson.D{{}}
 	findOptions := options.FindOne().SetSort(bson.D{primitive.E{Key: fieldkey, Value: -1}}).SetSkip(0)
 	return collection.FindOne(context.TODO(), filter, findOptions).Decode(document)
 }
+
+// //FindFieldMaxFilter 查询最大值
+// func FindFieldMaxFilter(tbname string, fieldkey string, filter interface{}, document interface{}) error {
+// 	client, collection := getCollection(tbname)
+// 	defer clientPool.ReturnObject(context.Background(), client)
+
+// 	findOptions := options.FindOne().SetSort(bson.D{primitive.E{Key: fieldkey, Value: -1}}).SetSkip(0)
+// 	return collection.FindOne(context.TODO(), filter, findOptions).Decode(document)
+// }

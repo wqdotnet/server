@@ -32,7 +32,7 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 	logrus.Info(fmt.Sprintf("tcp run on localhost: [%v]", nw.Port))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", nw.Port))
-	//defer listener.Close()
+	defer listener.Close()
 	checkError(err)
 	if nw.StartHook != nil {
 		nw.StartHook()
@@ -42,20 +42,20 @@ func (c *TCPNetwork) Start(nw *NetWorkx) {
 		conn, err := listener.Accept()
 		if err != nil {
 			logrus.Error(err.Error())
-			break
+			continue
 		}
 		logrus.Infof("sockert connect RemoteAddr:[%v]", conn.RemoteAddr().String())
 
 		num := atomic.LoadInt32(&nw.ConnectCount)
 		if !nw.OpenConn || num >= nw.MaxConnectNum {
-			logrus.Warnf("sockert connect max count:[%v]", nw.MaxConnectNum)
+			logrus.Warnf("sockert connect open:[%v]  max count:[%v]", nw.OpenConn, nw.MaxConnectNum)
 			conn.Close()
 			continue
 		}
 
 		go nw.HandleClient(conn)
 	}
-	listener.Close()
+	//listener.Close()
 }
 
 //Close 关闭

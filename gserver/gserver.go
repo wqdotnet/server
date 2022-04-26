@@ -33,6 +33,14 @@ type gameServer struct {
 	command chan string
 }
 
+func (g *gameServer) OpenConn() {
+	g.nw.OpenConn = true
+}
+
+func (g *gameServer) CloseConn() {
+	g.nw.OpenConn = false
+}
+
 func (g *gameServer) Start() {
 	nodeManange.Start(g.command)
 
@@ -73,10 +81,6 @@ func StartGServer() {
 		logrus.Warnf("服务已启动请检查或清除 进程id [%v] pidfile: [%v]  ", i, filename)
 		return
 	}
-
-	// if commonstruct.ServerCfg.Daemon {
-	//https://github.com/takama/daemon
-	// }
 
 	cfg.InitViperConfig(commonstruct.ServerCfg.CfgPath, commonstruct.ServerCfg.CfgType)
 	if commonstruct.ServerCfg.WatchConfig {
@@ -122,7 +126,7 @@ func StartGServer() {
 			commonstruct.ServerCfg.MsgNum,
 			func() { SendGameServerMsg("StartSuccess") },
 			func() {
-				//db.RedisExec("del", "ConnectNumber")
+				db.RedisExec("del", "MaxRoleID")
 			},
 			func() {
 				//logrus.Info("connect number: ", db.RedisINCRBY("ConnectNumber", 1))
@@ -140,7 +144,10 @@ func StartGServer() {
 	defer GameServerInfo.Close()
 
 	if commonstruct.ServerCfg.OpenHTTP {
-		go web.Start(commonstruct.ServerCfg.HTTPPort, GameServerInfo.nw)
+		go web.Start(
+			commonstruct.ServerCfg.HTTPPort,
+			commonstruct.ServerCfg.SetMode,
+			GameServerInfo.nw)
 	}
 
 	if commonstruct.ServerCfg.OpenPyroscope {
@@ -168,8 +175,13 @@ func StartGServer() {
 				pid := StartSuccess()
 				logrus.Infof("====================== Start Game Server pid:[%v] Success =========================", pid)
 			case "shutdown":
+				GameServerInfo.CloseConn()
 				logrus.Warn("Shut down the game server")
 				return
+			case "OpenConn":
+				GameServerInfo.OpenConn()
+			case "CloseConn":
+				GameServerInfo.CloseConn()
 			default:
 				logrus.Warn("command:", command)
 			}
@@ -184,7 +196,6 @@ func StartGServer() {
 			// 	logrus.Infof("time: [%v]  online:[%v]  [%v]", time.Now().Format(tools.DateTimeFormat), db.RedisGetInt("ConnectNumber"), GameServerInfo.nw.ConnectCount)
 		}
 	}
-
 }
 
 //SendGameServerMsg game system msg
@@ -197,6 +208,9 @@ func StartSuccess() int {
 	pidfile.Write()
 	logrus.Infof("pidfile :%v", pidfile.GetPidfilePath())
 	i, _ := pidfile.Read()
+
+	db.RedisExec("set", "MaxRoleID", commonstruct.GetMaxRoleID(commonstruct.ServerCfg.ServerID))
+	GameServerInfo.OpenConn()
 	return i
 }
 

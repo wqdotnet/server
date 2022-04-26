@@ -1,6 +1,6 @@
 package cfg
 
-type ExpLvInfo struct {
+type ExpLvInfoCfg struct {
 	Level            int     `json:"level"`
 	NeedExp          int     `json:"needExp"`
 	FailExp          int     `json:"failExp"`
@@ -24,7 +24,7 @@ type ExpLvInfo struct {
 	MailID           int     `json:"mailId"`
 }
 
-func GetLvExpInfo(lv int32) *ExpLvInfo {
+func GetLvExpInfo(lv int32) *ExpLvInfoCfg {
 	for _, v := range GetGameCfg().ExpXiufaInfo {
 		if v.Level == int(lv) {
 			return v

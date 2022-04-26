@@ -95,7 +95,7 @@ func NewNetWorkX(createObj func() genServer.GateGenHanderInterface, port, packet
 		connectHook:       connectHook,
 		closedConnectHook: closedConnectHook,
 		MaxConnectNum:     maxConnectNum,
-		OpenConn:          true,
+		OpenConn:          false,
 	}
 	atomic.StoreInt32(&netWorkx.ConnectCount, 0)
 
@@ -131,8 +131,12 @@ func (n *NetWorkx) CreateProcess() (gen.Process, genServer.GateGenHanderInterfac
 	}
 
 	sendchan := make(chan []byte, 1)
+	option := gen.ProcessOptions{
+		MailboxSize: 0,
+		//Fallback:    gen.ProcessFallback{},
+	}
 
-	process, err := n.gateNode.Spawn(uid.String(), gen.ProcessOptions{}, &genServer.GateGenServer{}, sendchan, clientHander)
+	process, err := n.gateNode.Spawn(uid.String(), option, &genServer.GateGenServer{}, sendchan, clientHander)
 
 	if err != nil {
 		return nil, nil, nil, err
@@ -236,7 +240,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		if e != nil {
 			switch e {
 			case io.EOF:
-				logrus.Debug("socket closed:", e.Error())
+				//logrus.Debug("socket closed:", e.Error())
 			default:
 				logrus.Warn("socket closed:", e.Error())
 			}
@@ -254,7 +258,7 @@ func (n *NetWorkx) HandleClient(conn net.Conn) {
 		//process.Send(process.Self(), etf.Tuple{module, method, buf[n.Packet+4:]})
 		err := process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Tuple{module, method, buf[n.Packet+4:]}}))
 		if err != nil {
-			logrus.Warnf("send error:", err.Error())
+			logrus.Warnf("send error:[%v] [%v] [%v]", method, err.Error(), n.ConnectCount)
 			return
 		}
 

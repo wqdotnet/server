@@ -9,6 +9,7 @@ import (
 	"encoding/binary"
 	"net/http"
 	"server/network"
+	"sync/atomic"
 	"time"
 
 	"github.com/ergo-services/ergo/etf"
@@ -65,6 +66,9 @@ func WsClient(hub *Hub, context *gin.Context, nw *network.NetWorkx) {
 	wsclient.hub.register <- wsclient
 
 	pongWait = time.Second * time.Duration(nw.Readtimeout)
+
+	atomic.AddInt32(&nw.ConnectCount, 1)
+	defer atomic.AddInt32(&nw.ConnectCount, -1)
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.

@@ -19,7 +19,7 @@ type RoleBaseInfo struct {
 	BodyList       map[uint32]*RoleBodyInfo //体质信息
 	CE             int64                    //战斗力 combat effectiveness
 
-	EquipList map[int32]*ItemInfo //道具
+	ItemList map[string]*ItemInfo //道具
 
 	OfflineTimestamp int64  //离线时间戳
 	Online           bool   //是否在线
@@ -41,28 +41,6 @@ type RoleBodyInfo struct {
 	AttributeValue int64  //属性值
 }
 
-//新增道具
-func (r *RoleBaseInfo) AddItem() {
-}
-
-//是否存在N个道具
-func (r *RoleBaseInfo) ExistsItem(itemid, num uint32) bool {
-	return false
-}
-
-func (r *RoleBaseInfo) ExistsItemList(itemid, num []uint32) bool {
-	return false
-}
-
-//扣除道具
-func (r *RoleBaseInfo) DeleteItem(itemid, num uint32) bool {
-	return false
-}
-
-func (r *RoleBaseInfo) DeleteItemList(itemid, num []uint32) bool {
-	return false
-}
-
 func (r *RoleBaseInfo) ToPB() *pbrole.Pb_RoleInfo {
 	return &pbrole.Pb_RoleInfo{
 		RoleID:         r.RoleID,
@@ -74,8 +52,4 @@ func (r *RoleBaseInfo) ToPB() *pbrole.Pb_RoleInfo {
 		CE:             r.CE,
 		//BodyList:       r.BodyList,
 	}
-}
-
-func (r *RoleBaseInfo) SetDirty() {
-	r.DirtyData = true
 }

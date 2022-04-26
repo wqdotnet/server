@@ -34,7 +34,7 @@ func (c *KCPNetwork) Start(nw *NetWorkx) {
 
 			num := atomic.LoadInt32(&nw.ConnectCount)
 			if !nw.OpenConn || num >= nw.MaxConnectNum {
-				logrus.Warnf("kcp connect max count:[%v]", nw.MaxConnectNum)
+				logrus.Warnf("kcp connect open:[%v]  max count:[%v]", nw.OpenConn, nw.MaxConnectNum)
 				conn.Close()
 				continue
 			}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+package item;
+option go_package = "proto/item";
+
+
+//策划配置表属性
+enum Item_Type
+{
+    UnKnown = 0;//未知
+	Money = 1;//货币
+    Equip = 2;//装备
+    Prop = 3;//道具
+    Drug = 4;//丹药
+    Trump = 5;//法宝
+    Rune = 6;//符文
+    Material = 7;//材料
+    Exp = 8;//经验
+    Pokemon = 9;//宠物
+    TrumpMaterial = 10;//法宝材料
+};
+
+
+message pbItem
+{
+    string uuid = 1; //道具id
+    uint32 item_id  = 2;
+    int64 item_number  = 3; //拥有数量
+    uint32 item_lock = 4;//是否锁定0没锁
+    uint32 use_location = 5;//是否装备，0否，1~6装备位置 
+    map<int64,int64> equip_base_attr =6;//基本属性
+    map<int64,int64> equip_extend_attr =7;//扩展属性
+
+    uint32 trump_cur_star = 8;//法宝当前星级
+    uint32 trump_cur_exp = 9;//法宝当前经验
+    
+    string AttributeJson =10;//扩展属性 丹方 丹药
+    string name=11;
+    string desc=12;
+}
+ 

@@ -8,9 +8,9 @@ import (
 
 func init() {
 	InitViperConfig("../../config", "json")
-
 	logrus.Info("ErrorCode:", GetGameCfg().ErrorCode.CfgList)
 	logrus.Info("ExpXiufaInfo len :", len(GetGameCfg().ExpXiufaInfo))
+	logrus.Info("item len :", len(GetGameCfg().ItemInfo))
 }
 
 func TestMapCfg(t *testing.T) {

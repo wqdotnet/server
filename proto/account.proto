@@ -41,7 +41,6 @@ message  s2c_Login {
     sint32	retcode	= 1;
     role.Pb_RoleInfo RoleInfo =2;
     map<uint32,string> Settings =3;  //游戏内设置
-
     map<uint32, string> ItemList = 7;//背包物品列表
     //宗门
     //好友
@@ -63,7 +62,9 @@ message s2c_Register {
 // 创建角色
 message c2s_CreateRole {
     string RoleName =1;
-    int32 sex =2;
+    uint32 sex =2;
+    uint32 headID =3;
+    
 }
 
 message  s2c_CreateRole {

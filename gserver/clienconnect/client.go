@@ -1,8 +1,7 @@
 package clienconnect
 
 import (
-	"server/db"
-	"server/gserver/commonstruct"
+	"server/gserver/nodeManange"
 	"server/proto/account"
 	"server/tools"
 	"time"
@@ -10,8 +9,6 @@ import (
 	"github.com/ergo-services/ergo/etf"
 	"github.com/ergo-services/ergo/gen"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -19,10 +16,12 @@ import (
 //Client 客户端连接
 type Client struct {
 	process         *gen.ServerProcess
+	registerName    string
 	sendChan        chan []byte
 	infofunc        map[int32]func(buf []byte)
 	genServerStatus gen.ServerStatus
 
+	roleID       int32      //角色ID
 	connectState userStatus //连接状态
 }
 
@@ -51,12 +50,12 @@ func (c *Client) initMsgRoute() {
 	c.infofunc[int32(account.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
 	c.infofunc[int32(account.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
 	c.genServerStatus = gen.ServerStatusOK
-
 }
 
 func (c *Client) InitHander(process *gen.ServerProcess, sendChan chan []byte) {
 	c.process = process
 	c.sendChan = sendChan
+
 }
 
 func (c *Client) MsgHander(module, method int32, buf []byte) {
@@ -66,8 +65,15 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 		}
 	}()
 
+	//禁用模块
+	//next...
+
 	if msgfunc := c.infofunc[method]; msgfunc != nil {
-		msgfunc(buf)
+		if c.connectState == StatusLogin || module == int32(account.MSG_ACCOUNT_PLACEHOLDER) {
+			msgfunc(buf)
+		} else {
+			logrus.Errorf("未登陆 [%v] [%v] [%v]", module, method, buf)
+		}
 	} else {
 		logrus.Warnln("未注册的消息", module, method)
 	}
@@ -86,26 +92,47 @@ func (c *Client) LoopHander() time.Duration {
 func (c *Client) HandleCall(message etf.Term) {
 
 }
-func (c *Client) HandleInfo(message etf.Term) {}
+
+func (c *Client) HandleInfo(message etf.Term) {
+	// switch info := message.(type) {
+	// case etf.Tuple:
+	// 	switch info[0].(string) {
+	// 	case "BroadcastMsg":
+	// 		module := info[1].(int32)
+	// 		method := info[2].(int32)
+	// 		buf := info[3].(proto.Message)
+	// 		c.SendToClient(module, method, buf)
+	// 	}
+	// }
+}
 
 func (c *Client) GenServerStatus() gen.ServerStatus {
 	return c.genServerStatus
 }
 
 func (c *Client) Terminate(reason string) {
+	node := nodeManange.GetNode(nodeManange.GateNode)
+	node.UnregisterName(c.registerName)
 	c.process = nil
 	c.sendChan = nil
+	c.connectState = StatusSockert
 	switch reason {
 	case "Extrusionline": //挤下线
 		c.connectState = StatusSqueezeOut
-		// c.SendToClient(int32(account.MSG_ACCOUNT_Module),
-		// 	int32(account.MSG_ACCOUNT_Register),
-		// 	&account.S2C_Register{
-		// 		Retcode: 0,
-		// 	})
 	}
-
 }
+
+// func BroadcastMsg(module int32, method int32, pb proto.Message) {
+// 	data, err := proto.Marshal(pb)
+// 	if err != nil {
+// 		logrus.Errorf("proto encode error[%v] [%v][%v] [%v]", err.Error(), module, method, pb)
+// 		return
+// 	}
+// 	node := nodeManange.GetNode(nodeManange.GateNode)
+// 	for _, process := range node.ProcessList() {
+// 		process.Send(process.Self(), etf.Tuple{etf.Atom("BroadcastMsg"), module, method, data})
+// 	}
+// }
 
 //==========================
 
@@ -141,6 +168,7 @@ func createRegisterFunc[T any](execfunc func(*T)) func(buf []byte) {
 		if err != nil {
 			logrus.Errorf("decode error[%v]", err.Error())
 		} else {
+			//logrus.Debugf("client msg:[%v] [%v]", info, tools.GoID())
 			execfunc(info)
 		}
 	}
@@ -152,23 +180,4 @@ func decodeProto(info interface{}, buf []byte) error {
 		return proto.Unmarshal(buf, data)
 	}
 	return nil
-}
-
-//================db get data=============
-func GetAccountinfo(account, passwd string) (bool, *commonstruct.AccountInfo) {
-	filter := bson.D{
-		primitive.E{Key: "account", Value: account},
-		primitive.E{Key: "password", Value: passwd},
-	}
-	accountinfo := &commonstruct.AccountInfo{}
-	if err := db.FindOneBson(db.AccountTable, accountinfo, filter); err != nil {
-		return false, nil
-	}
-
-	return true, accountinfo
-}
-
-func GetRoleAllData(roleid int32) *commonstruct.RoleData {
-
-	return &commonstruct.RoleData{}
 }

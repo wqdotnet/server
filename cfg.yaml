@@ -6,6 +6,7 @@ ServerID:   1
 OpenHTTP: true
 HTTPPort: 8080
 OpenWS: true
+SetMode: "debug" #debug release, test
 
 #pyroscope
 OpenPyroscope: false
@@ -16,7 +17,7 @@ NetType: tcp
 Port: 3344
 Packet : 2
 Readtimeout: 60  #超时(秒)
-MaxConnectNum: 3
+MaxConnectNum: 10000
 
 # MsgTime 多少秒后  
 # MsgNum 多少条消息后

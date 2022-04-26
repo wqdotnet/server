@@ -41,12 +41,13 @@ func reflectField(structName interface{}, cfgPath, cfgType string, v *viper.Vipe
 	}
 
 	fieldNum := t.NumField()
+
 	for i := 0; i < fieldNum; i++ {
 		fieldname := t.Type().Field(i).Name
 		typename := t.Field(i).Type().Name()
 		field := t.Field(i).Interface()
 
-		logrus.Info("load init config :", fieldname)
+		logrus.Info("load init config =>:", fieldname)
 		v.SetConfigName(fieldname)
 
 		if err := v.ReadInConfig(); err != nil {
@@ -68,7 +69,7 @@ func reflectField(structName interface{}, cfgPath, cfgType string, v *viper.Vipe
 				}
 
 				t.FieldByName(fieldname).Set(reflect.ValueOf(newdata).Elem())
-				break
+				continue
 			}
 			logrus.Fatalf("err:  [%v]   ", err)
 		}

@@ -17,7 +17,7 @@
     },
     {
       "key": "AccountNull",
-      "Name": "未找到账号或者密码错误",
+      "Name": "未找到账号",
       "Code": 100004
     },
     {
@@ -34,6 +34,18 @@
       "key": "RoleNameExists",
       "Name": "角色名已存在",
       "Code": 100007
+    },
+    {
+      "key": "LOGIN",
+      "Name": "已登陆",
+      "Code": 100008
+    },
+    {
+      "key": "CDK",
+      "Name": "cdk已注册",
+      "Code": 100009
     }
+
+    
   ]
 }

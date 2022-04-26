@@ -5,5 +5,6 @@ var (
 	//账号信息
 	AccountTable = "account_info"
 	//   用户表
-	UserTable = "user"
+	RoleBaseTable  = "role_base"
+	RoleItemsTable = "role_item"
 )

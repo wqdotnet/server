@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"server/gserver/commonstruct"
 	"server/network"
+	"sync/atomic"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
 // Start gin web interface
-func Start(Port int32, nw *network.NetWorkx) {
+func Start(Port int32, setmode string, nw *network.NetWorkx) {
 	log.Info("Start [Web Http]")
 	//禁用控制台颜色，在将日志写入文件时不需要控制台颜色
 	//gin.DisableConsoleColor()
@@ -30,6 +32,7 @@ func Start(Port int32, nw *network.NetWorkx) {
 	//如果需要同时将日志写入文件和控制台，请使用以下代码
 	//gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
+	gin.SetMode(setmode)
 	router := gin.New()
 	router.Use(logger(), gin.Recovery())
 
@@ -51,6 +54,15 @@ func Start(Port int32, nw *network.NetWorkx) {
 		})
 
 		router.GET("/ws", func(context *gin.Context) {
+			num := atomic.LoadInt32(&nw.ConnectCount)
+			if !nw.OpenConn || num >= nw.MaxConnectNum {
+				logrus.Warnf("sockert connect open:[%v]  max count:[%v]", nw.OpenConn, nw.MaxConnectNum)
+				context.JSON(500, gin.H{
+					"message": "",
+				})
+				return
+			}
+
 			WsClient(WSHub, context, nw)
 		})
 	}

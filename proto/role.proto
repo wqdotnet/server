@@ -17,6 +17,7 @@ message Pb_RoleInfo {
     int64 CE =8;//战斗力
 }
 
+
  
 //消息号
 enum MSG_ROLE {
@@ -24,4 +25,14 @@ enum MSG_ROLE {
     
     //账号模块
     Module  = 2000; 
+    GetBackpackInfo = 2001;//获取背包信息
+}
+
+
+message c2s_GetBackpackInfo {
+}
+
+
+message s2c_GetBackpackInfo {
+
 }

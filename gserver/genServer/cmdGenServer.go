@@ -58,6 +58,12 @@ func (dgs *CmdGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerF
 	case etf.Atom("shutdown"):
 		dgs.ServerCmdChan <- "shutdown"
 		reply = etf.Atom(dgs.ServerNmae + "  shutdown")
+	case etf.Atom("OpenConn"):
+		dgs.ServerCmdChan <- "OpenConn"
+		reply = etf.Atom("ok")
+	case etf.Atom("CloseConn"):
+		dgs.ServerCmdChan <- "CloseConn"
+		reply = etf.Atom("ok")
 	case etf.Atom("state"):
 		i, _ := pidfile.Read()
 		reply = etf.Atom(fmt.Sprintf(" [%v] pid:[%v]", dgs.ServerNmae, i))

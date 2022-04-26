@@ -31,7 +31,7 @@ func TestInsertOne(t *testing.T) {
 
 func TestFindFieldMax(t *testing.T) {
 	var obj Testdata
-	FindFieldMax("cron_log", "age", &obj)
+	FindFieldMax("cron_log", "age", &obj, bson.D{{}})
 	logrus.Info("TestFindFieldMax:", obj.Age)
 	assert.Equal(t, obj.Age, int32(18))
 }

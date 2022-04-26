@@ -1,8 +1,6 @@
 package db
 
 import (
-	"fmt"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -20,5 +18,5 @@ func GetStorageInfo(tabname string, field string, value interface{}, document in
 
 //SaveStorageInfo save
 func SaveStorageInfo(tabname string, key interface{}, document interface{}) {
-	RedisSetStruct(fmt.Sprintf("%v_%v", tabname, key), document)
+	//RedisSetStruct(fmt.Sprintf("%v_%v", tabname, key), document)
 }

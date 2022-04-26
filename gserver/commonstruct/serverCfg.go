@@ -12,6 +12,7 @@ type ServerConfig struct {
 	OpenHTTP bool
 	HTTPPort int32
 	OpenWS   bool
+	SetMode  string
 
 	OpenPyroscope bool
 	PyroscopeHost string
@@ -63,6 +64,7 @@ var ServerCfg = ServerConfig{
 	OpenHTTP: false,
 	HTTPPort: 8080,
 	OpenWS:   true,
+	SetMode:  "debug",
 
 	OpenPyroscope: false,
 	PyroscopeHost: "http://localhost:4040",

@@ -20,13 +20,13 @@ func saveCfg(cfg *cfgCollection) {
 
 type cfgCollection struct {
 
-	//角色数据
-
 	//错误提示码
 	ErrorCode struct {
 		CfgList []*ErrorCodeCfg
 	}
 
 	//exp
-	ExpXiufaInfo []*ExpLvInfo
+	ExpXiufaInfo []*ExpLvInfoCfg
+	//道具
+	ItemInfo []*ItemInfoCfg
 }
