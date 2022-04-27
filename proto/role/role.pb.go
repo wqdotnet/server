@@ -27,6 +27,7 @@ const (
 	MSG_ROLE_PLACEHOLDER MSG_ROLE = 0 //占位
 	//账号模块
 	MSG_ROLE_Module MSG_ROLE = 2000
+	MSG_ROLE_AddExp MSG_ROLE = 2001
 )
 
 // Enum value maps for MSG_ROLE.
@@ -34,10 +35,12 @@ var (
 	MSG_ROLE_name = map[int32]string{
 		0:    "PLACEHOLDER",
 		2000: "Module",
+		2001: "AddExp",
 	}
 	MSG_ROLE_value = map[string]int32{
 		"PLACEHOLDER": 0,
 		"Module":      2000,
+		"AddExp":      2001,
 	}
 )
 
@@ -172,6 +175,61 @@ func (x *Pb_RoleInfo) GetCE() int64 {
 	return 0
 }
 
+type S2C_AddExp_S struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Addexp int64 `protobuf:"varint,1,opt,name=addexp,proto3" json:"addexp,omitempty"`
+	Exp    int64 `protobuf:"varint,2,opt,name=exp,proto3" json:"exp,omitempty"`
+}
+
+func (x *S2C_AddExp_S) Reset() {
+	*x = S2C_AddExp_S{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_role_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_AddExp_S) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_AddExp_S) ProtoMessage() {}
+
+func (x *S2C_AddExp_S) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_role_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_AddExp_S.ProtoReflect.Descriptor instead.
+func (*S2C_AddExp_S) Descriptor() ([]byte, []int) {
+	return file_proto_role_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *S2C_AddExp_S) GetAddexp() int64 {
+	if x != nil {
+		return x.Addexp
+	}
+	return 0
+}
+
+func (x *S2C_AddExp_S) GetExp() int64 {
+	if x != nil {
+		return x.Exp
+	}
+	return 0
+}
+
 var File_proto_role_proto protoreflect.FileDescriptor
 
 var file_proto_role_proto_rawDesc = []byte{
@@ -202,11 +260,15 @@ var file_proto_role_proto_rawDesc = []byte{
 	0x74, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x0d, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75,
 	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02,
-	0x38, 0x01, 0x2a, 0x28, 0x0a, 0x08, 0x4d, 0x53, 0x47, 0x5f, 0x52, 0x4f, 0x4c, 0x45, 0x12, 0x0f,
-	0x0a, 0x0b, 0x50, 0x4c, 0x41, 0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x00, 0x12,
-	0x0b, 0x0a, 0x06, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x10, 0xd0, 0x0f, 0x42, 0x0c, 0x5a, 0x0a,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x72, 0x6f, 0x6c, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x38, 0x01, 0x22, 0x38, 0x0a, 0x0c, 0x73, 0x32, 0x63, 0x5f, 0x41, 0x64, 0x64, 0x45, 0x78, 0x70,
+	0x5f, 0x53, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x64, 0x64, 0x65, 0x78, 0x70, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x06, 0x61, 0x64, 0x64, 0x65, 0x78, 0x70, 0x12, 0x10, 0x0a, 0x03, 0x65, 0x78,
+	0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x03, 0x65, 0x78, 0x70, 0x2a, 0x35, 0x0a, 0x08,
+	0x4d, 0x53, 0x47, 0x5f, 0x52, 0x4f, 0x4c, 0x45, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x4c, 0x41, 0x43,
+	0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x06, 0x4d, 0x6f, 0x64,
+	0x75, 0x6c, 0x65, 0x10, 0xd0, 0x0f, 0x12, 0x0b, 0x0a, 0x06, 0x41, 0x64, 0x64, 0x45, 0x78, 0x70,
+	0x10, 0xd1, 0x0f, 0x42, 0x0c, 0x5a, 0x0a, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x72, 0x6f, 0x6c,
+	0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -222,16 +284,17 @@ func file_proto_role_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_role_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_role_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_proto_role_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_role_proto_goTypes = []interface{}{
-	(MSG_ROLE)(0),       // 0: role.MSG_ROLE
-	(*Pb_RoleInfo)(nil), // 1: role.Pb_RoleInfo
-	nil,                 // 2: role.Pb_RoleInfo.AttributeValueEntry
-	nil,                 // 3: role.Pb_RoleInfo.BodyListEntry
+	(MSG_ROLE)(0),        // 0: role.MSG_ROLE
+	(*Pb_RoleInfo)(nil),  // 1: role.Pb_RoleInfo
+	(*S2C_AddExp_S)(nil), // 2: role.s2c_AddExp_S
+	nil,                  // 3: role.Pb_RoleInfo.AttributeValueEntry
+	nil,                  // 4: role.Pb_RoleInfo.BodyListEntry
 }
 var file_proto_role_proto_depIdxs = []int32{
-	2, // 0: role.Pb_RoleInfo.AttributeValue:type_name -> role.Pb_RoleInfo.AttributeValueEntry
-	3, // 1: role.Pb_RoleInfo.BodyList:type_name -> role.Pb_RoleInfo.BodyListEntry
+	3, // 0: role.Pb_RoleInfo.AttributeValue:type_name -> role.Pb_RoleInfo.AttributeValueEntry
+	4, // 1: role.Pb_RoleInfo.BodyList:type_name -> role.Pb_RoleInfo.BodyListEntry
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -257,6 +320,18 @@ func file_proto_role_proto_init() {
 				return nil
 			}
 		}
+		file_proto_role_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2C_AddExp_S); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -264,7 +339,7 @@ func file_proto_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_role_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

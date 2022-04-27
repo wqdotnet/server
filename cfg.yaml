@@ -2,6 +2,7 @@ ServerName: "server"
 ServerID:   1
 #Version: "1.0.1"
 
+
 ##web htpp port
 OpenHTTP: true
 HTTPPort: 8080
@@ -9,8 +10,8 @@ OpenWS: true
 SetMode: "debug" #debug release, test
 
 #pyroscope
-OpenPyroscope: false
-PyroscopeHost: "http://localhost:4040"
+OpenPyroscope: true
+PyroscopeHost: "http://192.168.1.68:4040"
 
 #NetType : tcp/kcp
 NetType: tcp
@@ -52,5 +53,9 @@ LogName: "log"
 ListenBegin: 15151
 ListenEnd:   25151
 Cookie: "123"
+
+
+
 #gateway db server
 StartList : ["gateway","db","server"]
+CentralServerNode: ["serverNode@127.0.0.1"]

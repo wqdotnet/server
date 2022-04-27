@@ -24,7 +24,6 @@ func (gateGS *GateGenServer) Init(process *gen.ServerProcess, args ...etf.Term) 
 	gateGS.sendChan = args[0].(chan []byte)
 	gateGS.clientHander = args[1].(GateGenHanderInterface)
 	gateGS.clientHander.InitHander(process, gateGS.sendChan)
-
 	process.SendAfter(process.Self(), etf.Atom("loop"), time.Second)
 	return nil
 }
@@ -61,16 +60,7 @@ func (gateGS *GateGenServer) HandleCast(process *gen.ServerProcess, message etf.
 func (gateGS *GateGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFrom, message etf.Term) (etf.Term, gen.ServerStatus) {
 	logrus.Infof("HandleCall (%v): %v, From: %v", process.Name(), message, from)
 
-	switch info := message.(type) {
-	case etf.Atom:
-		switch info {
-		case "Extrusionline": //挤下线
-			gateGS.clientHander.Terminate("Extrusionline")
-			return etf.Term("ignore"), gen.ServerStatusStop
-		}
-	}
-	gateGS.clientHander.HandleCall(message)
-
+	//gateGS.clientHander.HandleCall(message)
 	reply := etf.Atom("ignore")
 	return reply, gateGS.clientHander.GenServerStatus()
 }
@@ -79,6 +69,8 @@ func (gateGS *GateGenServer) HandleInfo(process *gen.ServerProcess, message etf.
 	switch info := message.(type) {
 	case etf.Atom:
 		switch info {
+		case "Extrusionline": //挤下线
+			gateGS.clientHander.Terminate("Extrusionline")
 		case "loop":
 			after := gateGS.clientHander.LoopHander()
 			if after < time.Millisecond {
@@ -89,15 +81,16 @@ func (gateGS *GateGenServer) HandleInfo(process *gen.ServerProcess, message etf.
 		case "stop":
 			return gen.ServerStatusStop
 		}
+	default:
+		gateGS.clientHander.HandleInfo(message)
 	}
 
-	gateGS.clientHander.HandleInfo(message)
 	return gateGS.clientHander.GenServerStatus()
 }
 
 // Terminate called when process died
 func (gateGS *GateGenServer) Terminate(process *gen.ServerProcess, reason string) {
-	//logrus.Infof("Terminate (%v): %v", process.Name(), reason)
+	logrus.Infof("Terminate (%v): %v", process.Name(), reason)
 	gateGS.clientHander.Terminate(reason)
 }
 

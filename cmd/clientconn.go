@@ -22,6 +22,7 @@ import (
 	"net"
 	"server/network"
 	"server/proto/account"
+	"server/proto/protocol_base"
 	"server/tools"
 	"strconv"
 	"sync"
@@ -36,22 +37,18 @@ var wg sync.WaitGroup
 // clientconnCmd represents the clientconn command
 var clientconnCmd = &cobra.Command{
 	Use:   "clientconn",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "模拟客户端连接",
+	Long:  `模拟客户端连接  args: 连接数量`,
 	Run: func(cmd *cobra.Command, args []string) {
-		num := 1
+		num := 2
 
 		wg = sync.WaitGroup{}
 
 		if len(args) == 1 {
 			num, _ = strconv.Atoi(args[0])
+			num++
 		}
-		wg.Add(num)
+		wg.Add(num - 1)
 		fmt.Println(num)
 		for i := 1; i < num; i++ {
 			go conn(i)
@@ -112,7 +109,7 @@ func conn(key int) {
 
 				if msg.Retcode == 100005 {
 					//角色为空， 创建角色
-					SendToClient(int32(account.MSG_ACCOUNT_PLACEHOLDER),
+					SendToClient(int32(account.MSG_ACCOUNT_Module),
 						int32(account.MSG_ACCOUNT_CreateRole),
 						&account.C2S_CreateRole{
 							RoleName: accountname,
@@ -121,7 +118,7 @@ func conn(key int) {
 						}, sendchan)
 				} else if msg.Retcode == 100004 {
 					//注册账号
-					SendToClient(int32(account.MSG_ACCOUNT_PLACEHOLDER),
+					SendToClient(int32(account.MSG_ACCOUNT_Module),
 						int32(account.MSG_ACCOUNT_Register),
 						&account.C2S_Register{
 							Account:   accountname,
@@ -135,15 +132,29 @@ func conn(key int) {
 					return
 				} else if msg.Retcode == 0 {
 					fmt.Println("登陆成功:", msg.Retcode)
-					return
+					// time.Sleep(time.Second * 1)
+					// SendToClient(int32(account.MSG_ACCOUNT_Module),
+					// 	int32(account.MSG_ACCOUNT_Ping),
+					// 	&account.C2S_Ping{}, sendchan)
 				}
+			// case int32(account.MSG_ACCOUNT_Ping):
+			// 	msg := &account.S2C_Ping{}
+			// 	proto.Unmarshal(msgbuf, msg)
+			// 	fmt.Println("ping:", msg.Timestamp)
+			// 	time.Sleep(time.Second * 1)
+			// 	SendToClient(int32(account.MSG_ACCOUNT_Module),
+			// 		int32(account.MSG_ACCOUNT_Ping),
+			// 		&account.C2S_Ping{}, sendchan)
+			case int32(protocol_base.MSG_BASE_NoticeMsg):
+				fmt.Println("被挤下线")
+				return
 			case int32(account.MSG_ACCOUNT_Register):
 				msg := &account.S2C_Register{}
 				proto.Unmarshal(msgbuf, msg)
 				fmt.Printf("S2C_Register: [%v]\n", msg)
 
 				//成功注册创建角色
-				SendToClient(int32(account.MSG_ACCOUNT_PLACEHOLDER),
+				SendToClient(int32(account.MSG_ACCOUNT_Module),
 					int32(account.MSG_ACCOUNT_CreateRole),
 					&account.C2S_CreateRole{
 						RoleName: accountname,
@@ -155,8 +166,9 @@ func conn(key int) {
 				msg := &account.S2C_CreateRole{}
 				proto.Unmarshal(msgbuf, msg)
 				fmt.Printf("S2C_CreateRole: [%v]\n", msg)
-
-				return
+				SendToClient(int32(account.MSG_ACCOUNT_Module),
+					int32(protocol_base.MSG_BASE_HeartBeat),
+					&protocol_base.C2S_HeartBeat{}, sendchan)
 			}
 		}
 	}()
@@ -165,7 +177,7 @@ func conn(key int) {
 		Account:  accountname,
 		Password: password,
 	}
-	SendToClient(int32(account.MSG_ACCOUNT_PLACEHOLDER), int32(account.MSG_ACCOUNT_Login), msg, sendchan)
+	SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), msg, sendchan)
 
 	for {
 		select {

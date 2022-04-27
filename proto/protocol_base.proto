@@ -9,13 +9,12 @@ enum MSG_BASE {
     PLACEHOLDER_BASE =0;  //占位
     
     //模块id
-    PROTOCOL_BASE=100;  //基础模块
+    Module=100;  //基础模块
 
     //消息method id
-    C2SHeartBeat =101;     //心跳
-    S2CHeartBeat =102;     
+    HeartBeat =101;     //心跳
 
-    S2CErrorMsg = 103; //错误提示
+    NoticeMsg = 103; //错误提示
 }
 
 //心跳  1
@@ -23,11 +22,12 @@ message c2s_HeartBeat {
 }
 
 message s2c_HeartBeat {
-    //服务器时间戳 
-    int64 servertime =1;
+    sint32	retcode	= 1;
+    int64 Timestamp =2;//服务器时间
 }
  
 //错误提示消息
-message s2c_ErrorMsg {
-    string  MsgCode = 1;
+message s2c_NoticeMsg { 
+    sint32	retcode	= 1;
+    string  NoticeMsg =2;
 }

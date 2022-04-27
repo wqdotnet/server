@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//游戏逻辑服务
+//中心服务
 type GameGenServer struct {
 	gen.Server
 }

@@ -48,7 +48,8 @@ type ServerConfig struct {
 	ListenEnd   int
 	Cookie      string
 
-	StartList []string
+	StartList         []string
+	CentralServerNode []string
 }
 
 // ServerCfg  Program overall configuration
@@ -98,8 +99,9 @@ var ServerCfg = ServerConfig{
 	LogName:  "log",
 	LogWrite: false,
 
-	ListenBegin: 15151,
-	ListenEnd:   25151,
-	Cookie:      "123",
-	StartList:   []string{"db", "gateway", "server"},
+	ListenBegin:       15151,
+	ListenEnd:         25151,
+	Cookie:            "123",
+	StartList:         []string{"db", "gateway", "server"},
+	CentralServerNode: []string{"CentralServerNode@127.0.0.1"},
 }

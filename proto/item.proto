@@ -37,4 +37,22 @@ message pbItem
     string name=11;
     string desc=12;
 }
- 
+
+
+//消息号
+enum MSG_ITEM {
+    PLACEHOLDER =0;  //占位
+    
+    //账号模块
+    Module  = 3000; 
+
+    GetBackpackInfo = 3001;//获取背包信息
+}
+
+message c2s_GetBackpackInfo {
+}
+
+
+message s2c_GetBackpackInfo {
+
+}

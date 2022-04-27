@@ -77,6 +77,7 @@ func StartGameServerSupNode(nodeName string, cmd chan string) (node.Node, gen.Pr
 
 	// Spawn supervisor process
 	process, err := node.Spawn("gameServer_sup", gen.ProcessOptions{}, &GameServerSup{ServerCmdChan: cmd})
+
 	return node, process, err
 
 }

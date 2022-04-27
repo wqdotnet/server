@@ -1,7 +1,6 @@
 package genServer
 
 import (
-	"server/db"
 	"server/gserver/commonstruct"
 	"time"
 
@@ -37,7 +36,6 @@ func (dgs *DbGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFr
 }
 
 func (dgs *DbGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
-	logrus.Debugf("HandleInfo (%v): %v", process.Name(), message)
 	switch info := message.(type) {
 	case etf.Atom:
 		switch info {
@@ -55,23 +53,5 @@ func (dgs *DbGenServer) Terminate(process *gen.ServerProcess, reason string) {
 }
 
 func loop() {
-	commonstruct.RangeAllData(func(rd *commonstruct.RoleData) (issave bool) {
-		if rd.RoleBase.DirtyData {
-			logrus.Debug("保存数据", rd.RoleBase.Name, rd.RoleBase.RoleID)
-			if err := db.InsertOne(db.RoleBaseTable, rd.RoleBase); err == nil {
-				rd.RoleBase.DirtyData = false
-				issave = true
-			}
-		}
-
-		if rd.RoleItems.DirtyData {
-			logrus.Debug("保存数据", rd.RoleBase.Name, rd.RoleBase.RoleID)
-			if err := db.InsertOne(db.RoleItemsTable, rd.RoleItems); err == nil {
-				rd.RoleItems.DirtyData = false
-				issave = true
-			}
-		}
-
-		return issave
-	})
+	commonstruct.RangeAllData(commonstruct.SaveRoleData)
 }

@@ -46,6 +46,7 @@ func (g *gameServer) Start() {
 
 	//启动网络
 	gateNode := nodeManange.GetNode(nodeManange.GateNode)
+
 	if gateNode != nil {
 		g.nw.Start(gateNode)
 	}

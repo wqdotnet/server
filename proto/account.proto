@@ -15,6 +15,7 @@ enum MSG_ACCOUNT {
     Login = 1001;//用户登陆
     Register= 1002;//注册账号
     CreateRole= 1003;//创建角色     
+
 }
 
 
@@ -72,3 +73,4 @@ message  s2c_CreateRole {
     role.Pb_RoleInfo RoleInfo =2;
 }
 
+ 

@@ -44,14 +44,14 @@ func (h *Hub) run() {
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
-				close(client.send)
+				close(client.testsend)
 			}
 		case message := <-h.broadcast:
 			for client := range h.clients {
 				select {
-				case client.send <- message:
+				case client.testsend <- message:
 				default:
-					close(client.send)
+					close(client.testsend)
 					delete(h.clients, client)
 				}
 			}

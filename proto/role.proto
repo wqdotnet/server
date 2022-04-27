@@ -23,16 +23,16 @@ message Pb_RoleInfo {
 enum MSG_ROLE {
     PLACEHOLDER =0;  //占位
     
-    //账号模块
+    //角色模块
     Module  = 2000; 
-    GetBackpackInfo = 2001;//获取背包信息
+    AddExp =  2001;
+
+    //突破-雷劫
+    
 }
 
-
-message c2s_GetBackpackInfo {
-}
-
-
-message s2c_GetBackpackInfo {
-
+//加经验
+message  s2c_AddExp_S {    
+    int64 addexp = 1;
+    int64 exp =2;
 }

@@ -168,6 +168,22 @@ func Update(tbname string, Findfield interface{}, Upfield interface{}) (int64, e
 	return updateResult.ModifiedCount, nil
 }
 
+//Update 更新数据
+//	Findfield := bson.D{primitive.E{Key: field, Value: value}}
+//	replacement   替换所选文档的文档
+func ReplaceOne(tbname string, Findfield interface{}, replacement interface{}) (int64, error) {
+	client, collection := getCollection(tbname)
+	defer clientPool.ReturnObject(context.Background(), client)
+
+	updateResult, err := collection.ReplaceOne(context.TODO(), Findfield, replacement)
+	//updateResult, err := collection.UpdateOne(context.TODO(), Findfield, Upfield)
+	if err != nil {
+		return 0, err
+	}
+	//logrus.Debug("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+	return updateResult.ModifiedCount, nil
+}
+
 //Delete 删除
 func Delete(tbname string, field string, value interface{}) int64 {
 	client, collection := getCollection(tbname)

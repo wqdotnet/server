@@ -1,8 +1,15 @@
 package clienconnect
 
 import (
+	"fmt"
+	"runtime"
+	"server/gserver/cfg"
+	"server/gserver/commonstruct"
 	"server/gserver/nodeManange"
 	"server/proto/account"
+	"server/proto/item"
+	"server/proto/protocol_base"
+	"server/proto/role"
 	"server/tools"
 	"time"
 
@@ -32,8 +39,11 @@ const (
 	StatusSockert userStatus = 0
 	//StatusLogin 已登陆成功
 	StatusLogin userStatus = 1
+	//正常游戏中
+	StatusGame userStatus = 2
+
 	//StatusSqueezeOut 重复登陆 挤下线
-	StatusSqueezeOut userStatus = 2
+	//StatusSqueezeOut userStatus = 2
 )
 
 //===========GateGenHanderInterface 接口实现===============
@@ -44,11 +54,20 @@ func NewClient() *Client {
 }
 
 func (c *Client) initMsgRoute() {
-	c.infofunc = make(map[int32]func(buf []byte))
 	//消息注册
+	c.infofunc = make(map[int32]func(buf []byte))
+	//心跳
+	c.infofunc[int32(protocol_base.MSG_BASE_HeartBeat)] = createRegisterFunc(c.heartBeat)
+
+	//账号
 	c.infofunc[int32(account.MSG_ACCOUNT_Login)] = createRegisterFunc(c.accountLogin)
 	c.infofunc[int32(account.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
 	c.infofunc[int32(account.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
+	//角色
+
+	//道具
+	c.infofunc[int32(item.MSG_Item_GetBackpackInfo)] = createRegisterFunc(c.getBackpackInfo)
+
 	c.genServerStatus = gen.ServerStatusOK
 }
 
@@ -69,7 +88,7 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 	//next...
 
 	if msgfunc := c.infofunc[method]; msgfunc != nil {
-		if c.connectState == StatusLogin || module == int32(account.MSG_ACCOUNT_PLACEHOLDER) {
+		if c.connectState == StatusGame || module == int32(account.MSG_ACCOUNT_Module) {
 			msgfunc(buf)
 		} else {
 			logrus.Errorf("未登陆 [%v] [%v] [%v]", module, method, buf)
@@ -82,11 +101,42 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 func (c *Client) LoopHander() time.Duration {
 	defer func() {
 		if err := recover(); err != nil {
-			logrus.Error(err)
+			var err string
+			for i := 0; i < 10; i++ {
+				pc, fn, line, _ := runtime.Caller(i)
+				if line == 0 {
+					break
+				}
+				err += fmt.Sprintf("funcname:[%v] fn:[%v] line:[%v] \n", runtime.FuncForPC(pc).Name(), fn, line)
+			}
+			logrus.Error("err: \n", err)
 		}
 	}()
 
-	return time.Second
+	if c.connectState == StatusGame {
+		roledata := commonstruct.GetRoleAllData(c.roleID)
+		nowtime := time.Now().Unix()
+		num := (nowtime - roledata.RoleBase.PracticeTimestamp) / 5
+		if num > 0 {
+			roledata.RoleBase.PracticeTimestamp = nowtime
+			if expcfg := cfg.GetLvExpInfo(roledata.RoleBase.Level); expcfg != nil {
+				expcfg := cfg.GetLvExpInfo(roledata.RoleBase.Level)
+				addexp := int64(expcfg.CycleEXP) * num
+				roledata.RoleBase.Exp += addexp
+				//加经验通知
+				c.SendToClient(int32(role.MSG_ROLE_Module),
+					int32(role.MSG_ROLE_AddExp),
+					&role.S2C_AddExp_S{Exp: roledata.RoleBase.Exp, Addexp: addexp})
+
+			} else {
+				logrus.Error("expcfg is nil:", roledata.RoleBase.Level, roledata.RoleBase)
+			}
+		}
+
+		//logrus.Debug("loop role exp:", roledata.RoleBase.Exp, num)
+	}
+
+	return time.Second * 5
 }
 
 func (c *Client) HandleCall(message etf.Term) {
@@ -111,28 +161,28 @@ func (c *Client) GenServerStatus() gen.ServerStatus {
 }
 
 func (c *Client) Terminate(reason string) {
+	logrus.Debugf("client 关闭  [%v] roleid:[%v]  [%v]", reason, c.roleID, c.process.Name())
+	switch reason {
+	case "Extrusionline": //挤下线 不中断socket连接 ,只将状态设置成为登陆状态
+		c.SendToClient(int32(protocol_base.MSG_BASE_Module),
+			int32(protocol_base.MSG_BASE_NoticeMsg),
+			&protocol_base.S2C_NoticeMsg{
+				Retcode:   0,
+				NoticeMsg: reason,
+			})
+		c.connectState = StatusSockert
+		return
+	}
+
 	node := nodeManange.GetNode(nodeManange.GateNode)
 	node.UnregisterName(c.registerName)
+	c.registerName = ""
 	c.process = nil
 	c.sendChan = nil
+	c.roleID = 0
 	c.connectState = StatusSockert
-	switch reason {
-	case "Extrusionline": //挤下线
-		c.connectState = StatusSqueezeOut
-	}
-}
 
-// func BroadcastMsg(module int32, method int32, pb proto.Message) {
-// 	data, err := proto.Marshal(pb)
-// 	if err != nil {
-// 		logrus.Errorf("proto encode error[%v] [%v][%v] [%v]", err.Error(), module, method, pb)
-// 		return
-// 	}
-// 	node := nodeManange.GetNode(nodeManange.GateNode)
-// 	for _, process := range node.ProcessList() {
-// 		process.Send(process.Self(), etf.Tuple{etf.Atom("BroadcastMsg"), module, method, data})
-// 	}
-// }
+}
 
 //==========================
 

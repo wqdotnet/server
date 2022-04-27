@@ -7,8 +7,11 @@ package web
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"net/http"
 	"server/network"
+	"server/tools"
 	"sync/atomic"
 	"time"
 
@@ -62,7 +65,7 @@ func WsClient(hub *Hub, context *gin.Context, nw *network.NetWorkx) {
 	process, clientHander, sendchan, err := nw.CreateProcess()
 	defer nw.UserPool.Put(clientHander)
 
-	wsclient := &wsClient{hub: hub, conn: conn, send: sendchan}
+	wsclient := &wsClient{hub: hub, conn: conn, send: sendchan, testsend: make(chan []byte, 1)}
 	wsclient.hub.register <- wsclient
 
 	pongWait = time.Second * time.Duration(nw.Readtimeout)
@@ -72,8 +75,8 @@ func WsClient(hub *Hub, context *gin.Context, nw *network.NetWorkx) {
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
-	go wsclient.writePump()
-	wsclient.readPump(process)
+	go wsclient.writePump(nw.Packet)
+	wsclient.readPump(process, nw.Packet)
 }
 
 // wsClient is a middleman between the websocket connection and the hub.
@@ -83,9 +86,11 @@ type wsClient struct {
 	conn *websocket.Conn
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	testsend chan []byte
 }
 
-func (c *wsClient) readPump(process gen.Process) {
+func (c *wsClient) readPump(process gen.Process, packet int32) {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -97,31 +102,30 @@ func (c *wsClient) readPump(process gen.Process) {
 	defer process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Atom("SocketStop")}))
 
 	for {
-		_, messagebuf, err := c.conn.ReadMessage()
+		messageType, messagebuf, err := unpackToBlockFromReader(c.conn, packet, []byte{})
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				logrus.Errorf("WebSocket closed  error: %v", err.Error())
-			} else {
-				logrus.Debugf("WebSocket closed: [%v]", err.Error())
 			}
 			return
 		}
-		messagebuf = bytes.TrimSpace(bytes.Replace(messagebuf, newline, space, -1))
 
-		if len(messagebuf) < int(4) {
-			logrus.Debug("buf len:", len(messagebuf))
-			return
+		if messageType == 1 {
+			messagebuf = bytes.TrimSpace(bytes.Replace(messagebuf, newline, space, -1))
+			c.hub.broadcast <- messagebuf
+		} else {
+			if len(messagebuf) < 4 {
+				logrus.Debug("buf len:", len(messagebuf))
+				return
+			}
+			module := int32(binary.BigEndian.Uint16(messagebuf[packet : packet+2]))
+			method := int32(binary.BigEndian.Uint16(messagebuf[packet+2 : packet+4]))
+			process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Tuple{module, method, messagebuf[packet+4:]}}))
 		}
-
-		module := int32(binary.BigEndian.Uint16(messagebuf[:2]))
-		method := int32(binary.BigEndian.Uint16(messagebuf[2:4]))
-		process.Send(process.Self(), etf.Term(etf.Tuple{etf.Atom("$gen_cast"), etf.Tuple{module, method, messagebuf[4:]}}))
-
-		//c.hub.broadcast <- messagebuf
 	}
 }
 
-func (c *wsClient) writePump() {
+func (c *wsClient) writePump(packet int32) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -136,18 +140,37 @@ func (c *wsClient) writePump() {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-
 			w, err := c.conn.NextWriter(websocket.BinaryMessage)
+			if err != nil {
+				return
+			}
+
+			le := tools.IntToBytes(int32(len(message)), packet)
+			buf := tools.BytesCombine(le, message)
+			w.Write(buf)
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case message, ok := <-c.testsend:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				// The hub closed the channel.
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
+			n := len(c.testsend)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
-				w.Write(<-c.send)
+				w.Write(<-c.testsend)
 			}
 
 			if err := w.Close(); err != nil {
@@ -159,5 +182,49 @@ func (c *wsClient) writePump() {
 				return
 			}
 		}
+	}
+}
+
+func unpackToBlockFromReader(conn *websocket.Conn, packet int32, lastbyte []byte) (int, []byte, error) {
+	messageType, buf, err := conn.ReadMessage()
+	buf = tools.BytesCombine(lastbyte, buf)
+	if err != nil {
+		return 0, nil, err
+	}
+	switch messageType {
+	case 1:
+		return messageType, buf, nil
+	case 2:
+		if len(buf) <= int(packet) {
+			return messageType, nil, errors.New("packet size error")
+		}
+		lenght, err := LengthOf(buf, packet)
+		if err != nil {
+			return messageType, nil, err
+		}
+
+		if int(lenght) < len(buf[packet:]) {
+			return unpackToBlockFromReader(conn, packet, buf[lenght:])
+		} else {
+			return messageType, buf, nil
+		}
+	}
+
+	return 0, nil, nil
+}
+
+func LengthOf(stream []byte, packet int32) (int32, error) {
+	if len(stream) < int(packet) {
+		return 0, errors.New(fmt.Sprint("stream lenth should be bigger than ", packet))
+	}
+
+	switch packet {
+	case 2:
+		return int32(binary.BigEndian.Uint16(stream[0:2])), nil
+	case 4:
+		return int32(binary.BigEndian.Uint32(stream[0:4])), nil
+	default:
+		errstr := fmt.Sprintf("stream lenth seting error  [packet: %v]", packet)
+		return 0, errors.New(errstr)
 	}
 }

@@ -18,7 +18,6 @@ type AccountInfo struct {
 	RoleUUID           string //角色uuid
 	CDK                string
 	Settings           map[uint32]string //设置
-
 }
 
 func (accountinfo *AccountInfo) GetAccountinfo() bool {
@@ -40,7 +39,7 @@ func (accountinfo *AccountInfo) GetAccountinfo() bool {
 func GetMaxRoleID(value int32) int32 {
 	var obj AccountInfo
 	//区号
-	db.FindFieldMax(db.AccountTable, "roleid", &obj, bson.D{primitive.E{Key: "zoneid", Value: value}})
+	db.FindFieldMax(db.AccountTable, "roleid", &obj, bson.D{{}})
 	return obj.RoleID
 }
 
