@@ -27,13 +27,8 @@ message pbItem
     int64 item_number  = 3; //拥有数量
     uint32 item_lock = 4;//是否锁定0没锁
     uint32 use_location = 5;//是否装备，0否，1~6装备位置 
-    map<int64,int64> equip_base_attr =6;//基本属性
-    map<int64,int64> equip_extend_attr =7;//扩展属性
-
-    uint32 trump_cur_star = 8;//法宝当前星级
-    uint32 trump_cur_exp = 9;//法宝当前经验
-    
-    string AttributeJson =10;//扩展属性 丹方 丹药
+    map<int64,int64> base_attr =6;//基本属性
+    string AttributeJson =7;//扩展属性 
     string name=11;
     string desc=12;
 }

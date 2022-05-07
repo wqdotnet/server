@@ -1,6 +1,7 @@
 package commonstruct
 
 import (
+	"server/gserver/cfg"
 	pbrole "server/proto/role"
 )
 
@@ -13,6 +14,7 @@ type RoleBaseInfo struct {
 	Sex               uint32 //性别
 	Level             int32  //等级
 	Exp               int64  //经验
+	MaxExp            int64  //储存最大经验
 	PracticeTimestamp int64  //练功时间戳
 
 	AttributeValue map[uint32]int64         //属性值
@@ -30,7 +32,9 @@ type RoleBaseInfo struct {
 	//任务
 	//成就记录
 
-	DirtyData bool
+	// DirtyData     bool
+	// DirtyDataList map[string]primitive.E
+	DirtyDataRecord
 }
 
 //体质
@@ -52,4 +56,13 @@ func (r *RoleBaseInfo) ToPB() *pbrole.Pb_RoleInfo {
 		CE:             r.CE,
 		//BodyList:       r.BodyList,
 	}
+}
+
+func (r *RoleBaseInfo) CalculationProperties() {
+	lvcfg := cfg.GetLvExpInfo(r.Level)
+	r.MaxExp = lvcfg.MaxExp
+	for i, v := range lvcfg.Properties {
+		r.AttributeValue[uint32(v)] = int64(lvcfg.AttributeValues[i])
+	}
+	r.CE = 0
 }

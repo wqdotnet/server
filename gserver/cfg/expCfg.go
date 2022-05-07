@@ -2,12 +2,12 @@ package cfg
 
 type ExpLvInfoCfg struct {
 	Level            int     `json:"level"`
-	NeedExp          int     `json:"needExp"`
-	FailExp          int     `json:"failExp"`
-	MaxExp           int     `json:"maxExp"`
+	NeedExp          int64   `json:"needExp"`
+	FailExp          int64   `json:"failExp"`
+	MaxExp           int64   `json:"maxExp"`
 	BigLevel         string  `json:"bigLevel"`
 	HeadSize         int     `json:"headSize"`
-	CycleEXP         int     `json:"cycleEXP"`
+	CycleEXP         int64   `json:"cycleEXP"`
 	ExpWeight        []int   `json:"expWeight"`
 	ExpWeightValue   [][]int `json:"expWeightValue"`
 	ExpUp            int     `json:"expUp"`

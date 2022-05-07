@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	//"github.com/go-playground/assert/v2"
-
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
 	"go.mongodb.org/mongo-driver/bson"
 )
 

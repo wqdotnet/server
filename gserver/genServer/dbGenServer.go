@@ -1,7 +1,6 @@
 package genServer
 
 import (
-	"server/gserver/commonstruct"
 	"time"
 
 	"github.com/ergo-services/ergo/etf"
@@ -36,6 +35,12 @@ func (dgs *DbGenServer) HandleCall(process *gen.ServerProcess, from gen.ServerFr
 }
 
 func (dgs *DbGenServer) HandleInfo(process *gen.ServerProcess, message etf.Term) gen.ServerStatus {
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Error("err:", err)
+		}
+	}()
+
 	switch info := message.(type) {
 	case etf.Atom:
 		switch info {
@@ -53,5 +58,5 @@ func (dgs *DbGenServer) Terminate(process *gen.ServerProcess, reason string) {
 }
 
 func loop() {
-	commonstruct.RangeAllData(commonstruct.SaveRoleData)
+	//commonstruct.RangeAllData(commonstruct.SaveRoleData)
 }

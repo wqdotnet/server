@@ -155,7 +155,7 @@ func FindBson(tbname string, filter interface{}) (*mongo.Cursor, error) {
 
 //Update 更新数据
 //	Findfield := bson.D{{"name", "Ash"}}
-//	Upfield := bson.D{{"$inc", bson.D{{"age", 1}}}}
+//	Upfield := bson.D{{"$set", bson.D{{"age", 1}}}}
 func Update(tbname string, Findfield interface{}, Upfield interface{}) (int64, error) {
 	client, collection := getCollection(tbname)
 	defer clientPool.ReturnObject(context.Background(), client)

@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"sync"
+
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 // testCmd represents the test command
@@ -18,17 +18,16 @@ func init() {
 	rootCmd.AddCommand(testCmd)
 }
 
-func exectest(cmd *cobra.Command, args []string) {
-
-	// info := &account.C2S_CreateRole{RoleName: "sdfhowme"}
-	// buf, _ := proto.Marshal(info)
-
+type TestObject struct {
+	Field1 int
+	Field2 int
 }
 
-//protobuf 解码
-func decodeProto(info interface{}, buf []byte) error {
-	if data, ok := info.(protoreflect.ProtoMessage); ok {
-		return proto.Unmarshal(buf, data)
-	}
-	return nil
+var (
+	mp   = map[string]TestObject{}
+	lock = sync.RWMutex{}
+)
+
+func exectest(cmd *cobra.Command, args []string) {
+
 }

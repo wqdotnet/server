@@ -27,12 +27,30 @@ enum MSG_ROLE {
     Module  = 2000; 
     AddExp =  2001;
 
-    //突破-雷劫
-    
+ 
+    Upgrade  =2002;
+
+    AttributeChange = 2004;
 }
 
 //加经验
 message  s2c_AddExp_S {    
     int64 addexp = 1;
     int64 exp =2;
+}
+
+//升级突破-雷劫
+message c2s_Upgrade {
+}
+
+message s2c_Upgrade {
+    sint32	retcode	= 1;
+    int32 level = 2;
+    int64 exp =3;
+}
+
+//属性变化通知
+message s2c_AttributeChange_S {
+    map<uint32, int64> AttributeList = 1;    //属性列表
+    int64 CE = 2;//战斗力combat effectiveness
 }

@@ -95,53 +95,53 @@ func (Item_Type) EnumDescriptor() ([]byte, []int) {
 }
 
 //消息号
-type MSG_Item int32
+type MSG_ITEM int32
 
 const (
-	MSG_Item_PLACEHOLDER MSG_Item = 0 //占位
+	MSG_ITEM_PLACEHOLDER MSG_ITEM = 0 //占位
 	//账号模块
-	MSG_Item_Module          MSG_Item = 3000
-	MSG_Item_GetBackpackInfo MSG_Item = 3001 //获取背包信息
+	MSG_ITEM_Module          MSG_ITEM = 3000
+	MSG_ITEM_GetBackpackInfo MSG_ITEM = 3001 //获取背包信息
 )
 
-// Enum value maps for MSG_Item.
+// Enum value maps for MSG_ITEM.
 var (
-	MSG_Item_name = map[int32]string{
+	MSG_ITEM_name = map[int32]string{
 		0:    "PLACEHOLDER",
 		3000: "Module",
 		3001: "GetBackpackInfo",
 	}
-	MSG_Item_value = map[string]int32{
+	MSG_ITEM_value = map[string]int32{
 		"PLACEHOLDER":     0,
 		"Module":          3000,
 		"GetBackpackInfo": 3001,
 	}
 )
 
-func (x MSG_Item) Enum() *MSG_Item {
-	p := new(MSG_Item)
+func (x MSG_ITEM) Enum() *MSG_ITEM {
+	p := new(MSG_ITEM)
 	*p = x
 	return p
 }
 
-func (x MSG_Item) String() string {
+func (x MSG_ITEM) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (MSG_Item) Descriptor() protoreflect.EnumDescriptor {
+func (MSG_ITEM) Descriptor() protoreflect.EnumDescriptor {
 	return file_proto_item_proto_enumTypes[1].Descriptor()
 }
 
-func (MSG_Item) Type() protoreflect.EnumType {
+func (MSG_ITEM) Type() protoreflect.EnumType {
 	return &file_proto_item_proto_enumTypes[1]
 }
 
-func (x MSG_Item) Number() protoreflect.EnumNumber {
+func (x MSG_ITEM) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use MSG_Item.Descriptor instead.
-func (MSG_Item) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use MSG_ITEM.Descriptor instead.
+func (MSG_ITEM) EnumDescriptor() ([]byte, []int) {
 	return file_proto_item_proto_rawDescGZIP(), []int{1}
 }
 
@@ -409,8 +409,8 @@ var file_proto_item_proto_rawDesc = []byte{
 	0x0c, 0x0a, 0x08, 0x4d, 0x61, 0x74, 0x65, 0x72, 0x69, 0x61, 0x6c, 0x10, 0x07, 0x12, 0x07, 0x0a,
 	0x03, 0x45, 0x78, 0x70, 0x10, 0x08, 0x12, 0x0b, 0x0a, 0x07, 0x50, 0x6f, 0x6b, 0x65, 0x6d, 0x6f,
 	0x6e, 0x10, 0x09, 0x12, 0x11, 0x0a, 0x0d, 0x54, 0x72, 0x75, 0x6d, 0x70, 0x4d, 0x61, 0x74, 0x65,
-	0x72, 0x69, 0x61, 0x6c, 0x10, 0x0a, 0x2a, 0x3e, 0x0a, 0x08, 0x4d, 0x53, 0x47, 0x5f, 0x49, 0x74,
-	0x65, 0x6d, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x4c, 0x41, 0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45,
+	0x72, 0x69, 0x61, 0x6c, 0x10, 0x0a, 0x2a, 0x3e, 0x0a, 0x08, 0x4d, 0x53, 0x47, 0x5f, 0x49, 0x54,
+	0x45, 0x4d, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x4c, 0x41, 0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45,
 	0x52, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x06, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x10, 0xb8, 0x17,
 	0x12, 0x14, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x42, 0x61, 0x63, 0x6b, 0x70, 0x61, 0x63, 0x6b, 0x49,
 	0x6e, 0x66, 0x6f, 0x10, 0xb9, 0x17, 0x42, 0x0c, 0x5a, 0x0a, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f,
@@ -433,7 +433,7 @@ var file_proto_item_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_proto_item_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_item_proto_goTypes = []interface{}{
 	(Item_Type)(0),              // 0: item.Item_Type
-	(MSG_Item)(0),               // 1: item.MSG_Item
+	(MSG_ITEM)(0),               // 1: item.MSG_ITEM
 	(*PbItem)(nil),              // 2: item.pbItem
 	(*C2S_GetBackpackInfo)(nil), // 3: item.c2s_GetBackpackInfo
 	(*S2C_GetBackpackInfo)(nil), // 4: item.s2c_GetBackpackInfo

@@ -25,9 +25,11 @@ type MSG_ROLE int32
 
 const (
 	MSG_ROLE_PLACEHOLDER MSG_ROLE = 0 //占位
-	//账号模块
-	MSG_ROLE_Module MSG_ROLE = 2000
-	MSG_ROLE_AddExp MSG_ROLE = 2001
+	//角色模块
+	MSG_ROLE_Module          MSG_ROLE = 2000
+	MSG_ROLE_AddExp          MSG_ROLE = 2001
+	MSG_ROLE_Upgrade         MSG_ROLE = 2002
+	MSG_ROLE_AttributeChange MSG_ROLE = 2004
 )
 
 // Enum value maps for MSG_ROLE.
@@ -36,11 +38,15 @@ var (
 		0:    "PLACEHOLDER",
 		2000: "Module",
 		2001: "AddExp",
+		2002: "Upgrade",
+		2004: "AttributeChange",
 	}
 	MSG_ROLE_value = map[string]int32{
-		"PLACEHOLDER": 0,
-		"Module":      2000,
-		"AddExp":      2001,
+		"PLACEHOLDER":     0,
+		"Module":          2000,
+		"AddExp":          2001,
+		"Upgrade":         2002,
+		"AttributeChange": 2004,
 	}
 )
 
@@ -175,6 +181,7 @@ func (x *Pb_RoleInfo) GetCE() int64 {
 	return 0
 }
 
+//加经验
 type S2C_AddExp_S struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -230,6 +237,164 @@ func (x *S2C_AddExp_S) GetExp() int64 {
 	return 0
 }
 
+//升级突破-雷劫
+type C2S_Upgrade struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *C2S_Upgrade) Reset() {
+	*x = C2S_Upgrade{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_role_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2S_Upgrade) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2S_Upgrade) ProtoMessage() {}
+
+func (x *C2S_Upgrade) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_role_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2S_Upgrade.ProtoReflect.Descriptor instead.
+func (*C2S_Upgrade) Descriptor() ([]byte, []int) {
+	return file_proto_role_proto_rawDescGZIP(), []int{2}
+}
+
+type S2C_Upgrade struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Retcode int32 `protobuf:"zigzag32,1,opt,name=retcode,proto3" json:"retcode,omitempty"`
+	Level   int32 `protobuf:"varint,2,opt,name=level,proto3" json:"level,omitempty"`
+	Exp     int64 `protobuf:"varint,3,opt,name=exp,proto3" json:"exp,omitempty"`
+}
+
+func (x *S2C_Upgrade) Reset() {
+	*x = S2C_Upgrade{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_role_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_Upgrade) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_Upgrade) ProtoMessage() {}
+
+func (x *S2C_Upgrade) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_role_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_Upgrade.ProtoReflect.Descriptor instead.
+func (*S2C_Upgrade) Descriptor() ([]byte, []int) {
+	return file_proto_role_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *S2C_Upgrade) GetRetcode() int32 {
+	if x != nil {
+		return x.Retcode
+	}
+	return 0
+}
+
+func (x *S2C_Upgrade) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *S2C_Upgrade) GetExp() int64 {
+	if x != nil {
+		return x.Exp
+	}
+	return 0
+}
+
+//属性变化通知
+type S2C_AttributeChange_S struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AttributeList map[uint32]int64 `protobuf:"bytes,1,rep,name=AttributeList,proto3" json:"AttributeList,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"` //属性列表
+	CE            int64            `protobuf:"varint,2,opt,name=CE,proto3" json:"CE,omitempty"`                                                                                                                //战斗力combat effectiveness
+}
+
+func (x *S2C_AttributeChange_S) Reset() {
+	*x = S2C_AttributeChange_S{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_role_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2C_AttributeChange_S) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2C_AttributeChange_S) ProtoMessage() {}
+
+func (x *S2C_AttributeChange_S) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_role_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2C_AttributeChange_S.ProtoReflect.Descriptor instead.
+func (*S2C_AttributeChange_S) Descriptor() ([]byte, []int) {
+	return file_proto_role_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *S2C_AttributeChange_S) GetAttributeList() map[uint32]int64 {
+	if x != nil {
+		return x.AttributeList
+	}
+	return nil
+}
+
+func (x *S2C_AttributeChange_S) GetCE() int64 {
+	if x != nil {
+		return x.CE
+	}
+	return 0
+}
+
 var File_proto_role_proto protoreflect.FileDescriptor
 
 var file_proto_role_proto_rawDesc = []byte{
@@ -263,12 +428,32 @@ var file_proto_role_proto_rawDesc = []byte{
 	0x38, 0x01, 0x22, 0x38, 0x0a, 0x0c, 0x73, 0x32, 0x63, 0x5f, 0x41, 0x64, 0x64, 0x45, 0x78, 0x70,
 	0x5f, 0x53, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x64, 0x64, 0x65, 0x78, 0x70, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x03, 0x52, 0x06, 0x61, 0x64, 0x64, 0x65, 0x78, 0x70, 0x12, 0x10, 0x0a, 0x03, 0x65, 0x78,
-	0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x03, 0x65, 0x78, 0x70, 0x2a, 0x35, 0x0a, 0x08,
-	0x4d, 0x53, 0x47, 0x5f, 0x52, 0x4f, 0x4c, 0x45, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x4c, 0x41, 0x43,
-	0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x06, 0x4d, 0x6f, 0x64,
-	0x75, 0x6c, 0x65, 0x10, 0xd0, 0x0f, 0x12, 0x0b, 0x0a, 0x06, 0x41, 0x64, 0x64, 0x45, 0x78, 0x70,
-	0x10, 0xd1, 0x0f, 0x42, 0x0c, 0x5a, 0x0a, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x72, 0x6f, 0x6c,
-	0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x03, 0x65, 0x78, 0x70, 0x22, 0x0d, 0x0a, 0x0b,
+	0x63, 0x32, 0x73, 0x5f, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x22, 0x4f, 0x0a, 0x0b, 0x73,
+	0x32, 0x63, 0x5f, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x72, 0x65,
+	0x74, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x11, 0x52, 0x07, 0x72, 0x65, 0x74,
+	0x63, 0x6f, 0x64, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x10, 0x0a, 0x03, 0x65, 0x78,
+	0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x03, 0x65, 0x78, 0x70, 0x22, 0xbf, 0x01, 0x0a,
+	0x15, 0x73, 0x32, 0x63, 0x5f, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x43, 0x68,
+	0x61, 0x6e, 0x67, 0x65, 0x5f, 0x53, 0x12, 0x54, 0x0a, 0x0d, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62,
+	0x75, 0x74, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2e, 0x2e,
+	0x72, 0x6f, 0x6c, 0x65, 0x2e, 0x73, 0x32, 0x63, 0x5f, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75,
+	0x74, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x53, 0x2e, 0x41, 0x74, 0x74, 0x72, 0x69,
+	0x62, 0x75, 0x74, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x0d, 0x41,
+	0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02,
+	0x43, 0x45, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x43, 0x45, 0x1a, 0x40, 0x0a, 0x12,
+	0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x45, 0x6e, 0x74,
+	0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x2a, 0x59,
+	0x0a, 0x08, 0x4d, 0x53, 0x47, 0x5f, 0x52, 0x4f, 0x4c, 0x45, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x4c,
+	0x41, 0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x06, 0x4d,
+	0x6f, 0x64, 0x75, 0x6c, 0x65, 0x10, 0xd0, 0x0f, 0x12, 0x0b, 0x0a, 0x06, 0x41, 0x64, 0x64, 0x45,
+	0x78, 0x70, 0x10, 0xd1, 0x0f, 0x12, 0x0c, 0x0a, 0x07, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65,
+	0x10, 0xd2, 0x0f, 0x12, 0x14, 0x0a, 0x0f, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65,
+	0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x10, 0xd4, 0x0f, 0x42, 0x0c, 0x5a, 0x0a, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2f, 0x72, 0x6f, 0x6c, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -284,22 +469,27 @@ func file_proto_role_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_role_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_role_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_role_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_proto_role_proto_goTypes = []interface{}{
-	(MSG_ROLE)(0),        // 0: role.MSG_ROLE
-	(*Pb_RoleInfo)(nil),  // 1: role.Pb_RoleInfo
-	(*S2C_AddExp_S)(nil), // 2: role.s2c_AddExp_S
-	nil,                  // 3: role.Pb_RoleInfo.AttributeValueEntry
-	nil,                  // 4: role.Pb_RoleInfo.BodyListEntry
+	(MSG_ROLE)(0),                 // 0: role.MSG_ROLE
+	(*Pb_RoleInfo)(nil),           // 1: role.Pb_RoleInfo
+	(*S2C_AddExp_S)(nil),          // 2: role.s2c_AddExp_S
+	(*C2S_Upgrade)(nil),           // 3: role.c2s_Upgrade
+	(*S2C_Upgrade)(nil),           // 4: role.s2c_Upgrade
+	(*S2C_AttributeChange_S)(nil), // 5: role.s2c_AttributeChange_S
+	nil,                           // 6: role.Pb_RoleInfo.AttributeValueEntry
+	nil,                           // 7: role.Pb_RoleInfo.BodyListEntry
+	nil,                           // 8: role.s2c_AttributeChange_S.AttributeListEntry
 }
 var file_proto_role_proto_depIdxs = []int32{
-	3, // 0: role.Pb_RoleInfo.AttributeValue:type_name -> role.Pb_RoleInfo.AttributeValueEntry
-	4, // 1: role.Pb_RoleInfo.BodyList:type_name -> role.Pb_RoleInfo.BodyListEntry
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 0: role.Pb_RoleInfo.AttributeValue:type_name -> role.Pb_RoleInfo.AttributeValueEntry
+	7, // 1: role.Pb_RoleInfo.BodyList:type_name -> role.Pb_RoleInfo.BodyListEntry
+	8, // 2: role.s2c_AttributeChange_S.AttributeList:type_name -> role.s2c_AttributeChange_S.AttributeListEntry
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_role_proto_init() }
@@ -332,6 +522,42 @@ func file_proto_role_proto_init() {
 				return nil
 			}
 		}
+		file_proto_role_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2S_Upgrade); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_role_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2C_Upgrade); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_role_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2C_AttributeChange_S); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -339,7 +565,7 @@ func file_proto_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_role_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   4,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -27,7 +27,7 @@ message s2c_HeartBeat {
 }
  
 //错误提示消息
-message s2c_NoticeMsg { 
+message s2c_NoticeMsg_S { 
     sint32	retcode	= 1;
     string  NoticeMsg =2;
 }

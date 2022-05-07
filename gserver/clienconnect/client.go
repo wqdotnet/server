@@ -6,16 +6,17 @@ import (
 	"server/gserver/cfg"
 	"server/gserver/commonstruct"
 	"server/gserver/nodeManange"
-	"server/proto/account"
-	"server/proto/item"
+	pbaccount "server/proto/account"
+	pbitem "server/proto/item"
 	"server/proto/protocol_base"
-	"server/proto/role"
+	pbrole "server/proto/role"
 	"server/tools"
 	"time"
 
 	"github.com/ergo-services/ergo/etf"
 	"github.com/ergo-services/ergo/gen"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -28,7 +29,8 @@ type Client struct {
 	infofunc        map[int32]func(buf []byte)
 	genServerStatus gen.ServerStatus
 
-	roleID       int32      //角色ID
+	roleID       int32 //角色ID
+	roleData     *commonstruct.RoleData
 	connectState userStatus //连接状态
 }
 
@@ -60,13 +62,13 @@ func (c *Client) initMsgRoute() {
 	c.infofunc[int32(protocol_base.MSG_BASE_HeartBeat)] = createRegisterFunc(c.heartBeat)
 
 	//账号
-	c.infofunc[int32(account.MSG_ACCOUNT_Login)] = createRegisterFunc(c.accountLogin)
-	c.infofunc[int32(account.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
-	c.infofunc[int32(account.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
+	c.infofunc[int32(pbaccount.MSG_ACCOUNT_Login)] = createRegisterFunc(c.accountLogin)
+	c.infofunc[int32(pbaccount.MSG_ACCOUNT_Register)] = createRegisterFunc(c.registerAccount)
+	c.infofunc[int32(pbaccount.MSG_ACCOUNT_CreateRole)] = createRegisterFunc(c.accountCreateRole)
 	//角色
-
+	c.infofunc[int32(pbrole.MSG_ROLE_Upgrade)] = createRegisterFunc(c.upgrade)
 	//道具
-	c.infofunc[int32(item.MSG_Item_GetBackpackInfo)] = createRegisterFunc(c.getBackpackInfo)
+	c.infofunc[int32(pbitem.MSG_ITEM_GetBackpackInfo)] = createRegisterFunc(c.getBackpackInfo)
 
 	c.genServerStatus = gen.ServerStatusOK
 }
@@ -80,7 +82,15 @@ func (c *Client) InitHander(process *gen.ServerProcess, sendChan chan []byte) {
 func (c *Client) MsgHander(module, method int32, buf []byte) {
 	defer func() {
 		if err := recover(); err != nil {
-			logrus.Error(err)
+			var err string
+			for i := 0; i < 10; i++ {
+				pc, fn, line, _ := runtime.Caller(i)
+				if line == 0 {
+					break
+				}
+				err += fmt.Sprintf("funcname:[%v] fn:[%v] line:[%v] \n", runtime.FuncForPC(pc).Name(), fn, line)
+			}
+			logrus.Error("err: \n", err)
 		}
 	}()
 
@@ -88,7 +98,7 @@ func (c *Client) MsgHander(module, method int32, buf []byte) {
 	//next...
 
 	if msgfunc := c.infofunc[method]; msgfunc != nil {
-		if c.connectState == StatusGame || module == int32(account.MSG_ACCOUNT_Module) {
+		if c.connectState == StatusGame || module == int32(pbaccount.MSG_ACCOUNT_Module) {
 			msgfunc(buf)
 		} else {
 			logrus.Errorf("未登陆 [%v] [%v] [%v]", module, method, buf)
@@ -114,22 +124,31 @@ func (c *Client) LoopHander() time.Duration {
 	}()
 
 	if c.connectState == StatusGame {
-		roledata := commonstruct.GetRoleAllData(c.roleID)
+		rolebase := &c.roleData.RoleBase
+		//logrus.Debugf("roledata.RoleBase.Exp: %v %v", c.roleID, roledata.RoleBase.Exp)
 		nowtime := time.Now().Unix()
-		num := (nowtime - roledata.RoleBase.PracticeTimestamp) / 5
-		if num > 0 {
-			roledata.RoleBase.PracticeTimestamp = nowtime
-			if expcfg := cfg.GetLvExpInfo(roledata.RoleBase.Level); expcfg != nil {
-				expcfg := cfg.GetLvExpInfo(roledata.RoleBase.Level)
+		num := (nowtime - rolebase.PracticeTimestamp) / 5
+		if num > 0 && rolebase.Exp < rolebase.MaxExp {
+			rolebase.PracticeTimestamp = nowtime
+			if expcfg := cfg.GetLvExpInfo(rolebase.Level); expcfg != nil {
+				expcfg := cfg.GetLvExpInfo(rolebase.Level)
 				addexp := int64(expcfg.CycleEXP) * num
-				roledata.RoleBase.Exp += addexp
+				rolebase.Exp += addexp
+				if rolebase.Exp >= rolebase.MaxExp {
+					rolebase.Exp = rolebase.MaxExp
+				}
+
+				rolebase.SetDirtyData(primitive.E{Key: "exp", Value: rolebase.Exp})
+				//commonstruct.SaveRoleData(roledata)
+				//commonstruct.StoreRoleData(roledata)
+
 				//加经验通知
-				c.SendToClient(int32(role.MSG_ROLE_Module),
-					int32(role.MSG_ROLE_AddExp),
-					&role.S2C_AddExp_S{Exp: roledata.RoleBase.Exp, Addexp: addexp})
+				c.SendToClient(int32(pbrole.MSG_ROLE_Module),
+					int32(pbrole.MSG_ROLE_AddExp),
+					&pbrole.S2C_AddExp_S{Exp: rolebase.Exp, Addexp: addexp})
 
 			} else {
-				logrus.Error("expcfg is nil:", roledata.RoleBase.Level, roledata.RoleBase)
+				logrus.Error("expcfg is nil:", rolebase.Level, rolebase)
 			}
 		}
 
@@ -166,22 +185,33 @@ func (c *Client) Terminate(reason string) {
 	case "Extrusionline": //挤下线 不中断socket连接 ,只将状态设置成为登陆状态
 		c.SendToClient(int32(protocol_base.MSG_BASE_Module),
 			int32(protocol_base.MSG_BASE_NoticeMsg),
-			&protocol_base.S2C_NoticeMsg{
-				Retcode:   0,
+			&protocol_base.S2C_NoticeMsg_S{
+				Retcode:   cfg.GetErrorCodeNumber(reason),
 				NoticeMsg: reason,
 			})
 		c.connectState = StatusSockert
 		return
 	}
 
-	node := nodeManange.GetNode(nodeManange.GateNode)
-	node.UnregisterName(c.registerName)
-	c.registerName = ""
-	c.process = nil
-	c.sendChan = nil
-	c.roleID = 0
-	c.connectState = StatusSockert
+	if c.connectState == StatusGame {
 
+		c.roleData.RoleBase.Online = false
+		c.roleData.RoleBase.OfflineTimestamp = time.Now().Unix()
+		c.roleData.RoleBase.SetDirtyData(primitive.E{Key: "offlinetimestamp", Value: time.Now().Unix()},
+			primitive.E{Key: "online", Value: false})
+		//下线时保存数据
+		commonstruct.StoreRoleData(c.roleData)
+		commonstruct.SaveRoleData(c.roleData)
+
+		//注销网关注册
+		node := nodeManange.GetNode(nodeManange.GateNode)
+		node.UnregisterName(c.registerName)
+		c.registerName = ""
+		c.process = nil
+		c.sendChan = nil
+		c.roleID = 0
+		c.connectState = StatusSockert
+	}
 }
 
 //==========================

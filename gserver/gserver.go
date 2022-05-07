@@ -14,6 +14,7 @@ import (
 	"server/logger"
 	"server/network"
 	"server/web"
+	"sync/atomic"
 	"syscall"
 
 	"github.com/fsnotify/fsnotify"
@@ -187,7 +188,8 @@ func StartGServer() {
 				logrus.Warn("command:", command)
 			}
 		case s := <-exitChan:
-			logrus.Info("收到信号: ", s)
+			num := atomic.LoadInt32(&GameServerInfo.nw.ConnectCount)
+			logrus.Infof("收到信号: %v  ConnectCount:%v", s, num)
 			if runtime.GOOS == "linux" && s.String() == "quit" || s.String() == "terminated" {
 				return
 			} else if runtime.GOOS == "windows" && s.String() == "interrupt" {

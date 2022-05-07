@@ -6,17 +6,18 @@ import (
 	"server/gserver/cfg"
 	"server/gserver/commonstruct"
 	"server/gserver/nodeManange"
-	"server/proto/account"
+	pbaccount "server/proto/account"
 	"server/proto/protocol_base"
 	pbrole "server/proto/role"
 	"time"
 
 	"github.com/ergo-services/ergo/etf"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (c *Client) accountLogin(msg *account.C2S_Login) {
-	retmsg := &account.S2C_Login{
+func (c *Client) accountLogin(msg *pbaccount.C2S_Login) {
+	retmsg := &pbaccount.S2C_Login{
 		Retcode:  0,
 		RoleInfo: &pbrole.Pb_RoleInfo{},
 	}
@@ -24,7 +25,7 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 	//已登陆
 	if c.connectState != StatusSockert {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("LOGIN")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Login), retmsg)
 	}
 
 	accountinfo := &commonstruct.AccountInfo{
@@ -35,12 +36,12 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 	//未找到账号
 	if !ok {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("AccountNull")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Login), retmsg)
 		return
 	}
 	if accountinfo.Password != msg.Password {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("PASSWORD_ERROR")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Login), retmsg)
 		return
 	}
 
@@ -49,10 +50,9 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 	//未创建账号 角色为空
 	if roledata.RoleBase.Name == "" {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("RoleNull")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Login), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Login), retmsg)
 		return
 	}
-	commonstruct.StoreRoleAllData(roledata)
 
 	//账号已登陆
 	c.registerName = fmt.Sprintf("role_%v", accountinfo.RoleID)
@@ -63,34 +63,31 @@ func (c *Client) accountLogin(msg *account.C2S_Login) {
 		c.process.Send(registerProcess.Self(), etf.Atom("Extrusionline"))
 	}
 
-	//获取了角色数据  roleData
-	info := commonstruct.GetRoleAllData(accountinfo.RoleID)
-	if info == nil {
-		logrus.Warn("获取角色数据失败")
-	} else {
-		retmsg.RoleInfo = info.RoleBase.ToPB()
-	}
+	retmsg.RoleInfo = roledata.RoleBase.ToPB()
 
 	//绑定genserver name
 	if error := c.process.RegisterName(c.registerName); error != nil {
-		logrus.Error("绑定genserver name 失败: ", error)
+		logrus.Errorf("绑定genserver name 失败: [%v]  [%v]  [%v]", error, c.registerName, accountinfo)
 	}
 
 	c.connectState = StatusGame
-	commonstruct.StoreRoleAllData(roledata)
-	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
-		int32(account.MSG_ACCOUNT_Login),
+	roledata.RoleBase.Online = true
+	commonstruct.StoreRoleData(roledata)
+	c.roleData = roledata
+
+	c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module),
+		int32(pbaccount.MSG_ACCOUNT_Login),
 		retmsg)
 }
 
-func (c *Client) registerAccount(msg *account.C2S_Register) {
-	retmsg := &account.S2C_Register{
+func (c *Client) registerAccount(msg *pbaccount.C2S_Register) {
+	retmsg := &pbaccount.S2C_Register{
 		Retcode: 0,
 	}
 	//已登陆
 	if c.connectState != StatusSockert {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("LOGIN")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Register), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Register), retmsg)
 	}
 
 	accountinfo := &commonstruct.AccountInfo{
@@ -99,7 +96,7 @@ func (c *Client) registerAccount(msg *account.C2S_Register) {
 	//已注册
 	if ok := accountinfo.GetAccountinfo(); ok {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("AccountExists")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Register), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Register), retmsg)
 		return
 	}
 
@@ -107,12 +104,18 @@ func (c *Client) registerAccount(msg *account.C2S_Register) {
 	if msg.CDK != "" {
 		if ok := commonstruct.GetCDKinfo(msg.CDK); ok {
 			retmsg.Retcode = cfg.GetErrorCodeNumber("CDK")
-			c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_Register), retmsg)
+			c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Register), retmsg)
 			return
 		}
 	}
 
 	c.roleID = commonstruct.GetNewRoleID()
+	if c.roleID == 0 {
+		logrus.Error("系统错误  获取角色ID失败")
+		retmsg.Retcode = cfg.GetErrorCodeNumber("SystemError")
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_Register), retmsg)
+		return
+	}
 
 	accountinfo = &commonstruct.AccountInfo{
 		Account:            msg.Account,
@@ -144,39 +147,42 @@ func (c *Client) registerAccount(msg *account.C2S_Register) {
 		ItemList:          map[string]*commonstruct.ItemInfo{},
 		Online:            true,
 		State:             0,
-		DirtyData:         false,
+
+		DirtyDataRecord: commonstruct.DirtyDataRecord{TableName: db.RoleBaseTable, DirtyDataList: map[string]primitive.E{}},
+		// DirtyDataList:     map[string]primitive.E{},
 	}
+	roleBase.CalculationProperties()
 	db.InsertOne(db.RoleBaseTable, roleBase)
 
 	//初始道具
 	roleItems := &commonstruct.RoleItemlist{
-		RoleID:    c.roleID,
-		ItemList:  map[string]*commonstruct.ItemInfo{},
-		DirtyData: false,
+		RoleID:          c.roleID,
+		ItemList:        map[string]*commonstruct.ItemInfo{},
+		DirtyDataRecord: commonstruct.DirtyDataRecord{TableName: db.RoleItemsTable, DirtyDataList: map[string]primitive.E{}},
 	}
 	db.InsertOne(db.RoleItemsTable, roleItems)
 
 	roledata := &commonstruct.RoleData{
 		Acconut:   accountinfo,
-		RoleBase:  roleBase,
-		RoleItems: roleItems,
+		RoleBase:  *roleBase,
+		RoleItems: *roleItems,
 	}
 	c.connectState = StatusLogin
-	commonstruct.StoreRoleAllData(roledata)
+	commonstruct.StoreRoleData(roledata)
 
-	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
-		int32(account.MSG_ACCOUNT_Register), retmsg)
+	c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module),
+		int32(pbaccount.MSG_ACCOUNT_Register), retmsg)
 }
 
-func (c *Client) accountCreateRole(msg *account.C2S_CreateRole) {
-	retmsg := &account.S2C_Login{
+func (c *Client) accountCreateRole(msg *pbaccount.C2S_CreateRole) {
+	retmsg := &pbaccount.S2C_Login{
 		Retcode:  0,
 		RoleInfo: &pbrole.Pb_RoleInfo{},
 	}
 	//未登陆
 	if c.connectState == StatusSockert {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("NOT_LOGIN")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_CreateRole), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_CreateRole), retmsg)
 		return
 	}
 
@@ -184,7 +190,7 @@ func (c *Client) accountCreateRole(msg *account.C2S_CreateRole) {
 	//已创建账号
 	if roledata.RoleBase.Name != "" {
 		retmsg.Retcode = cfg.GetErrorCodeNumber("AccountExists")
-		c.SendToClient(int32(account.MSG_ACCOUNT_Module), int32(account.MSG_ACCOUNT_CreateRole), retmsg)
+		c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module), int32(pbaccount.MSG_ACCOUNT_CreateRole), retmsg)
 		return
 	}
 
@@ -193,13 +199,20 @@ func (c *Client) accountCreateRole(msg *account.C2S_CreateRole) {
 	roledata.RoleBase.Sex = msg.Sex
 	roledata.RoleBase.Exp = 0
 	roledata.RoleBase.PracticeTimestamp = time.Now().Unix()
-	roledata.RoleBase.DirtyData = true
-
-	c.connectState = StatusGame
+	roledata.RoleBase.Online = true
+	roledata.RoleBase.SetDirtyData(primitive.E{Key: "name", Value: msg.RoleName})
+	roledata.RoleBase.SetDirtyData(primitive.E{Key: "headid", Value: msg.HeadID})
+	roledata.RoleBase.SetDirtyData(primitive.E{Key: "sex", Value: msg.Sex})
+	roledata.RoleBase.SetDirtyData(primitive.E{Key: "exp", Value: 0})
+	roledata.RoleBase.SetDirtyData(primitive.E{Key: "practicetimestamp", Value: time.Now().Unix()})
+	commonstruct.StoreRoleData(roledata)
 	commonstruct.SaveRoleData(roledata)
-	c.SendToClient(int32(account.MSG_ACCOUNT_Module),
-		int32(account.MSG_ACCOUNT_CreateRole),
-		&account.S2C_CreateRole{
+	c.connectState = StatusGame
+	c.roleData = roledata
+
+	c.SendToClient(int32(pbaccount.MSG_ACCOUNT_Module),
+		int32(pbaccount.MSG_ACCOUNT_CreateRole),
+		&pbaccount.S2C_CreateRole{
 			Retcode:  0,
 			RoleInfo: roledata.RoleBase.ToPB(),
 		})

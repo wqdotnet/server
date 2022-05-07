@@ -4,12 +4,24 @@ import (
 	"server/gserver/cfg"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type RoleItemlist struct {
-	RoleID    int32
-	ItemList  map[string]*ItemInfo
-	DirtyData bool
+	RoleID   int32
+	ItemList map[string]*ItemInfo
+
+	DirtyDataRecord
+}
+
+func (r *RoleItemlist) SetDirtyData(fieldNames ...primitive.E) {
+	if len(fieldNames) == 0 {
+		r.DirtyData = true
+	} else {
+		for _, v := range fieldNames {
+			r.DirtyDataList[v.Key] = v
+		}
+	}
 }
 
 //道具
